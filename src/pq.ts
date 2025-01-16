@@ -47,7 +47,18 @@ export class PriorityQueue<T> implements IPriorityQueue<T> {
    * @returns A negative value if a < b, zero if a = b, or a positive value if a > b.
    */
   protected compare(a: HeapNode<T>, b: HeapNode<T>): number {
-    return this._comparer?.(a, b) ?? a.priority - b.priority;
+    if (this._comparer) return this._comparer(a, b);
+    return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
+  }
+
+  protected removeRootNode(): void {
+    if (this.isEmpty()) return;
+    const lastNode = this._elements[--this._size];
+    if (this._size > 0) {
+      this._elements[0] = lastNode;
+      down(0, this._size, this._elements, this.compare.bind(this));
+    }
+    this._elements.pop();
   }
 
   enqueue(value: T, priority: number): boolean {
@@ -60,12 +71,14 @@ export class PriorityQueue<T> implements IPriorityQueue<T> {
   }
 
   dequeue(): T | undefined {
-    if (this.isEmpty) return undefined;
-    
+    if (this.isEmpty()) return undefined;
+    const element = this._elements[0];
+    this.removeRootNode();
+    return element.value;
   }
 
   peek(): T | undefined {
-    return this.isEmpty ? undefined : this._elements[0].value;
+    return this.isEmpty() ? undefined : this._elements[0].value;
   }
 
   clear(): void {
@@ -77,22 +90,27 @@ export class PriorityQueue<T> implements IPriorityQueue<T> {
     return this._size;
   }
 
-  get isEmpty(): boolean {
-    return this._size === 0;
-  }
 
   get values(): T[] {
     return this._elements.map((node) => node.value);
   }
 
+  get heap(): HeapNode<T>[] {
+    return this._elements;
+  }
+
   toArray(): T[] {
     const clone = this.clone();
     const result: T[] = [];
-    while (!clone.isEmpty) {
+    while (!clone.isEmpty()) {
       // biome-ignore lint/style/noNonNullAssertion: <explanation>
       result.push(clone.dequeue()!);
     }
     return result;
+  }
+
+  isEmpty(): boolean {
+    return this._size === 0;
   }
 
   remove(value: T): boolean {
@@ -123,6 +141,15 @@ export class PriorityQueue<T> implements IPriorityQueue<T> {
 
     this._elements.pop();
     return true;
+  }
+
+  indexOf(value: T): number {
+    return this._elements.findIndex((node) => node.value === value);
+  }
+
+  priorityAt(index: number): number {
+    console.log(this._elements[index]);
+    return index < this._size ? this._elements[index].priority : Number.MAX_VALUE;
   }
 
   clone(): PriorityQueue<T> {

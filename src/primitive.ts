@@ -127,44 +127,32 @@ export const down = <T>(index: number, length: number, heap: T[], comparer: ICom
   const node = heap[index];
   let currentIndex = index;
 
-  console.log(`Starting down: node=${JSON.stringify(node)}, index=${index}, length=${length}`);
-
   while (true) {
     const firstChildIndex = child(currentIndex);
     if (firstChildIndex >= length) break;
 
+    const lastChildIndex = Math.min(firstChildIndex + ARITY, length);
     let minChildIndex = firstChildIndex;
     let minChild = heap[firstChildIndex];
-    const lastChildIndex = Math.min(firstChildIndex + ARITY, length);
 
-    console.log(`Checking children: first=${firstChildIndex}, last=${lastChildIndex}`);
-
-    // Find minimum child
+    // Find minimum child using direct comparisons
     for (let i = firstChildIndex + 1; i < lastChildIndex; i++) {
-      console.log(`Compare: child[${i}]=${JSON.stringify(heap[i])} with min=${JSON.stringify(minChild)}`);
-      if (comparer(heap[i], minChild) < 0) {
-        minChild = heap[i];
+      const nextChild = heap[i];
+      if (comparer(nextChild, minChild) < 0) {
+        minChild = nextChild;
         minChildIndex = i;
-        console.log(`New min: index=${minChildIndex}, value=${JSON.stringify(minChild)}`);
       }
     }
 
-    // Check if we need to move the node
-    console.log(`Compare: node=${JSON.stringify(node)} with minChild=${JSON.stringify(minChild)}`);
-    if (comparer(node, minChild) <= 0) {
-      console.log('Heap property satisfied, breaking');
-      break;
-    }
+    // Early exit if heap property is satisfied
+    if (comparer(node, minChild) <= 0) break;
 
-    // Move the minimum child up
-    console.log(`Moving child up: index=${currentIndex} with ${minChildIndex}`);
+    // Single assignment instead of swap
     heap[currentIndex] = minChild;
     currentIndex = minChildIndex;
   }
 
-  // Place the node in the correct position
   heap[currentIndex] = node;
-  console.log(`Final heap: ${JSON.stringify(heap)}`);
 };
 
 /**

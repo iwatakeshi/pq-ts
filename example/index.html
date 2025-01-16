@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Priority Queue Visualization</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Priority Queue Visualization</h1>
+    <div class="controls">
+      <div class="flex">
+        <input id="input-value" type="number" placeholder="Value">
+        <input id="input-priority" type="number" placeholder="Priority">
+      </div>
+      <div class="hr"></div>
+      <div class="flex">
+        <button id="button-enqueue" onclick="enqueue()">Enqueue</button>
+        <button id="button-random" onclick="enqueueRandom()">Enqueue Random</button>
+        <button id="button-dequeue" onclick="dequeue()">Dequeue</button>
+      </div>
+    </div>
+    <div class="queue">
+      <h2>Queue State</h2>
+      <ul id="queue-list"></ul>
+    </div>
+    <div class="dequeued">
+      <h2>Dequeued Values</h2>
+      <ul id="dequeued-list"></ul>
+    </div>
+  </div>
+  <script type="module" src="./app.ts"></script>
+</body>
+
+</html>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .flex-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    text-align: center;
+  }
+
+  h1 {
+    margin-bottom: 20px;
+  }
+
+  .controls {
+    margin-bottom: 20px;
+  }
+
+  .controls input {
+    width: calc(50% - 10px);
+    padding: 10px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .controls button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    width: calc(33% - 10px);
+  }
+
+  .controls button:hover {
+    background-color: #0056b3;
+  }
+
+  .hr {
+    border-top: 1px solid #ccc;
+    margin: 10px 0;
+  }
+
+  .queue,
+  .dequeued {
+    text-align: left;
+  }
+
+  .queue ul,
+  .dequeued ul {
+    list-style-type: none;
+    padding: 0;
+    max-height: 100px;
+    overflow-y: auto;
+  }
+
+  .queue li,
+  .dequeued li {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    background-color: #f9f9f9;
+  }
+</style>

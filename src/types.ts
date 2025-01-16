@@ -15,8 +15,6 @@ export type IComparer<T> = (a: T, b: T) => number;
 export interface IQueue<T> {
   /** The number of elments in the queue */
   readonly count: number;
-  /** Determine whether the queue is empty */
-  readonly isEmpty: boolean;
   /** The elements in the queue returned in an unordered manner */
   readonly values: T[];
   /**
@@ -24,12 +22,12 @@ export interface IQueue<T> {
    * @param value - The value to add.
    * @param priority - Optional priority of the element.
    * @returns True if the element was added, false otherwise.
-   */
+  */
   enqueue(value: T, priority?: number): boolean;
   /**
    * Removes and returns the element at the front of the queue.
    * @returns The element at the front of the queue, or undefined if the queue is empty.
-   */
+  */
   dequeue(): T | undefined;
   /** Removes all elements from the queue */
   peek(): T | undefined;
@@ -38,16 +36,20 @@ export interface IQueue<T> {
   /**
    * Returns the elements in the queue in priority order.
    * @returns An array of elements in the queue.
-   */
+  */
   toArray(): T[];
   /**
    * Returns a shallow copy of the queue.
    * @returns A new queue instance with the same elements.
-   */
+  */
   clone(): IQueue<T>;
+  /** 
+   * Determine whether the queue is empty 
+   */
+  isEmpty(): boolean;
   /**
    * Returns a string representation of the queue.
-   */
+  */
   toString(): string;
 }
 
@@ -69,6 +71,7 @@ export type HeapNode<T> = { value: T, priority: number };
  * @extends {IQueue<HeapNode<T>>}
  */
 export interface IPriorityQueue<T> extends IQueue<T> {
+  readonly heap: HeapNode<T>[];
   /**
    * Adds an element to the end of the queue.
    * @param value - The value to add.
@@ -85,6 +88,17 @@ export interface IPriorityQueue<T> extends IQueue<T> {
    * @param value - The element to remove.
    */
   remove(value: T): boolean;
+  /**
+   * Returns the index of the first occurrence of a specific element in the queue.
+   * @param value - The element to search for.
+   */
+  indexOf(value: T): number;
+  /**
+   * Returns the priority of the element at the specified index.
+   * @param index - The index of the element.
+   * @returns The priority of the element if it exists, or `Number.MAX_VALUE` if the index is out of range.
+   */
+  priorityAt(index: number): number;
   /**
    * The comparison function used to determine the order of elements in the queue.
    */

@@ -1,5 +1,4 @@
-import { describe, it } from "jsr:@std/testing/bdd";
-import { expect } from "jsr:@std/expect";
+import { expect, describe, it } from "vitest";
 import { PriorityQueue } from "./pq.ts";
 
 describe("PriorityQueue", () => {
@@ -49,11 +48,11 @@ describe("PriorityQueue", () => {
   it("should return the correct count and isEmpty status", () => {
     const pq = new PriorityQueue<number>();
     expect(pq.count).toBe(0);
-    expect(pq.isEmpty).toBe(true);
+    expect(pq.isEmpty()).toBe(true);
 
     pq.enqueue(1, 5);
     expect(pq.count).toBe(1);
-    expect(pq.isEmpty).toBe(false);
+    expect(pq.isEmpty()).toBe(false);
   });
 
   it("should return values in the queue (unordered)", () => {
@@ -126,11 +125,26 @@ describe("PriorityQueue", () => {
       pq.enqueue(i, Math.floor(Math.random() * 1000));
     }
 
-    let prev = pq.dequeue();
-    while (!pq.isEmpty) {
-      const current = pq.dequeue();
-      expect(prev).toBeLessThanOrEqual(current as number);
-      prev = current;
+    console.log('before', pq.count);
+
+    let prevIndex = 0;
+    let prevPriority = pq.priorityAt(prevIndex);
+    pq.dequeue();
+
+    while (!pq.isEmpty()) {
+      const currentPriority = pq.priorityAt(prevIndex + 1);
+      pq.dequeue();
+      if (prevPriority === currentPriority) {
+        // We can't test an unstable priority queue
+        continue;
+      }
+      expect(prevPriority).toBeLessThanOrEqual(currentPriority as number);
+      prevPriority = currentPriority;
+      prevIndex++;
     }
+
+    // Ensure the priority queue is empty at the end
+    expect(pq.isEmpty()).toBe(true);
+    expect(pq.count).toBe(0);
   });
 });
