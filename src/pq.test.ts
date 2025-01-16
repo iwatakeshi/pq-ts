@@ -119,32 +119,97 @@ describe("PriorityQueue", () => {
     expect(values).toEqual([2, 3, 1]);
   });
 
-  it('should handle stress test', () => {
+  it("should return the index of a specific element", () => {
     const pq = new PriorityQueue<number>();
-    for (let i = 0; i < 1000; i++) {
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+    const result = pq.values;
+
+    expect(pq.indexOf(1)).toBe(result.findIndex((node) => node === 1));
+    expect(pq.indexOf(2)).toBe(result.findIndex((node) => node === 2));
+    expect(pq.indexOf(3)).toBe(result.findIndex((node) => node === 3));
+    expect(pq.indexOf(4)).toBe(-1);
+  });
+
+  it('should return the index of a specific element by dequeuing elements', () => {
+    const pq = new PriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    const result = pq.toArray();
+    expect(pq.indexOf(1, true)).toBe(result.findIndex((node) => node === 1));
+    expect(pq.indexOf(2, true)).toBe(result.findIndex((node) => node === 2));
+    expect(pq.indexOf(3, true)).toBe(result.findIndex((node) => node === 3));
+    expect(pq.indexOf(4, true)).toBe(-1);
+  });
+
+  it("should return the priority of an element at a specific index", () => {
+    const pq = new PriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+    const result = pq.heap.map((node) => node.priority);
+
+    expect(pq.priorityAt(0)).toBe(result[0]);
+    expect(pq.priorityAt(1)).toBe(result[1]);
+    expect(pq.priorityAt(2)).toBe(result[2]);
+    expect(pq.priorityAt(3)).toBe(Number.MAX_VALUE);
+
+  });
+
+  it('should return the priority of an element at a specific index by dequeuing elements', () => {
+    const pq = new PriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    expect(pq.priorityAt(0, true)).toBe(3); 
+    expect(pq.priorityAt(1, true)).toBe(4);
+    expect(pq.priorityAt(2, true)).toBe(5);
+    expect(pq.priorityAt(4, true)).toBe(Number.MAX_VALUE); // Out of bounds
+  });
+
+  it("should handle stress test", () => {
+    const pq = new PriorityQueue<number>();
+    for (let i = 0; i < 10000; i++) {
       pq.enqueue(i, Math.floor(Math.random() * 1000));
     }
-
-    console.log('before', pq.count);
-
     let prevIndex = 0;
-    let prevPriority = pq.priorityAt(prevIndex);
+    let prevPriority = pq.priorityAt(prevIndex, true);
     pq.dequeue();
 
     while (!pq.isEmpty()) {
-      const currentPriority = pq.priorityAt(prevIndex + 1);
+      const currentPriority = pq.priorityAt(prevIndex + 1, true);
       pq.dequeue();
-      if (prevPriority === currentPriority) {
-        // We can't test an unstable priority queue
-        continue;
-      }
-      expect(prevPriority).toBeLessThanOrEqual(currentPriority as number);
+
+      expect(prevPriority).toBeLessThanOrEqual(currentPriority);
       prevPriority = currentPriority;
       prevIndex++;
     }
-
     // Ensure the priority queue is empty at the end
     expect(pq.isEmpty()).toBe(true);
     expect(pq.count).toBe(0);
+  });
+
+  it("should maintain the same priority sequence when dequeue is enabled", () => {
+    const pq = new PriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    const dequeuedItems = [];
+    while (!pq.isEmpty()) {
+      dequeuedItems.push(pq.dequeue());
+    }
+
+    const pq2 = new PriorityQueue<number>();
+    pq2.enqueue(1, 5);
+    pq2.enqueue(2, 3);
+    pq2.enqueue(3, 4);
+
+    const priorities = dequeuedItems.map((_, index) => pq2.priorityAt(index, true));
+    expect(priorities).toEqual([3, 4, 5]);
   });
 });
