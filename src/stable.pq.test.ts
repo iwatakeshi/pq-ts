@@ -1,0 +1,241 @@
+import { expect, describe, it } from "vitest";
+import { StablePriorityQueue } from "./stable.pq.ts";
+
+describe("StablePriorityQueue", () => {
+  it("should enqueue elements with priorities", () => {
+    const pq = new StablePriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    expect(pq.count).toBe(3);
+    expect(pq.peek()).toBe(2);
+  });
+
+  it("should dequeue elements in priority order", () => {
+    const pq = new StablePriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    expect(pq.dequeue()).toBe(2);
+    expect(pq.dequeue()).toBe(3);
+    expect(pq.dequeue()).toBe(1);
+    expect(pq.dequeue()).toBeUndefined();
+  });
+
+  it("should peek the highest priority element without removing it", () => {
+    const pq = new StablePriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    expect(pq.peek()).toBe(2);
+    expect(pq.count).toBe(3);
+  });
+
+  it("should clear all elements", () => {
+    const pq = new StablePriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    pq.clear();
+    expect(pq.count).toBe(0);
+    expect(pq.peek()).toBeUndefined();
+  });
+
+  it("should return the correct count and isEmpty status", () => {
+    const pq = new StablePriorityQueue<number>();
+    expect(pq.count).toBe(0);
+    expect(pq.isEmpty()).toBe(true);
+
+    pq.enqueue(1, 5);
+    expect(pq.count).toBe(1);
+    expect(pq.isEmpty()).toBe(false);
+  });
+
+  it("should return values in the queue (unordered)", () => {
+    const pq = new StablePriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    expect(new Set(pq.values)).toEqual(new Set([1, 2, 3]));
+  });
+
+  it("should convert to array (prioritized)", () => {
+    const pq = new StablePriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    expect(pq.toArray()).toEqual([2, 3, 1]);
+  });
+
+  it("should remove a specific element", () => {
+    const pq = new StablePriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    expect(pq.remove(2)).toBe(true);
+    expect(pq.count).toBe(2);
+    expect(new Set(pq.values)).toEqual(new Set([1, 3]));
+    expect(pq.toArray()).toEqual([3, 1]);
+  });
+
+  it("should clone the queue", () => {
+    const pq = new StablePriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    const clone = pq.clone();
+    expect(clone.count).toBe(3);
+    expect(pq.values).toEqual(clone.values);
+  });
+
+  it("should return a string representation of the queue (prioritized)", () => {
+    const pq = new StablePriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    expect(pq.toString()).toBe("2, 3, 1");
+  });
+
+  it("should iterate over the queue (prioritized)", () => {
+    const pq = new StablePriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    const values = [];
+    for (const value of pq) {
+      values.push(value);
+    }
+
+    expect(values).toEqual([2, 3, 1]);
+  });
+
+  it("should return the index of a specific element", () => {
+    const pq = new StablePriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+    pq.enqueue(4, 3);
+    pq.enqueue(5, 4);
+
+    const values = pq.heap.map(e => e.value);
+
+    expect(values).toContain(1);
+    expect(values).toContain(2);
+    expect(values).toContain(3);
+    expect(values).toContain(4);
+    expect(values).toContain(5);
+
+    expect(pq.indexOf(1, false)).toBeGreaterThanOrEqual(0);
+    expect(pq.indexOf(2, false)).toBeGreaterThanOrEqual(0);
+    expect(pq.indexOf(3, false)).toBeGreaterThanOrEqual(0);
+    expect(pq.indexOf(4, false)).toBeGreaterThanOrEqual(0);
+    expect(pq.indexOf(5, false)).toBeGreaterThanOrEqual(0);
+
+    expect(pq.indexOf(99, false)).toBe(-1);
+  });
+
+  it("should return the index of a specific element by dequeuing elements", () => {
+    const pq = new StablePriorityQueue<number>();
+
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+    pq.enqueue(4, 3);
+    pq.enqueue(5, 4);
+
+    expect(pq.indexOf(2, true)).toBe(0);
+    expect(pq.indexOf(4, true)).toBe(1);
+    expect(pq.indexOf(3, true)).toBe(2);
+    expect(pq.indexOf(5, true)).toBe(3);
+    expect(pq.indexOf(1, true)).toBe(4);
+    expect(pq.indexOf(99, true)).toBe(-1);
+  });
+
+  it("should return the priority of an element at a specific index", () => {
+    const pq = new StablePriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+    pq.enqueue(4, 3);
+    pq.enqueue(5, 4);
+
+    const priorities = pq.heap.map(e => e.priority);
+
+    expect(pq.priorityAt(0, false)).toBe(Math.min(...priorities));
+
+    expect(priorities).toContain(3);
+    expect(priorities).toContain(4);
+    expect(priorities).toContain(5);
+
+    expect(pq.priorityAt(99, false)).toBe(Number.MAX_VALUE);
+  });
+
+  it("should return the priority of an element at a specific index by dequeuing elements", () => {
+    const pq = new StablePriorityQueue<number>();
+
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+    pq.enqueue(4, 3);
+    pq.enqueue(5, 4);
+
+    expect(pq.priorityAt(0, true)).toBe(3);
+    expect(pq.priorityAt(1, true)).toBe(3);
+    expect(pq.priorityAt(2, true)).toBe(4);
+    expect(pq.priorityAt(3, true)).toBe(4);
+    expect(pq.priorityAt(4, true)).toBe(5);
+    expect(pq.priorityAt(99, true)).toBe(Number.MAX_VALUE);
+  });
+
+  it("should handle stress test", () => {
+    const pq = new StablePriorityQueue<number>();
+    for (let i = 0; i < 10000; i++) {
+      pq.enqueue(i, Math.floor(Math.random() * 1000));
+    }
+    let prevIndex = 0;
+    let prevPriority = pq.priorityAt(prevIndex, true);
+    pq.dequeue();
+
+    while (!pq.isEmpty()) {
+      const currentPriority = pq.priorityAt(prevIndex + 1, true);
+      pq.dequeue();
+
+      expect(prevPriority).toBeLessThanOrEqual(currentPriority);
+      prevPriority = currentPriority;
+      prevIndex++;
+    }
+    // Ensure the priority queue is empty at the end
+    expect(pq.isEmpty()).toBe(true);
+    expect(pq.count).toBe(0);
+  });
+
+  it("should maintain the same priority sequence when dequeue is enabled", () => {
+    const pq = new StablePriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    const dequeuedItems = [];
+    while (!pq.isEmpty()) {
+      dequeuedItems.push(pq.dequeue());
+    }
+
+    const pq2 = new StablePriorityQueue<number>();
+    pq2.enqueue(1, 5);
+    pq2.enqueue(2, 3);
+    pq2.enqueue(3, 4);
+
+    const priorities = dequeuedItems.map((_, index) => pq2.priorityAt(index, true));
+    expect(priorities).toEqual([3, 4, 5]);
+  });
+});
