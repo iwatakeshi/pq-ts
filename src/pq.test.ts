@@ -165,10 +165,10 @@ describe("PriorityQueue", () => {
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
 
-    expect(pq.priorityAt(0, true)).toBe(3); 
+    expect(pq.priorityAt(0, true)).toBe(3);
     expect(pq.priorityAt(1, true)).toBe(4);
     expect(pq.priorityAt(2, true)).toBe(5);
-    expect(pq.priorityAt(4, true)).toBe(Number.MAX_VALUE); // Out of bounds
+    expect(pq.priorityAt(4, true)).toBe(Number.MAX_VALUE);
   });
 
   it("should handle stress test", () => {
@@ -188,7 +188,7 @@ describe("PriorityQueue", () => {
       prevPriority = currentPriority;
       prevIndex++;
     }
-    // Ensure the priority queue is empty at the end
+
     expect(pq.isEmpty()).toBe(true);
     expect(pq.count).toBe(0);
   });
