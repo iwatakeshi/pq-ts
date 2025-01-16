@@ -1,33 +1,36 @@
-// deno-lint-ignore-file no-explicit-any
-import type { IPriorityQueue, IComparer, HeapNode } from "./types.ts";
-import { swap, up, down, heapify } from "./primitive.ts";
+import type { IPriorityQueue, IComparer, INode } from "./types.ts";
+import { up, down, heapify } from "./primitive.ts";
 
-export class PriorityQueue<T> implements IPriorityQueue<T> {
-  private _elements: HeapNode<T>[] = [];
-  private _comparer?: IComparer<HeapNode<T>>;
-  private _size = 0;
+export class PriorityQueue<
+T, 
+Node extends INode<T> = INode<T>,
+Comparer extends IComparer<Node> = IComparer<Node>
+> implements IPriorityQueue<T, Node> {
+  protected _elements: Node[] = [];
+  protected _comparer?: Comparer;
+  protected _size = 0;
 
   constructor();
   constructor(
-    elements: HeapNode<T>[],
-    comparer?: IComparer<HeapNode<T>>
+    elements: Node[],
+    comparer?: Comparer
   );
   constructor(
-    queue: PriorityQueue<T>,
-    comparer?: IComparer<HeapNode<T>>
+    queue: PriorityQueue<T, Node>,
+    comparer?: Comparer
   );
   constructor(
     elements: T[],
     comparer?: IComparer<T>
   );
   constructor(
-    elements?: T[] | PriorityQueue<T>,
-    comparer?: IComparer<HeapNode<T>>
+    elements?: T[] | PriorityQueue<T, Node>,
+    comparer?: Comparer
   ) {
     if (elements instanceof PriorityQueue) {
       this._elements = [...elements._elements];
       this._size = elements._size;
-      this._comparer = elements._comparer;
+      this._comparer = elements._comparer as Comparer;
     } else if (Array.isArray(elements)) {
       for (const element of elements) {
         this.enqueue(element, 0);
@@ -40,13 +43,8 @@ export class PriorityQueue<T> implements IPriorityQueue<T> {
 
     heapify(this._size, this._elements, this.compare.bind(this));
   }
-  /**
-   * Compares two nodes based on their priority values.
-   * @param a - The first node to compare.
-   * @param b - The second node to compare.
-   * @returns A negative value if a < b, zero if a = b, or a positive value if a > b.
-   */
-  protected compare(a: HeapNode<T>, b: HeapNode<T>): number {
+
+  protected compare(a: Node, b: Node): number {
     if (this._comparer) return this._comparer(a, b);
     return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
   }
@@ -64,21 +62,25 @@ export class PriorityQueue<T> implements IPriorityQueue<T> {
   enqueue(value: T, priority: number): boolean {
     if (typeof priority !== "number") return false;
 
-    this._elements.push({ value, priority });
+    this._elements.push({ value, priority } as Node);
     up(this._size++, this._elements, this.compare.bind(this));
 
     return true;
   }
 
   dequeue(): T | undefined {
-    if (this.isEmpty()) return undefined;
-    const element = this._elements[0];
-    this.removeRootNode();
-    return element.value;
+    return this.pop()?.value;
   }
 
   peek(): T | undefined {
     return this.isEmpty() ? undefined : this._elements[0].value;
+  }
+
+  pop(): Node | undefined {
+    if (this.isEmpty()) return undefined;
+    const element = this._elements[0];
+    this.removeRootNode();
+    return element;
   }
 
   clear(): void {
@@ -90,12 +92,11 @@ export class PriorityQueue<T> implements IPriorityQueue<T> {
     return this._size;
   }
 
-
   get values(): T[] {
     return this._elements.map((node) => node.value);
   }
 
-  get heap(): HeapNode<T>[] {
+  get heap(): Node[] {
     return this._elements;
   }
 
@@ -143,16 +144,34 @@ export class PriorityQueue<T> implements IPriorityQueue<T> {
     return true;
   }
 
-  indexOf(value: T): number {
-    return this._elements.findIndex((node) => node.value === value);
+  indexOf(value: T, dequeue?: boolean): number {
+    if (!dequeue) return this._elements.findIndex((node) => node.value === value);
+    const clone = this.clone();
+    let index = 0;
+    while (!clone.isEmpty()) {
+      if (clone.dequeue() === value) return index;
+      index++;
+    }
+    
+    return -1;
   }
 
-  priorityAt(index: number): number {
-    console.log(this._elements[index]);
-    return index < this._size ? this._elements[index].priority : Number.MAX_VALUE;
+  priorityAt(index: number, dequeue = false): number {
+    if (index >= this._size) return Number.MAX_VALUE;
+    if (!dequeue) return this._elements[index].priority;
+    const clone = this.clone();
+    let i = index;
+    // Once we dequeue, we don't really know the index of the element
+    // so we will have to dequeue until we find the element
+    while (!clone.isEmpty()) {
+      const node = clone.pop();
+      if (i-- === 0) return node?.priority ?? Number.MAX_VALUE;
+    }
+
+    return Number.MAX_VALUE;
   }
 
-  clone(): PriorityQueue<T> {
+  clone(): PriorityQueue<T, Node> {
     return new PriorityQueue(this, this._comparer);
   }
 
@@ -164,22 +183,22 @@ export class PriorityQueue<T> implements IPriorityQueue<T> {
     return this.toArray()[Symbol.iterator]();
   }
 
-  static from<T>(
-    elements: HeapNode<T>[],
-    comparer?: IComparer<HeapNode<T>>
-  ): PriorityQueue<T>;
-  static from<T>(
-    queue: PriorityQueue<T>,
-    comparer?: IComparer<HeapNode<T>>
-  ): PriorityQueue<T>;
-  static from<T>(
+  static from<T, Node extends INode<T> = INode<T>>(
+    elements: INode<T>[],
+    comparer?: IComparer<INode<T>>
+  ): PriorityQueue<T, Node>;
+  static from<T, Node extends INode<T> = INode<T>>(
+    queue: PriorityQueue<T, Node>,
+    comparer?: IComparer<INode<T>>
+  ): PriorityQueue<T, Node>;
+  static from<T, Node extends INode<T> = INode<T>>(
     elements: T[],
     comparer?: IComparer<T>
-  ): PriorityQueue<T>;
-  static from<T>(
-    elements?: T[] | PriorityQueue<T>,
+  ): PriorityQueue<T, Node>;
+  static from<T, Node extends INode<T> = INode<T>>(
+    elements?: T[] | PriorityQueue<T, Node>,
     comparer?: IComparer<T>
-  ): PriorityQueue<T> {
+  ): PriorityQueue<T, Node> {
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     return new PriorityQueue(elements as any, comparer as any);
   }
