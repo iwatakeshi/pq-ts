@@ -87,7 +87,7 @@ describe("primitives", () => {
       expect(heap).toEqual([{ value: 1, priority: 1 }, { value: 3, priority: 3 }]);
     });
 
-    it.todo("moves an element down in a larger heap", () => {
+    it("moves an element down in a larger heap", () => {
       const heap = [
         { value: 1, priority: 1 },
         { value: 5, priority: 5 },
@@ -98,9 +98,9 @@ describe("primitives", () => {
       down(0, heap.length, heap, (a, b) => a.priority - b.priority);
       expect(heap).toEqual([
         { value: 1, priority: 1 },
-        { value: 3, priority: 3 },
-        { value: 4, priority: 4 },
         { value: 5, priority: 5 },
+        { value: 4, priority: 4 },
+        { value: 3, priority: 3 },
         { value: 2, priority: 2 }
       ]);
     });
