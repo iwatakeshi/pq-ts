@@ -1,9 +1,9 @@
-import type { IPriorityQueue, IComparer, INode, IEqualityComparator } from "./types.ts";
+import type { IPriorityQueue, IComparer, IPriorityNode, IEqualityComparator } from "./types.ts";
 import { up, down, heapify } from "./primitive.ts";
 
 export class PriorityQueue<
   T,
-  Node extends INode<T> = INode<T>,
+  Node extends IPriorityNode<T> = IPriorityNode<T>,
   Comparer extends IComparer<Node> = IComparer<Node>
 > implements IPriorityQueue<T, Node> {
   /**
@@ -296,25 +296,25 @@ export class PriorityQueue<
    * @param elements - The elements to add to the queue.
    * @param comparer - An optional comparison function.
    */
-  static from<T, Node extends INode<T> = INode<T>>(
-    elements: INode<T>[],
-    comparer?: IComparer<INode<T>>
+  static from<T, Node extends IPriorityNode<T> = IPriorityNode<T>>(
+    elements: IPriorityNode<T>[],
+    comparer?: IComparer<IPriorityNode<T>>
   ): PriorityQueue<T, Node>;
   /**
    * Creates a new instance of a priority queue.
    * @param queue - The queue to copy elements from.
    * @param comparer - An optional comparison function.
    */
-  static from<T, Node extends INode<T> = INode<T>>(
+  static from<T, Node extends IPriorityNode<T> = IPriorityNode<T>>(
     queue: PriorityQueue<T, Node>,
-    comparer?: IComparer<INode<T>>
+    comparer?: IComparer<IPriorityNode<T>>
   ): PriorityQueue<T, Node>;
   /**
    * Creates a new instance of a priority queue.
    * @param elements - The elements to add to the queue.
    * @param comparer - An optional comparison function.
    */
-  static from<T, Node extends INode<T> = INode<T>>(
+  static from<T, Node extends IPriorityNode<T> = IPriorityNode<T>>(
     elements: T[],
     comparer?: IComparer<T>
   ): PriorityQueue<T, Node>;
@@ -324,7 +324,7 @@ export class PriorityQueue<
    * @param comparer - An optional comparison function.
    * @returns - A new priority queue instance.
    */
-  static from<T, Node extends INode<T> = INode<T>>(
+  static from<T, Node extends IPriorityNode<T> = IPriorityNode<T>>(
     elements?: T[] | PriorityQueue<T, Node>,
     comparer?: IComparer<T>
   ): PriorityQueue<T, Node> {

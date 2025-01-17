@@ -1,10 +1,10 @@
-import type { IComparer, IEqualityComparator, StableHeapNode } from "./types.ts";
+import type { IComparer, IEqualityComparator, IStableNode } from "./types.ts";
 import { up, heapify } from "./primitive.ts";
 import { PriorityQueue } from "./pq.ts";
 
 export class StablePriorityQueue<
   T,
-  Node extends StableHeapNode<T> = StableHeapNode<T>,
+  Node extends IStableNode<T> = IStableNode<T>,
   Comparer extends IComparer<Node> = IComparer<Node>
 > extends PriorityQueue<T, Node, Comparer> {
   protected override _elements: Node[] = [];
@@ -89,21 +89,21 @@ export class StablePriorityQueue<
   }
 
   static from<T>(
-    elements: StableHeapNode<T>[],
-    comparer?: IComparer<StableHeapNode<T>>
-  ): StablePriorityQueue<T, StableHeapNode<T>, IComparer<StableHeapNode<T>>>;
+    elements: IStableNode<T>[],
+    comparer?: IComparer<IStableNode<T>>
+  ): StablePriorityQueue<T, IStableNode<T>, IComparer<IStableNode<T>>>;
   static from<T>(
-    queue: StablePriorityQueue<T, StableHeapNode<T>, IComparer<StableHeapNode<T>>>,
-    comparer?: IComparer<StableHeapNode<T>>
-  ): StablePriorityQueue<T, StableHeapNode<T>, IComparer<StableHeapNode<T>>>;
+    queue: StablePriorityQueue<T, IStableNode<T>, IComparer<IStableNode<T>>>,
+    comparer?: IComparer<IStableNode<T>>
+  ): StablePriorityQueue<T, IStableNode<T>, IComparer<IStableNode<T>>>;
   static from<T>(
     elements: T[],
     comparer?: IComparer<T>
-  ): StablePriorityQueue<T, StableHeapNode<T>, IComparer<StableHeapNode<T>>>;
+  ): StablePriorityQueue<T, IStableNode<T>, IComparer<IStableNode<T>>>;
   static from<T>(
-    elements?: T[] | StablePriorityQueue<T, StableHeapNode<T>, IComparer<StableHeapNode<T>>>,
+    elements?: T[] | StablePriorityQueue<T, IStableNode<T>, IComparer<IStableNode<T>>>,
     comparer?: IComparer<T>
-  ): StablePriorityQueue<T, StableHeapNode<T>, IComparer<StableHeapNode<T>>> {
+  ): StablePriorityQueue<T, IStableNode<T>, IComparer<IStableNode<T>>> {
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     return new StablePriorityQueue(elements as any, comparer);
   }
