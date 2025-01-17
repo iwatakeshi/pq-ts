@@ -17,8 +17,10 @@ describe("StablePriorityQueue", () => {
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
+    pq.enqueue(4, 3);
 
     expect(pq.dequeue()).toBe(2);
+    expect(pq.dequeue()).toBe(4);
     expect(pq.dequeue()).toBe(3);
     expect(pq.dequeue()).toBe(1);
     expect(pq.dequeue()).toBeUndefined();
@@ -69,8 +71,9 @@ describe("StablePriorityQueue", () => {
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
+    pq.enqueue(4, 3);
 
-    expect(pq.toArray()).toEqual([2, 3, 1]);
+    expect(pq.toArray()).toEqual([2, 4, 3, 1]);
   });
 
   it("should remove a specific element", () => {
@@ -78,11 +81,12 @@ describe("StablePriorityQueue", () => {
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
+    pq.enqueue(4, 3);
 
     expect(pq.remove(2)).toBe(true);
-    expect(pq.count).toBe(2);
-    expect(new Set(pq.values)).toEqual(new Set([1, 3]));
-    expect(pq.toArray()).toEqual([3, 1]);
+    expect(pq.count).toBe(3);
+    expect(new Set(pq.values)).toEqual(new Set([1, 3, 4]));
+    expect(pq.toArray()).toEqual([4, 3, 1]);
   });
 
   it("should clone the queue", () => {
@@ -90,10 +94,12 @@ describe("StablePriorityQueue", () => {
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
+    pq.enqueue(4, 3);
 
     const clone = pq.clone();
-    expect(clone.count).toBe(3);
+    expect(clone.count).toBe(4);
     expect(pq.values).toEqual(clone.values);
+    expect(clone.toArray()).toEqual([2, 4, 3, 1]);
   });
 
   it("should return a string representation of the queue (prioritized)", () => {
@@ -101,8 +107,9 @@ describe("StablePriorityQueue", () => {
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
+    pq.enqueue(4, 3);
 
-    expect(pq.toString()).toBe("2, 3, 1");
+    expect(pq.toString()).toBe("2, 4, 3, 1");
   });
 
   it("should iterate over the queue (prioritized)", () => {
@@ -110,13 +117,14 @@ describe("StablePriorityQueue", () => {
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
+    pq.enqueue(4, 3);
 
     const values = [];
     for (const value of pq) {
       values.push(value);
     }
 
-    expect(values).toEqual([2, 3, 1]);
+    expect(values).toEqual([2, 4, 3, 1]);
   });
 
   it("should return the index of a specific element", () => {
@@ -219,23 +227,24 @@ describe("StablePriorityQueue", () => {
     expect(pq.count).toBe(0);
   });
 
-  it("should maintain the same priority sequence when dequeue is enabled", () => {
+  it("should maintain the same priority sequence and stability when dequeue is enabled", () => {
     const pq = new StablePriorityQueue<number>();
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
+    pq.enqueue(4, 3); // Adding another element with the same priority as 2
 
     const dequeuedItems = [];
     while (!pq.isEmpty()) {
-      dequeuedItems.push(pq.dequeue());
+      dequeuedItems.push(pq.pop());
     }
 
-    const pq2 = new StablePriorityQueue<number>();
-    pq2.enqueue(1, 5);
-    pq2.enqueue(2, 3);
-    pq2.enqueue(3, 4);
+    // Check if the priorities are in the correct order
+    const priorities = dequeuedItems.map((item) => item?.priority);
+    expect(priorities).toEqual([3, 3, 4, 5]);
 
-    const priorities = dequeuedItems.map((_, index) => pq2.priorityAt(index, true));
-    expect(priorities).toEqual([3, 4, 5]);
+    // Check if the elements with the same priority are dequeued in the order they were enqueued
+    const elements = dequeuedItems.map((item) => item?.value);
+    expect(elements).toEqual([2, 4, 3, 1]);
   });
 });
