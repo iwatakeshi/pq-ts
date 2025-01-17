@@ -1,4 +1,4 @@
-import type { IPriorityQueue, IComparer, INode } from "./types.ts";
+import type { IPriorityQueue, IComparer, INode, IEqualityComparator } from "./types.ts";
 import { up, down, heapify } from "./primitive.ts";
 
 export class PriorityQueue<
@@ -114,8 +114,8 @@ export class PriorityQueue<
     return this._size === 0;
   }
 
-  remove(value: T): boolean {
-    const index = this._elements.findIndex((node) => node.value === value);
+  remove(value: T, comparer: IEqualityComparator<T> = (a, b) => a === b): boolean {
+    const index = this._elements.findIndex((node) => comparer(node.value, value));
     if (index === -1) return false;
 
     const removedElement = this._elements[index];
@@ -135,12 +135,12 @@ export class PriorityQueue<
     return true;
   }
 
-  indexOf(value: T, dequeue?: boolean): number {
-    if (!dequeue) return this._elements.findIndex((node) => node.value === value);
+  indexOf(value: T, dequeue?: boolean, comparer: IEqualityComparator<T> = (a, b) => a === b): number {
+    if (!dequeue) return this._elements.findIndex((node) => comparer(node.value, value));
     const clone = this.clone();
     let index = 0;
     while (!clone.isEmpty()) {
-      if (clone.dequeue() === value) return index;
+      if (comparer(clone.dequeue() as T, value)) return index;
       index++;
     }
 
