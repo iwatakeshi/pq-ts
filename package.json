@@ -14,7 +14,8 @@
     "build": "tsup main.ts --dts --format esm,cjs --sourcemap",
     "test": "vitest",
     "docs:generate": "deno doc --html --name=pq-ts main.ts",
-    "docs:serve": "npx serve docs"
+    "docs:serve": "npx serve docs",
+    "prepublishOnly": "npm run build && npm run docs:generate"
   },
   "keywords": [
     "priority-queue",
