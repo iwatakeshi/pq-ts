@@ -2,13 +2,37 @@
   "name": "pq-ts",
   "module": "main.ts",
   "type": "module",
+  "version": "0.0.0",
+  "author": {
+    "name": "Takeshi Iwana",
+    "email": "iwatakeshi@gmail.com"
+  },
+  "repository": "github.com:iwatakeshi/pq-ts",
+  "description": "A priority queue written in TypeScript.",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "tsup": "^8.3.5",
+    "vitest": "^2.1.8"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
-  "dependencies": {
-    "vitest": "^2.1.8"
-  }
+  "devependencies": {},
+  "scripts": {
+    "build": "tsup main.ts --minify --dts --format esm,cjs --sourcemap",
+    "test": "vitest",
+    "docs:generate": "deno doc --html --name=pq-ts main.ts",
+    "docs:serve": "npx serve docs"
+  },
+  "keywords": [
+    "priority-queue",
+    "stable-priority-queue",
+    "unstable-priority-queue",
+    "typescript",
+    "priority",
+    "queue",
+    "stable",
+    "unstable"
+  ],
+  "license": "MIT"
 }
