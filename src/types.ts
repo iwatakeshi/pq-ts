@@ -122,8 +122,8 @@ export interface IPriorityQueue<
  * @template T The type of value stored in the node
  * @interface StableHeapNode
  * @extends {INode<T>}
- * @property {bigint} ___index An internal index used to maintain insertion order stability
+ * @property {bigint} index An index used to maintain insertion order stability
  */
 export interface StableHeapNode<T> extends INode<T> {
-  ___index: bigint;
+  index: bigint;
 }

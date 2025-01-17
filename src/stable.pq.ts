@@ -81,7 +81,7 @@ export class StablePriorityQueue<
   protected override compare(a: Node, b: Node): number {
     if (this._comparer) return this._comparer(a, b);
     // If the priorities are the same, compare by index
-    if (a.priority === b.priority) return a.___index < b.___index ? -1 : 1;
+    if (a.priority === b.priority) return a.index < b.index ? -1 : 1;
 
     return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
   }
@@ -95,7 +95,7 @@ export class StablePriorityQueue<
   override enqueue(value: T, priority: number): boolean {
     if (typeof priority !== "number") return false;
 
-    this._elements.push({ value, priority, ___index: this._index++ } as Node);
+    this._elements.push({ value, priority, index: this._index++ } as Node);
     up(this._size++, this._elements, this.compare.bind(this));
 
     return true;
@@ -109,14 +109,14 @@ export class StablePriorityQueue<
     if (this.isEmpty()) return undefined;
     const element = this._elements[0];
     this.removeRootNode();
-    return { value: element.value, priority: element.priority, ___index: element.___index } as Node;
+    return { value: element.value, priority: element.priority, index: element.index } as Node;
   }
 
   /**
    * Removes the first occurrence of a specific element from the queue.
    */
   override get heap(): Node[] {
-    return this._elements.map(({ value, priority, ___index }) => ({ value, priority, ___index } as Node));
+    return this._elements.map(({ value, priority, index: ___index }) => ({ value, priority, index: ___index } as Node));
   }
 
   /**
