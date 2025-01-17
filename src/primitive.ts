@@ -3,7 +3,7 @@
 // Credits: 
 //  * https://andrewlock.net/behind-the-implementation-of-dotnets-priorityqueue/
 //  * https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/PriorityQueue.cs
-import type { IComparer, TypedArray } from "./types.ts";
+import type { IComparer, TypedArray, TypedArrayConstructor } from "./types.ts";
 
 
 /**
@@ -185,28 +185,15 @@ export const heapify = <T, Heap extends Indexable<T>>(length: number, heap: Heap
   }
 }
 
-
-
-export const grow = <T extends TypedArray>(elements: T, size: number): T => {
-  let newElements: T;
-
-  if (elements instanceof Uint8Array) {
-    newElements = new Uint8Array(size) as T;
-    newElements.set(elements);
-    return elements;
-  }
-
-  if (elements instanceof Uint16Array) {
-    newElements = new Uint16Array(size) as T;
-    newElements.set(elements);
-    return elements;
-  }
-
-  if (elements instanceof Uint32Array) {
-    newElements = new Uint32Array(size) as T;
-    newElements.set(elements);
-    return elements;
-  }
-
-  return elements;
+/**
+ * Grows an array to a new size and copies the elements from the original array.
+ * @param elements - The original array to copy
+ * @param size - The new size of the array
+ * @param backend - The constructor for the new array
+ * @returns A new array with the copied elements
+ */
+export const grow = <T extends TypedArray>(elements: T, size: number, backend: TypedArrayConstructor<T>): T => {
+  const _elements = new backend(size) as T;
+  _elements.set(elements);
+  return _elements;
 }

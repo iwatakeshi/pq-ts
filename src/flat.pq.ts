@@ -73,7 +73,7 @@ export class FlatPriorityQueue<
   }
 
   priorityAt(index: number, dequeue = false): number {
-    if (index < 0 || index >= this._size) throw new Error("Index out of bounds");
+    if (index < 0 || index >= this._size) return Number.MAX_VALUE;
     const priority = this._priorities[index];
     if (dequeue) {
       this._elements[index] = this._elements[--this._size];
@@ -137,8 +137,8 @@ export class FlatPriorityQueue<
   }
 
   protected grow(newSize: number): void {
-    this._elements = grow(this._elements, newSize);
-    this._priorities = grow(this._priorities, newSize);
+    this._elements = grow(this._elements, newSize, this._backend);
+    this._priorities = grow(this._priorities, newSize, this._backend);
   }
 
   protected compare(a: number, b: number): number {
