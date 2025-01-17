@@ -2,9 +2,9 @@ import type { IPriorityQueue, IComparer, INode } from "./types.ts";
 import { up, down, heapify } from "./primitive.ts";
 
 export class PriorityQueue<
-T, 
-Node extends INode<T> = INode<T>,
-Comparer extends IComparer<Node> = IComparer<Node>
+  T,
+  Node extends INode<T> = INode<T>,
+  Comparer extends IComparer<Node> = IComparer<Node>
 > implements IPriorityQueue<T, Node> {
   protected _elements: Node[] = [];
   protected _comparer?: Comparer;
@@ -119,24 +119,15 @@ Comparer extends IComparer<Node> = IComparer<Node>
     if (index === -1) return false;
 
     const removedElement = this._elements[index];
-    const priority = removedElement.priority;
     const newSize = --this._size;
 
     if (index < newSize) {
       const lastNode = this._elements[newSize];
       this._elements[index] = lastNode;
-      if (this._comparer) {
-        if (this._comparer(lastNode, removedElement) < 0) {
-          up(index, this._elements, this.compare.bind(this));
-        } else {
-          down(index, newSize, this._elements, this.compare.bind(this));
-        }
+      if (this.compare(lastNode, removedElement) < 0) {
+        up(index, this._elements, this.compare.bind(this));
       } else {
-        if (lastNode.priority < priority) {
-          up(index, this._elements, this.compare.bind(this));
-        } else {
-          down(index, newSize, this._elements, this.compare.bind(this));
-        }
+        down(index, newSize, this._elements, this.compare.bind(this));
       }
     }
 
@@ -152,7 +143,7 @@ Comparer extends IComparer<Node> = IComparer<Node>
       if (clone.dequeue() === value) return index;
       index++;
     }
-    
+
     return -1;
   }
 
