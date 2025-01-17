@@ -120,8 +120,8 @@ console.log(spq.peek()); // 2
 - `values`: Returns the values in the queue (unordered).
 - `toArray()`: Converts the queue to an array (prioritized).
 - `remove(value)`: Removes a specific element from the queue.
-- `indexOf(value, dequeue)`: Returns the index of a specific element.
-- `priorityAt(index, dequeue)`: Returns the priority of an element at a specific index.
+- `indexOf(value, dequeue, comparer)`: Returns the index of a specific element.
+- `priorityAt(index, dequeue, comparer)`: Returns the priority of an element at a specific index.
 - `clone()`: Creates a shallow copy of the queue.
 - `toString()`: Returns a string representation of the queue.
 
