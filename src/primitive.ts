@@ -3,7 +3,7 @@
 // Credits: 
 //  * https://andrewlock.net/behind-the-implementation-of-dotnets-priorityqueue/
 //  * https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/PriorityQueue.cs
-import type { IComparer, TypedArray, TypedArrayConstructor } from "./types.ts";
+import type { IComparer, Indexable, TypedArray, TypedArrayConstructor } from "./types.ts";
 
 
 /**
@@ -80,20 +80,34 @@ export const swap = <T>(elements: T[], i: number, j: number): void => {
  * compares an element with its parent and swaps them if necessary
  * until the heap property is restored.
  */
-export const up = <T, Heap extends Indexable<T> = Indexable<T>>(
+export function up<T, Heap extends Indexable<T>>(index: number, heap: Heap, comparer: IComparer<T>): void;
+export function up<T, Heap extends Indexable<T>>(index: number, heap: Heap, comparer: IComparer<T>, priorities: Indexable<number>): void;
+export function up<T, Heap extends Indexable<T>>(
   index: number,
   heap: Heap,
-  comparer: IComparer<T>
-): void => {
+  comparer: IComparer<T> | IComparer<number>, // Can be for elements or priorities
+  priorities?: Indexable<number>
+): void {
   const node = heap[index];
+  const nodePriority = priorities ? priorities[index] : undefined;
   let nodeIndex = index;
 
   while (nodeIndex > 0) {
     const parentIndex = (nodeIndex - 1) >> LOG2_ARITY;
     const parentNode = heap[parentIndex];
+    const parentPriority = priorities ? priorities[parentIndex] : undefined;
 
-    if (comparer(node, parentNode) < 0) {
+    let result: number;
+
+    // Compare based on priorities if priorities exist, otherwise compare heap elements
+    if (priorities) {
+      result = (comparer as IComparer<number>)(nodePriority as number, parentPriority as number);
+    } else {
+      result = (comparer as IComparer<T>)(node, parentNode);
+    }
+    if (result < 0) {
       heap[nodeIndex] = parentNode;
+      if (priorities) priorities[nodeIndex] = parentPriority as number;
       nodeIndex = parentIndex;
     } else {
       break;
@@ -101,11 +115,7 @@ export const up = <T, Heap extends Indexable<T> = Indexable<T>>(
   }
 
   heap[nodeIndex] = node;
-};
-
-interface Indexable<T> {
-  [index: number]: T;
-  length: number;
+  if (priorities) priorities[nodeIndex] = nodePriority as number;
 }
 
 /**
@@ -128,8 +138,11 @@ interface Indexable<T> {
  * // minHeap is now [1, 4, 3, 7, 8, 9, 10]
  * ```
  */
-export const down = <T, Heap extends Indexable<T>>(index: number, length: number, heap: Heap, comparer: IComparer<T>): void => {
+export function down<T, Heap extends Indexable<T>>(index: number, length: number, heap: Heap, comparer: IComparer<T>): void;
+export function down<T, Heap extends Indexable<T>>(index: number, length: number, heap: Heap, comparer: IComparer<T>, priorities: Indexable<number>): void;
+export function down<T, Heap extends Indexable<T>>(index: number, length: number, heap: Heap, comparer: IComparer<T>, priorities?: Indexable<number>): void {
   const node = heap[index];
+  const nodePriority = priorities ? priorities[index] : undefined;
   let currentIndex = index;
 
   while (true) {
@@ -139,12 +152,15 @@ export const down = <T, Heap extends Indexable<T>>(index: number, length: number
     const lastChildIndex = Math.min(firstChildIndex + ARITY, length);
     let minChildIndex = firstChildIndex;
     let minChild = heap[firstChildIndex];
+    let minChildPriority = priorities ? priorities[firstChildIndex] : undefined;
 
     // Find minimum child using direct comparisons
     for (let i = firstChildIndex + 1; i < lastChildIndex; i++) {
       const nextChild = heap[i];
+      const nextChildPriority = priorities ? priorities[i] : undefined;
       if (comparer(nextChild, minChild) < 0) {
         minChild = nextChild;
+        minChildPriority = nextChildPriority;
         minChildIndex = i;
       }
     }
@@ -154,11 +170,13 @@ export const down = <T, Heap extends Indexable<T>>(index: number, length: number
 
     // Single assignment instead of swap
     heap[currentIndex] = minChild;
+    if (priorities) priorities[currentIndex] = minChildPriority as number;
     currentIndex = minChildIndex;
   }
 
   heap[currentIndex] = node;
-};
+  if (priorities) priorities[currentIndex] = nodePriority as number;
+}
 
 /**
  * Converts an array into a heap data structure using the provided comparison function.
@@ -178,10 +196,12 @@ export const down = <T, Heap extends Indexable<T>>(index: number, length: number
  * heapify(numbers, (a, b) => a - b); // Creates a min-heap
  * // numbers is now arranged as a heap
  */
-export const heapify = <T, Heap extends Indexable<T>>(length: number, heap: Heap, comparer: IComparer<T>): void => {
+export function heapify<T, Heap extends Indexable<T>>(length: number, heap: Heap, comparer: IComparer<T>): void;
+export function heapify<T, Heap extends Indexable<T>>(length: number, heap: Heap, comparer: IComparer<T>, priorities: Indexable<number>): void;
+export function heapify<T, Heap extends Indexable<T>>(length: number, heap: Heap, comparer: IComparer<T>, priorities?: Indexable<number>): void {
   // Start from the last parent node and move up the tree
   for (let i = (length - 1 - 1) >> LOG2_ARITY; i >= 0; i--) {
-    down(i, length, heap, comparer);
+    down(i, length, heap, comparer, priorities as Indexable<number>);
   }
 }
 
@@ -193,6 +213,7 @@ export const heapify = <T, Heap extends Indexable<T>>(length: number, heap: Heap
  * @returns A new array with the copied elements
  */
 export const grow = <T extends TypedArray>(elements: T, size: number, backend: TypedArrayConstructor<T>): T => {
+  if (size <= elements.length) return elements;
   const _elements = new backend(size) as T;
   _elements.set(elements);
   return _elements;
