@@ -161,6 +161,11 @@ npm run docs:serve
 
 Contributions are welcome! Please open an issue or submit a pull request on GitHub.
 
+## Credits
+
+* [Behind the implementation of .NET's PriorityQueue](https://andrewlock.net/behind-the-implementation-of-dotnets-priorityqueue/)
+* [DotNet's `PriorityQueue<TElement,TPriority> Class`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/PriorityQueue.cs)
+
 ## License
 
 This project is licensed under the MIT License.
