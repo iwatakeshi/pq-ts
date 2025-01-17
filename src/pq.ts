@@ -21,6 +21,11 @@ export class PriorityQueue<
    * @protected
    */
   protected _size = 0;
+  /**
+   * The bound compare function.
+   * @protected
+   */
+  protected readonly _compare: (a: Node, b: Node) => number;
 
   /**
    * Creates a new instance of a priority queue.
@@ -71,7 +76,8 @@ export class PriorityQueue<
       this._comparer = comparer;
     }
 
-    heapify(this._size, this._elements, this.compare.bind(this));
+    this._compare = this.compare.bind(this);
+    heapify(this._size, this._elements, this._compare);
   }
 
   /**
@@ -95,7 +101,7 @@ export class PriorityQueue<
     const lastNode = this._elements[--this._size];
     if (this._size > 0) {
       this._elements[0] = lastNode;
-      down(0, this._size, this._elements, this.compare.bind(this));
+      down(0, this._size, this._elements, this._compare);
     }
     this._elements.pop();
   }
@@ -110,7 +116,7 @@ export class PriorityQueue<
     if (typeof priority !== "number") return false;
 
     this._elements.push({ value, priority } as Node);
-    up(this._size++, this._elements, this.compare.bind(this));
+    up(this._size++, this._elements, this._compare);
 
     return true;
   }
@@ -212,10 +218,10 @@ export class PriorityQueue<
     if (index < newSize) {
       const lastNode = this._elements[newSize];
       this._elements[index] = lastNode;
-      if (this.compare(lastNode, removedElement) < 0) {
-        up(index, this._elements, this.compare.bind(this));
+      if (this._compare(lastNode, removedElement) < 0) {
+        up(index, this._elements, this._compare);
       } else {
-        down(index, newSize, this._elements, this.compare.bind(this));
+        down(index, newSize, this._elements, this._compare);
       }
     }
 
