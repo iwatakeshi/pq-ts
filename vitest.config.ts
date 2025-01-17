@@ -10,6 +10,7 @@ const exclude = [
   'dist',
   'example'
 ];
+
 export default defineConfig({
   test: {
     coverage: {
