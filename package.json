@@ -10,6 +10,12 @@
     "src",
     "dist"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/main.esm.js",
+      "require": "./dist/main.cjs.js"
+    }
+  },
   "scripts": {
     "build": "npx rimraf dist && tsup main.ts --dts --format esm,cjs --sourcemap",
     "test": "vitest",
