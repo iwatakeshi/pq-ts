@@ -11,9 +11,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup main.ts --dts --format esm,cjs --sourcemap",
+    "build": "npx rimraf dist && tsup main.ts --dts --format esm,cjs --sourcemap",
     "test": "vitest",
-    "docs:generate": "deno doc --html --name=pq-ts main.ts",
+    "docs:generate": "npx rimraf docs && deno doc --html --name=pq-ts main.ts",
     "docs:serve": "npx serve docs",
     "prepublishOnly": "npm run build && npm run docs:generate"
   },
