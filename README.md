@@ -146,6 +146,17 @@ console.log(pq.dequeue()); // 3
 console.log(pq.dequeue()); // 2
 ```
 
+## Documentation
+
+Deno is required to generate the documentation.
+```sh
+# Generate the docs
+npm run docs:generate
+# View the docs
+npm run docs:serve
+```
+
+
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request on GitHub.
