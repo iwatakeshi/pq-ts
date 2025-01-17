@@ -6,7 +6,9 @@
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "src",
+    "main.ts"
   ],
   "scripts": {
     "build": "tsup main.ts --dts --format esm,cjs --sourcemap",
