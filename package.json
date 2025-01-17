@@ -21,7 +21,7 @@
     "test": "vitest",
     "docs:generate": "npx rimraf docs && deno doc --html --name=pq-ts main.ts",
     "docs:serve": "npx serve docs",
-    "docs:publish": "npx gh-pages -d docs",
+    "docs:publish": "npm run docs:generate && npx gh-pages -d docs",
     "prepublishOnly": "npm run build && npm run docs:generate"
   },
   "keywords": [
