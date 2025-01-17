@@ -1,11 +1,11 @@
 import type { IComparer, IEqualityComparator, StableHeapNode } from "./types.ts";
-import { up, down, heapify } from "./primitive.ts";
+import { up, heapify } from "./primitive.ts";
 import { PriorityQueue } from "./pq.ts";
 
 export class StablePriorityQueue<T> extends PriorityQueue<T, StableHeapNode<T>> {
-  protected _elements: StableHeapNode<T>[] = [];
+  protected override _elements: StableHeapNode<T>[] = [];
   private _index = 0n;
-  protected _comparer?: IComparer<StableHeapNode<T>> | undefined;
+  protected override _comparer?: IComparer<StableHeapNode<T>> | undefined;
 
   constructor();
   constructor(
@@ -24,20 +24,18 @@ export class StablePriorityQueue<T> extends PriorityQueue<T, StableHeapNode<T>> 
     elements?: T[] | StablePriorityQueue<T> | StableHeapNode<T>[],
     comparer?: IComparer<StableHeapNode<T>>
   ) {
+    super([], comparer);
     if (elements instanceof StablePriorityQueue) {
-      super(elements._elements, elements._comparer);
       this._elements = [...elements._elements];
       this._size = elements._size;
       this._comparer = elements._comparer;
     } else if (Array.isArray(elements)) {
-      super([], comparer);
       for (const element of elements) {
         this.enqueue(element as T, 0);
       }
       this._size = elements.length;
       this._comparer = comparer;
     } else {
-      super([], comparer);
       this._comparer = comparer;
     }
 
