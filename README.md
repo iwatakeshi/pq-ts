@@ -67,16 +67,16 @@ console.log(pq.peek()); // 2
 
 #### Other Methods
 
-- `clear()` - Clears all elements from the queue.
-- `count`  - Returns the number of elements in the queue.
-- `isEmpty()`  - Checks if the queue is empty.
-- `values`  - Returns the values in the queue (unordered).
-- `toArray()`  - Converts the queue to an array (prioritized).
-- `remove(value)`  - Removes a specific element from the queue.
-- `indexOf(value, dequeue, comparer)`  - Returns the index of a specific element.
-- `priorityAt(index, dequeue, comparer)`  - Returns the priority of an element at a specific index.
-- `clone()`  - Creates a shallow copy of the queue.
-- `toString()`  - Returns a string representation of the queue.
+- `clear()`: Clears all elements from the queue.
+- `count`: Returns the number of elements in the queue.
+- `isEmpty()`: Checks if the queue is empty.
+- `values`: Returns the values in the queue (unordered).
+- `toArray()`: Converts the queue to an array (prioritized).
+- `remove(value)`: Removes a specific element from the queue.
+- `indexOf(value, dequeue, comparer)`: Returns the index of a specific element.
+- `priorityAt(index, dequeue, comparer)`: Returns the priority of an element at a specific index.
+- `clone()`: Creates a shallow copy of the queue.
+- `toString()`: Returns a string representation of the queue.
 
 ### Stable Priority Queue
 
