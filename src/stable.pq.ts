@@ -123,8 +123,8 @@ export class StablePriorityQueue<
    * Returns the elements in the queue in priority order.
    * @returns The elements in the queue in priority order.
    */
-  override clone(): StablePriorityQueue<T, Node, Comparer> {
-    return new StablePriorityQueue(this, this._comparer);
+  override clone(): this {
+    return new StablePriorityQueue(this, this._comparer) as this;
   }
 
   /**

@@ -266,8 +266,8 @@ export class PriorityQueue<
    * Creates a shallow copy of the priority queue.
    * @returns - A new priority queue instance with the same elements.
    */
-  clone(): PriorityQueue<T, Node> {
-    return new PriorityQueue(this, this._comparer);
+  clone(): this {
+    return new PriorityQueue(this, this._comparer) as this;
   }
 
   /**
