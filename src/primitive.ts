@@ -3,7 +3,7 @@
 // Credits: 
 //  * https://andrewlock.net/behind-the-implementation-of-dotnets-priorityqueue/
 //  * https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/PriorityQueue.cs
-import type { IComparer } from "./types.ts";
+import type { IComparer, TypedArray } from "./types.ts";
 
 
 /**
@@ -80,9 +80,9 @@ export const swap = <T>(elements: T[], i: number, j: number): void => {
  * compares an element with its parent and swaps them if necessary
  * until the heap property is restored.
  */
-export const up = <T>(
+export const up = <T, Heap extends Indexable<T> = Indexable<T>>(
   index: number,
-  heap: T[],
+  heap: Heap,
   comparer: IComparer<T>
 ): void => {
   const node = heap[index];
@@ -102,6 +102,11 @@ export const up = <T>(
 
   heap[nodeIndex] = node;
 };
+
+interface Indexable<T> {
+  [index: number]: T;
+  length: number;
+}
 
 /**
  * Moves a node down in a 4-ary heap to maintain the heap property.
@@ -123,7 +128,7 @@ export const up = <T>(
  * // minHeap is now [1, 4, 3, 7, 8, 9, 10]
  * ```
  */
-export const down = <T>(index: number, length: number, heap: T[], comparer: IComparer<T>): void => {
+export const down = <T, Heap extends Indexable<T>>(index: number, length: number, heap: Heap, comparer: IComparer<T>): void => {
   const node = heap[index];
   let currentIndex = index;
 
@@ -173,9 +178,35 @@ export const down = <T>(index: number, length: number, heap: T[], comparer: ICom
  * heapify(numbers, (a, b) => a - b); // Creates a min-heap
  * // numbers is now arranged as a heap
  */
-export const heapify = <T>(length: number, heap: T[], comparer: IComparer<T>): void => {
+export const heapify = <T, Heap extends Indexable<T>>(length: number, heap: Heap, comparer: IComparer<T>): void => {
   // Start from the last parent node and move up the tree
   for (let i = parent(length - 1); i >= 0; i--) {
     down(i, length, heap, comparer);
   }
+}
+
+
+
+export const grow = <T extends TypedArray>(elements: T, size: number): T => {
+  let newElements: T;
+
+  if (elements instanceof Uint8Array) {
+    newElements = new Uint8Array(size) as T;
+    newElements.set(elements);
+    return elements;
+  }
+
+  if (elements instanceof Uint16Array) {
+    newElements = new Uint16Array(size) as T;
+    newElements.set(elements);
+    return elements;
+  }
+
+  if (elements instanceof Uint32Array) {
+    newElements = new Uint32Array(size) as T;
+    newElements.set(elements);
+    return elements;
+  }
+
+  return elements;
 }

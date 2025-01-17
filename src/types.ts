@@ -20,7 +20,14 @@ export type IComparer<T> = (a: T, b: T) => number;
  * @returns True if the values are considered equal, false otherwise
  */
 export type IEqualityComparator<T> = (a: T, b: T) => boolean;
-
+/**
+ * A type representing a typed array.
+ */
+export type TypedArray = Uint8Array | Uint16Array | Uint32Array | Float32Array | Float64Array;
+/**
+ * A type representing a constructor for a typed array.
+ */
+export type TypedArrayConstructor<T extends TypedArray> = new (...args: unknown[]) => T;
 
 /**
  * Represents a node in a priority queue that extends a basic Node type with priority information.
@@ -43,7 +50,7 @@ export interface INode<T> {
 export interface IPriorityQueue<
   T,
   Node extends INode<T> = INode<T>,
-  Comparer extends IComparer<Node> = IComparer<Node>
+  Comparer extends IComparer<Node> = IComparer<Node>,
 > {
   /** The number of elements in the queue */
   readonly count: number;
@@ -80,7 +87,7 @@ export interface IPriorityQueue<
    * Creates a shallow copy of the priority queue.
    * @returns A new priority queue instance with the same elements.
    */
-  clone(): IPriorityQueue<T>;
+  clone(): this;
   /**
    * Removes the first occurrence of a specific element from the queue.
    * @param value - The element to remove.
