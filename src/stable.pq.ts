@@ -3,9 +3,17 @@ import { up, heapify } from "./primitive.ts";
 import { PriorityQueue } from "./pq.ts";
 
 export class StablePriorityQueue<T> extends PriorityQueue<T, StableHeapNode<T>> {
+  /**
+   * The elements in the queue used internally.
+   * @protected
+   */
   protected override _elements: StableHeapNode<T>[] = [];
-  private _index = 0n;
+  /**
+   * The compare function used internally.
+   * @protected
+   */
   protected override _comparer?: IComparer<StableHeapNode<T>> | undefined;
+  private _index = 0n;
   /**
    * Creates a new instance of a stable priority queue.
    */

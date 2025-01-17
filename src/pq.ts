@@ -6,8 +6,20 @@ export class PriorityQueue<
   Node extends INode<T> = INode<T>,
   Comparer extends IComparer<Node> = IComparer<Node>
 > implements IPriorityQueue<T, Node> {
+  /**
+   * The elements in the queue used internally.
+   * @protected
+   */
   protected _elements: Node[] = [];
+  /**
+   * The compare function used internally.
+   * @protected
+   */
   protected _comparer?: Comparer;
+  /**
+   * The size of elements in the queue used internally.
+   * @protected
+   */
   protected _size = 0;
 
   /**
