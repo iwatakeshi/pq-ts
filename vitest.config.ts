@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config'
 
 const exclude = [
   'main.ts',
+  'bench.ts',
   'vite.config.ts',
   'vitest.config.ts',
   'node_modules',
