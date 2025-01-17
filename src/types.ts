@@ -13,6 +13,16 @@
 export type IComparer<T> = (a: T, b: T) => number;
 
 /**
+ * A type representing a function that compares two values for equality.
+ * @template T The type of values being compared
+ * @param a The first value to compare
+ * @param b The second value to compare
+ * @returns True if the values are considered equal, false otherwise
+ */
+export type IEqualityComparator<T> = (a: T, b: T) => boolean;
+
+
+/**
  * Represents a node in a priority queue that extends a basic Node type with priority information.
  * 
  * @template T The type of value stored in the node
@@ -74,14 +84,16 @@ export interface IPriorityQueue<
   /**
    * Removes the first occurrence of a specific element from the queue.
    * @param value - The element to remove.
+   * @param comparer - An optional equality comparison function.
    */
-  remove(value: T): boolean;
+  remove(value: T, comparer?: IEqualityComparator<T>): boolean;
   /**
    * Returns the index of the first occurrence of a specific element in the queue.
    * @param value - The element to search for.
    * @param dequeue - If true, searches for the element by dequeuing elements from a cloned queue, preserving the original queue's order.
+   * @param comparer - An optional equality comparison function.
    */
-  indexOf(value: T, dequeue?: boolean): number;
+  indexOf(value: T, dequeue?: boolean, comparer?: IEqualityComparator<T>): number;
   /**
    * Returns the priority of the element at the specified index.
    * @param index - The index of the element.
