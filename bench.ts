@@ -1,4 +1,5 @@
 import { PriorityQueue, StablePriorityQueue, type IPriorityQueue } from './main';
+import { FlatPriorityQueue } from './src/flat.pq';
 
 function bench<T extends IPriorityQueue<number>>(queue: T, operations: number) {
   console.time(`${queue.constructor.name} enqueue`);
@@ -29,11 +30,16 @@ const run = (queue: IPriorityQueue<number>, operations: number[], count: number)
 // const operations = 1_000_000;
 const priorityQueue = new PriorityQueue<number>();
 const stablePriorityQueue = new StablePriorityQueue<number>();
-const operations = [10, 100, 1000, 10000, 100000, 1000000];
+const flatPriorityQueue = new FlatPriorityQueue<number>(Uint32Array, 10000);
+const operations = [10, 100, 1000, 10000, 100000, 1000000, 10000000];
 const count = 100;
 
-bench(priorityQueue, operations[5]);
-bench(stablePriorityQueue, operations[5]);
+const operation = operations[5];
+
+console.log(`Running benchmarks for ${operation} operations`);
+bench(priorityQueue, operation);
+bench(stablePriorityQueue, operation);
+bench(flatPriorityQueue as IPriorityQueue<number>, operation);
 
 // run(priorityQueue, operations, count);
 // run(stablePriorityQueue, operations, count);
