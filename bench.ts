@@ -39,7 +39,7 @@ const operation = operations[5];
 console.log(`Running benchmarks for ${operation} operations`);
 bench(priorityQueue, operation);
 bench(stablePriorityQueue, operation);
-bench(flatPriorityQueue as IPriorityQueue<number>, operation);
+// bench(flatPriorityQueue as IPriorityQueue<number>, operation);
 
 // run(priorityQueue, operations, count);
 // run(stablePriorityQueue, operations, count);
