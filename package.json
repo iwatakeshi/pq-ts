@@ -2,8 +2,8 @@
   "name": "pq-ts",
   "version": "0.6.0",
   "description": "A priority queue written in TypeScript.",
-  "main": "dist/main.cjs.js",
-  "module": "dist/main.esm.js",
+  "main": "dist/main.js",
+  "module": "dist/main.mjs",
   "types": "dist/main.d.ts",
   "files": [
     "main.ts",
@@ -12,8 +12,8 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/main.esm.js",
-      "require": "./dist/main.cjs.js"
+      "import": "./dist/main.mjs",
+      "require": "./dist/main.js"
     }
   },
   "scripts": {
