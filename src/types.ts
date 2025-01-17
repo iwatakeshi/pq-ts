@@ -127,32 +127,3 @@ export interface IPriorityQueue<
 export interface StableHeapNode<T> extends INode<T> {
   ___index: bigint;
 }
-
-type OmittedProperties = 'heap' | 'pop';
-export interface IStablePriorityQueue<T> extends Omit<IPriorityQueue<T, StableHeapNode<T>>, OmittedProperties> {
-  /** The heap array containing the elements */
-  readonly heap: INode<T>[];
-  /**
-   * Adds an element to the queue with a specified priority, ensuring stability.
-   * @param value - The value to add.
-   * @param priority - The priority of the element.
-   * @returns True if the element was added, false otherwise.
-   */
-  enqueue(value: T, priority: number): boolean;
-
-  /**
-   * Removes and returns the element with the highest priority, ensuring stability.
-   * @returns The element with the highest priority, or undefined if the queue is empty.
-   */
-  dequeue(): T | undefined;
-  /**
-   * Removes and returns the element at the front of the queue.
-   */
-  pop(): INode<T> | undefined;
-  /**
-   * Returns the index of the first occurrence of a specific element in the queue.
-   * @param value - The element to search for.
-   * @returns The index of the element if it exists, or -1 if it does not.
-   */
-  indexOf(value: T): number;
-}
