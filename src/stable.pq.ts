@@ -1,4 +1,4 @@
-import type { IComparer, StableHeapNode } from "./types.ts";
+import type { IComparer, IEqualityComparator, StableHeapNode } from "./types.ts";
 import { up, down, heapify } from "./primitive.ts";
 import { PriorityQueue } from "./pq.ts";
 
@@ -76,12 +76,12 @@ export class StablePriorityQueue<T> extends PriorityQueue<T, StableHeapNode<T>> 
     return new StablePriorityQueue(this, this._comparer);
   }
 
-  override indexOf(value: T, dequeue = false): number {
-    if (!dequeue) return this._elements.findIndex((node) => node.value === value);
+  override indexOf(value: T, dequeue = false, comparer: IEqualityComparator<T> = (a, b) => a === b): number {
+    if (!dequeue) return this._elements.findIndex((node) => comparer(node.value, value));
     const clone = this.clone();
     let index = 0;
     while (!clone.isEmpty()) {
-      if (clone.dequeue() === value) return index;
+      if (comparer(clone.dequeue() as T, value)) return index;
       index++;
     }
     return -1;
