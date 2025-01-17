@@ -89,7 +89,7 @@ export const up = <T, Heap extends Indexable<T> = Indexable<T>>(
   let nodeIndex = index;
 
   while (nodeIndex > 0) {
-    const parentIndex = parent(nodeIndex);
+    const parentIndex = (nodeIndex - 1) >> LOG2_ARITY;
     const parentNode = heap[parentIndex];
 
     if (comparer(node, parentNode) < 0) {
@@ -133,7 +133,7 @@ export const down = <T, Heap extends Indexable<T>>(index: number, length: number
   let currentIndex = index;
 
   while (true) {
-    const firstChildIndex = child(currentIndex);
+    const firstChildIndex = (currentIndex << LOG2_ARITY) + 1;
     if (firstChildIndex >= length) break;
 
     const lastChildIndex = Math.min(firstChildIndex + ARITY, length);
@@ -180,7 +180,7 @@ export const down = <T, Heap extends Indexable<T>>(index: number, length: number
  */
 export const heapify = <T, Heap extends Indexable<T>>(length: number, heap: Heap, comparer: IComparer<T>): void => {
   // Start from the last parent node and move up the tree
-  for (let i = parent(length - 1); i >= 0; i--) {
+  for (let i = (length - 1 - 1) >> LOG2_ARITY; i >= 0; i--) {
     down(i, length, heap, comparer);
   }
 }
