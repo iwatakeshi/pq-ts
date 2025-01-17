@@ -1,50 +1,43 @@
 {
-  "name": "pq-ts",
-  "version": "0.7.0",
-  "description": "A priority queue written in TypeScript.",
-  "main": "dist/main.js",
-  "module": "dist/main.mjs",
-  "types": "dist/main.d.ts",
-  "files": [
-    "main.ts",
-    "src",
-    "dist"
-  ],
-  "exports": {
-    ".": {
-      "import": "./dist/main.mjs",
-      "require": "./dist/main.js"
-    }
-  },
-  "scripts": {
-    "build": "npx rimraf dist && tsup main.ts --dts --format esm,cjs --sourcemap",
-    "test": "vitest",
-    "docs:generate": "npx rimraf docs && deno doc --html --name=pq-ts main.ts",
-    "docs:serve": "npx serve docs",
-    "docs:publish": "npm run docs:generate && npx gh-pages -d docs",
-    "prepublishOnly": "npm run build && npm run docs:generate"
-  },
-  "keywords": [
-    "priority-queue",
-    "typescript",
-    "browser",
-    "node"
-  ],
-  "author": {
-    "name": "Takeshi Iwana",
-    "email": "iwatakeshi@gmail.com"
-  },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/iwatakeshi/pq-ts.git"
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "tsup": "^8.3.5",
-    "vitest": "^2.1.8"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  }
+	"name": "pq-ts",
+	"version": "0.7.0",
+	"description": "A priority queue written in TypeScript.",
+	"main": "dist/main.js",
+	"module": "dist/main.mjs",
+	"types": "dist/main.d.ts",
+	"files": ["main.ts", "src", "dist"],
+	"exports": {
+		".": {
+			"import": "./dist/main.mjs",
+			"require": "./dist/main.js"
+		}
+	},
+	"scripts": {
+		"build": "npx rimraf dist && tsup main.ts --dts --format esm,cjs --sourcemap",
+		"test": "vitest --coverage",
+		"docs:generate": "npx rimraf docs && deno doc --html --name=pq-ts main.ts",
+		"docs:serve": "npx serve docs",
+		"docs:publish": "npm run docs:generate && npx gh-pages -d docs",
+		"prepublishOnly": "npm run build && npm run docs:generate"
+	},
+	"keywords": ["priority-queue", "typescript", "browser", "node"],
+	"author": {
+		"name": "Takeshi Iwana",
+		"email": "iwatakeshi@gmail.com"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/iwatakeshi/pq-ts.git"
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"@vitest/coverage-v8": "2.1.8",
+		"@vitest/ui": "2.1.8",
+		"tsup": "^8.3.5",
+		"vitest": "^2.1.8"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	}
 }
