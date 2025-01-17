@@ -1,45 +1,46 @@
-import { PriorityQueue, StablePriorityQueue, type IPriorityQueue } from './main';
-import { FlatPriorityQueue } from './src/flat.pq';
+import { PriorityQueue, StablePriorityQueue, FlatPriorityQueue } from "./main";
+import { run, bench, boxplot, summary } from "mitata";
 
-function bench<T extends IPriorityQueue<number>>(queue: T, operations: number) {
-  console.time(`${queue.constructor.name} enqueue`);
-  for (let i = 0; i < operations; i++) {
-    const value = Math.random();
-    const priority = Math.random(); // Generate a priority for each enqueue operation
-    queue.enqueue(value, priority);
+const pq = new PriorityQueue<number>();
+const spq = new StablePriorityQueue<number>();
+const fpq = new FlatPriorityQueue<number>(Uint32Array, 1000);
+
+const ITEMS_COUNT = 100000;
+
+bench("PriorityQueue enqueue 100000 items", () => {
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    pq.enqueue(Math.random(), Math.random());
   }
-  console.timeEnd(`${queue.constructor.name} enqueue`);
+});
 
-  console.time(`${queue.constructor.name} dequeue`);
-  for (let i = 0; i < operations; i++) {
-    queue.dequeue();
+bench("PriorityQueue dequeue 100000 items", () => {
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    pq.dequeue();
   }
-  console.timeEnd(`${queue.constructor.name} dequeue`);
-}
+});
 
-const run = (queue: IPriorityQueue<number>, operations: number[], count: number) => {
-  console.log(`Running benchmarks for ${queue.constructor.name}`);
-  for (let i = 0; i < count; i++) {
-    console.log(`Run ${i + 1}`);
-    for (let j = 0; j < operations.length; j++) {
-      bench(queue, operations[j]);
-    }
+bench("StablePriorityQueue enqueue 100000 items", () => {
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    spq.enqueue(Math.random(), Math.random());
   }
-}
+});
 
-// const operations = 1_000_000;
-const priorityQueue = new PriorityQueue<number>();
-const stablePriorityQueue = new StablePriorityQueue<number>();
-const flatPriorityQueue = new FlatPriorityQueue<number>(Uint32Array, 10000);
-const operations = [10, 100, 1000, 10000, 100000, 1000000, 10000000];
-const count = 100;
+bench("StablePriorityQueue dequeue 100000 items", () => {
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    spq.dequeue();
+  }
+});
 
-const operation = operations[5];
+bench("FlatPriorityQueue enqueue 100000 items", () => {
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    fpq.enqueue(Math.random(), Math.random());
+  }
+});
 
-console.log(`Running benchmarks for ${operation} operations`);
-bench(priorityQueue, operation);
-bench(stablePriorityQueue, operation);
-bench(flatPriorityQueue as IPriorityQueue<number>, operation);
+bench("FlatPriorityQueue dequeue 100000 items", () => {
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    fpq.dequeue();
+  }
+});
 
-// run(priorityQueue, operations, count);
-// run(stablePriorityQueue, operations, count);
+await run();
