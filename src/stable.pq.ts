@@ -1,19 +1,24 @@
-import type { IComparer, IEqualityComparator, INode, StableHeapNode } from "./types.ts";
+import type { IComparer, IEqualityComparator, StableHeapNode } from "./types.ts";
 import { up, heapify } from "./primitive.ts";
 import { PriorityQueue } from "./pq.ts";
 
-export class StablePriorityQueue<T> extends PriorityQueue<T, StableHeapNode<T>> {
+export class StablePriorityQueue<
+  T,
+  Node extends StableHeapNode<T> = StableHeapNode<T>,
+  Comparer extends IComparer<Node> = IComparer<Node>
+> extends PriorityQueue<T, Node, Comparer> {
   /**
    * The elements in the queue used internally.
    * @protected
    */
-  protected override _elements: StableHeapNode<T>[] = [];
+  protected override _elements: Node[] = [];
   /**
    * The compare function used internally.
    * @protected
    */
-  protected override _comparer?: IComparer<StableHeapNode<T>> | undefined;
+  protected override _comparer?: Comparer;
   private _index = 0n;
+
   /**
    * Creates a new instance of a stable priority queue.
    */
@@ -21,11 +26,11 @@ export class StablePriorityQueue<T> extends PriorityQueue<T, StableHeapNode<T>> 
   /**
    * Creates a new instance of a stable priority queue.
    * @param elements - The elements to add to the queue.
-   * @param comparer - An optional comparison function. 
+   * @param comparer - An optional comparison function.
    */
   constructor(
-    elements: StableHeapNode<T>[],
-    comparer?: IComparer<StableHeapNode<T>>
+    elements: Node[],
+    comparer?: Comparer
   );
   /**
    * Creates a new instance of a stable priority queue.
@@ -33,8 +38,8 @@ export class StablePriorityQueue<T> extends PriorityQueue<T, StableHeapNode<T>> 
    * @param comparer - An optional comparison function.
    */
   constructor(
-    queue: StablePriorityQueue<T>,
-    comparer?: IComparer<StableHeapNode<T>>
+    queue: StablePriorityQueue<T, Node, Comparer>,
+    comparer?: Comparer
   );
   /**
    * Creates a new instance of a stable priority queue.
@@ -46,8 +51,8 @@ export class StablePriorityQueue<T> extends PriorityQueue<T, StableHeapNode<T>> 
     comparer?: IComparer<T>
   );
   constructor(
-    elements?: T[] | StablePriorityQueue<T> | StableHeapNode<T>[],
-    comparer?: IComparer<StableHeapNode<T>>
+    elements?: T[] | StablePriorityQueue<T, Node, Comparer> | Node[],
+    comparer?: Comparer
   ) {
     super([], comparer);
     if (elements instanceof StablePriorityQueue) {
@@ -66,19 +71,21 @@ export class StablePriorityQueue<T> extends PriorityQueue<T, StableHeapNode<T>> 
 
     heapify(this._size, this._elements, this.compare.bind(this));
   }
+
   /**
    * Compares two nodes based on their priority values.
    * @param a - The first node to compare
    * @param b - The second node to compare
    * @returns A negative number if the first node has a lower priority,
    */
-  protected override compare(a: StableHeapNode<T>, b: StableHeapNode<T>): number {
+  protected override compare(a: Node, b: Node): number {
     if (this._comparer) return this._comparer(a, b);
     // If the priorities are the same, compare by index
     if (a.priority === b.priority) return a.___index < b.___index ? -1 : 1;
 
     return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
   }
+
   /**
    * Adds an element to the end of the queue.
    * @param value - The value to add.
@@ -88,36 +95,38 @@ export class StablePriorityQueue<T> extends PriorityQueue<T, StableHeapNode<T>> 
   override enqueue(value: T, priority: number): boolean {
     if (typeof priority !== "number") return false;
 
-    this._elements.push({ value, priority, ___index: this._index++ });
+    this._elements.push({ value, priority, ___index: this._index++ } as Node);
     up(this._size++, this._elements, this.compare.bind(this));
 
     return true;
   }
+
   /**
    * Removes and returns the element at the front of the queue.
    * @returns The element at the front of the queue, or undefined if the queue is empty.
    */
-  override pop(): StableHeapNode<T> | undefined {
+  override pop(): Node | undefined {
     if (this.isEmpty()) return undefined;
     const element = this._elements[0];
     this.removeRootNode();
-    return { value: element.value, priority: element.priority, ___index: element.___index };
+    return { value: element.value, priority: element.priority, ___index: element.___index } as Node;
   }
 
   /**
    * Removes the first occurrence of a specific element from the queue.
    */
-  override get heap(): StableHeapNode<T>[] {
-    return this._elements.map(({ value, priority, ___index }) => ({ value, priority, ___index }));
+  override get heap(): Node[] {
+    return this._elements.map(({ value, priority, ___index }) => ({ value, priority, ___index } as Node));
   }
 
   /**
    * Returns the elements in the queue in priority order.
    * @returns The elements in the queue in priority order.
    */
-  override clone(): StablePriorityQueue<T> {
+  override clone(): StablePriorityQueue<T, Node, Comparer> {
     return new StablePriorityQueue(this, this._comparer);
   }
+
   /**
    * Removes the first occurrence of a specific element from the queue.
    * @param value - The element to remove.
@@ -153,23 +162,23 @@ export class StablePriorityQueue<T> extends PriorityQueue<T, StableHeapNode<T>> 
   }
 
   /**
- * Creates a new instance of a priority queue.
- * @param elements - The elements to add to the queue.
- * @param comparer - An optional comparison function.
- */
+   * Creates a new instance of a priority queue.
+   * @param elements - The elements to add to the queue.
+   * @param comparer - An optional comparison function.
+   */
   static from<T>(
-    elements: INode<T>[],
-    comparer?: IComparer<INode<T>>
-  ): StablePriorityQueue<T>;
+    elements: StableHeapNode<T>[],
+    comparer?: IComparer<StableHeapNode<T>>
+  ): StablePriorityQueue<T, StableHeapNode<T>, IComparer<StableHeapNode<T>>>;
   /**
    * Creates a new instance of a stable priority queue.
    * @param queue - The queue to copy elements from.
    * @param comparer - An optional comparison function.
    */
   static from<T>(
-    queue: StablePriorityQueue<T>,
-    comparer?: IComparer<INode<T>>
-  ): StablePriorityQueue<T>;
+    queue: StablePriorityQueue<T, StableHeapNode<T>, IComparer<StableHeapNode<T>>>,
+    comparer?: IComparer<StableHeapNode<T>>
+  ): StablePriorityQueue<T, StableHeapNode<T>, IComparer<StableHeapNode<T>>>;
   /**
    * Creates a new instance of a stable priority queue.
    * @param elements - The elements to add to the queue.
@@ -178,7 +187,7 @@ export class StablePriorityQueue<T> extends PriorityQueue<T, StableHeapNode<T>> 
   static from<T>(
     elements: T[],
     comparer?: IComparer<T>
-  ): StablePriorityQueue<T>;
+  ): StablePriorityQueue<T, StableHeapNode<T>, IComparer<StableHeapNode<T>>>;
   /**
    * Creates a new instance of a stable priority queue.
    * @param elements - The elements to add to the queue.
@@ -186,10 +195,10 @@ export class StablePriorityQueue<T> extends PriorityQueue<T, StableHeapNode<T>> 
    * @returns - A new priority queue instance.
    */
   static from<T>(
-    elements?: T[] | StablePriorityQueue<T>,
+    elements?: T[] | StablePriorityQueue<T, StableHeapNode<T>, IComparer<StableHeapNode<T>>>,
     comparer?: IComparer<T>
-  ): StablePriorityQueue<T> {
+  ): StablePriorityQueue<T, StableHeapNode<T>, IComparer<StableHeapNode<T>>> {
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    return new StablePriorityQueue(elements as any, comparer as any);
+    return new StablePriorityQueue(elements as any, comparer);
   }
 }
