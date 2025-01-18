@@ -3,3 +3,4 @@ export * from "./src/primitive.ts";
 export * from "./src/pq.ts";
 export * from "./src/stable.pq.ts";
 export * from "./src/flat.pq.ts";
+export * from "./src/stable.flat.pq.ts";
