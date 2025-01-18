@@ -133,17 +133,17 @@ export class FlatPriorityQueue<
       this._elements[newSize] = 0; // Remove reference to the last element
 
       // If the last element should be "bubbled up" (preserve heap property)
-      if (this.compare && this.compare(lastElement, removedElement, [index, newSize]) < 0) {
+      if (this.compare && this.compare(this._priorities[newSize], this._priorities[index], [newSize, index]) < 0) {
         up(index, this._elements, this.compare, this._priorities);
       } else {
         // Otherwise, it should "bubble down"
-        down(index, newSize, this._elements, this.compare as Comparer, this._priorities);
+        down(this._priorities[newSize], this._priorities[index], this._elements, this.compare as Comparer, this._priorities);
       }
     } else {
       // If the element is the last one, just clear it
       this._elements[index] = 0;
+      this._priorities[index] = 0;
     }
-
     return true;
   }
 
@@ -174,7 +174,7 @@ export class FlatPriorityQueue<
   }
 
   toString(): string {
-    return `FlatPriorityQueue(${this.toArray().join(", ")})`;
+    return this.toArray().join(", ");
   }
 
   enqueue(value: T, priority: number): boolean {
