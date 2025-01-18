@@ -5,12 +5,13 @@
  * @typeParam T - The type of elements being compared
  * @param a - First element to compare
  * @param b - Second element to compare
+ * @param i - An optional tuple containing the indices of the elements in the heap
  * @returns 
  * - A negative number if `a` should be sorted before `b`
  * - A positive number if `a` should be sorted after `b`
  * - Zero if `a` equals `b`
  */
-export type IComparer<T> = (a: T, b: T) => number;
+export type IComparer<T> = (a: T, b: T, i: readonly [number, number]) => number;
 
 /**
  * A type representing a function that compares two values for equality.
