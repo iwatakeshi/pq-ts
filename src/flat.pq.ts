@@ -1,10 +1,10 @@
 import type { IComparer, IEqualityComparator, TypedArray, TypedArrayConstructor, IPriorityQueueLike, INode, IPriorityNode } from "./types.ts";
-import { up, down, heapify, grow, LOG2_ARITY } from "./primitive.ts";
+import { up, down, heapify, grow, LOG2_ARITY, upWithPriorities as moveUpWithPriorities, downWithPriorities, heapifyWithPriorities } from "./primitive.ts";
 
 export class FlatPriorityQueue<
   T extends number = number,
   Node extends IPriorityNode<T> = IPriorityNode<T>,
-  Comparer extends IComparer<number> = IComparer<number>,
+  Comparer extends IComparer<T> = IComparer<number>,
   Heap extends TypedArray = Uint32Array,
 > implements IPriorityQueueLike<T, Node> {
   protected _elements: Heap;
@@ -61,7 +61,7 @@ export class FlatPriorityQueue<
         this._priorities[i] = priorities[i];
       }
       this._size = elements.length;
-      heapify(this._size, this._elements, this.compare as Comparer, this._priorities);
+      heapifyWithPriorities(this._size, this._elements, this.compare as Comparer, this._priorities);
     } else if (typeof backendOrElements === "function" && typeof sizeOrPriorities === "number") {
       const backend = backendOrElements;
       const size = sizeOrPriorities;
@@ -121,7 +121,6 @@ export class FlatPriorityQueue<
     const index = this._elements.findIndex((v) => comparer(value, v as T));
     if (index === -1) return false;  // Element not found.
 
-    const removedElement = this._elements[index];
     const newSize = --this._size;
 
     // If the element is not the last one, replace it with the last element.
@@ -134,10 +133,10 @@ export class FlatPriorityQueue<
 
       // If the last element should be "bubbled up" (preserve heap property)
       if (this.compare && this.compare(this._priorities[newSize], this._priorities[index], [newSize, index]) < 0) {
-        up(index, this._elements, this.compare, this._priorities);
+        moveUpWithPriorities(index, this._elements, this.compare as Comparer, this._priorities);
       } else {
         // Otherwise, it should "bubble down"
-        down(this._priorities[newSize], this._priorities[index], this._elements, this.compare as Comparer, this._priorities);
+        downWithPriorities(index, newSize, this._elements, this.compare as Comparer, this._priorities);
       }
     } else {
       // If the element is the last one, just clear it
@@ -178,12 +177,12 @@ export class FlatPriorityQueue<
   }
 
   enqueue(value: T, priority: number): boolean {
-    if (this._size >= this._elements.length) {
+    const currentSize = this._size;
+    if (currentSize >= this._elements.length) {
       this.grow(this._elements.length * 2);
     }
-    this._elements[this._size] = value;
-    this._priorities[this._size] = priority;
-    up(this._size++, this._elements, this.compare as Comparer, this._priorities);
+    this._size = currentSize + 1;
+    moveUpWithPriorities([value, priority], currentSize, this._elements as Heap, this.compare as Comparer, this._priorities);
     return true;
   }
 
@@ -222,15 +221,15 @@ export class FlatPriorityQueue<
       throw new Error("[FlatPriorityQueue] Elements and priorities are out of sync.");
     }
     this._size = Math.max(0, this._size - 1);
-    const lastNode = this._elements[this._size];
-    const lastPriority = this._priorities[this._size];
     if (this._size > 0) {
+      const lastNode = this._elements[this._size];
+      const lastPriority = this._priorities[this._size];
       this._elements[0] = lastNode;
       this._priorities[0] = lastPriority;
-      down(0, this._size, this._elements, this.compare as Comparer, this._priorities);
+      downWithPriorities(0, this._size, this._elements, this.compare as Comparer, this._priorities);
     }
-    this._elements[this._size] = undefined as unknown as Heap[0];
-    this._priorities[this._size] = undefined as unknown as Heap[0];
+    this._elements[this._size] = 0;
+    this._priorities[this._size] = 0;
   }
 
   protected grow(newSize: number): void {
