@@ -99,6 +99,8 @@ describe("FlatPriorityQueue", () => {
     const clone = pq.clone();
     expect(clone.count).toBe(3);
     expect(pq.values).toEqual(clone.values);
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    expect((pq as any)._elements.length).toBe((clone as any)._elements.length);
   });
 
   it("should return a string representation of the queue (prioritized)", () => {
@@ -144,6 +146,7 @@ describe("FlatPriorityQueue", () => {
     pq.enqueue(3, 4);
 
     const result = pq.toArray();
+    expect(result).toEqual([2, 3, 1]);
     expect(pq.indexOf(1, true)).toBe(result.findIndex((node) => node === 1));
     expect(pq.indexOf(2, true)).toBe(result.findIndex((node) => node === 2));
     expect(pq.indexOf(3, true)).toBe(result.findIndex((node) => node === 3));
@@ -156,7 +159,6 @@ describe("FlatPriorityQueue", () => {
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
     const result = pq.heap.map((node) => node.priority);
-
     expect(pq.priorityAt(0)).toBe(result[0]);
     expect(pq.priorityAt(1)).toBe(result[1]);
     expect(pq.priorityAt(2)).toBe(result[2]);
@@ -169,6 +171,7 @@ describe("FlatPriorityQueue", () => {
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
 
+    expect(pq.toArray()).toEqual([2, 3, 1]);
     expect(pq.priorityAt(0, true)).toBe(3);
     expect(pq.priorityAt(1, true)).toBe(4);
     expect(pq.priorityAt(2, true)).toBe(5);
@@ -176,21 +179,17 @@ describe("FlatPriorityQueue", () => {
   });
 
   it("should handle stress test", () => {
-    const pq = new FlatPriorityQueue<number>(Uint32Array, 10000);
-    for (let i = 0; i < 10000; i++) {
+    const SIZE = 10000;
+    const pq = new FlatPriorityQueue<number>(Uint32Array, SIZE);
+    for (let i = 0; i < SIZE; i++) {
       pq.enqueue(i, Math.floor(Math.random() * 1000));
     }
-    let prevIndex = 0;
-    let prevPriority = pq.priorityAt(prevIndex, true);
-    pq.dequeue();
-
+    let { priority } = pq.pop() ?? { priority: 0 };
+  
     while (!pq.isEmpty()) {
-      const currentPriority = pq.priorityAt(prevIndex + 1, true);
-      pq.dequeue();
-
-      expect(prevPriority).toBeLessThanOrEqual(currentPriority);
-      prevPriority = currentPriority;
-      prevIndex++;
+      const { priority: currentPriority } = pq.pop() ?? { priority: 0 };
+      expect(currentPriority).toBeGreaterThanOrEqual(priority);
+      priority = currentPriority;
     }
 
     expect(pq.isEmpty()).toBe(true);
