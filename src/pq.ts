@@ -15,17 +15,12 @@ export class PriorityQueue<
    * The compare function used internally.
    * @protected
    */
-  protected _comparer?: Comparer;
+  protected compare?: Comparer;
   /**
    * The size of elements in the queue used internally.
    * @protected
    */
   protected _size = 0;
-  /**
-   * The bound compare function.
-   * @protected
-   */
-  protected readonly _compare: (a: Node, b: Node) => number;
 
   /**
    * Creates a new instance of a priority queue.
@@ -65,32 +60,20 @@ export class PriorityQueue<
     if (elements instanceof PriorityQueue) {
       this._elements = [...elements._elements];
       this._size = elements._size;
-      this._comparer = elements._comparer as Comparer;
+      this.compare = elements.compare as Comparer;
     } else if (Array.isArray(elements)) {
       for (const element of elements) {
         this.enqueue(element, 0);
       }
       this._size = elements.length;
-      this._comparer = comparer;
+      this.compare = comparer;
     } else {
-      this._comparer = comparer;
+      this.compare = comparer ?? ((a, b, _) => a.priority - b.priority) as Comparer;
     }
 
-    this._compare = this.compare.bind(this);
-    heapify(this._size, this._elements, this._compare);
+    heapify(this._size, this._elements, this.compare as Comparer);
   }
 
-  /**
-   * Compares two nodes based on their priority values.
-   * @param a - The first node to compare
-   * @param b - The second node to compare
-   * @returns - A negative number if the first node has a lower priority,
-   * @protected
-   */
-  protected compare(a: Node, b: Node): number {
-    if (this._comparer) return this._comparer(a, b);
-    return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
-  }
   /**
    * Removes the root node from the heap.
    * @returns - The removed node.
@@ -101,7 +84,7 @@ export class PriorityQueue<
     const lastNode = this._elements[--this._size];
     if (this._size > 0) {
       this._elements[0] = lastNode;
-      down(0, this._size, this._elements, this._compare);
+      down(0, this._size, this._elements, this.compare as Comparer);
     }
     this._elements.pop();
   }
@@ -116,7 +99,7 @@ export class PriorityQueue<
     if (typeof priority !== "number") return false;
 
     this._elements.push({ value, priority } as Node);
-    up(this._size++, this._elements, this._compare);
+    up(this._size++, this._elements, this.compare as Comparer);
 
     return true;
   }
@@ -218,10 +201,10 @@ export class PriorityQueue<
     if (index < newSize) {
       const lastNode = this._elements[newSize];
       this._elements[index] = lastNode;
-      if (this._compare(lastNode, removedElement) < 0) {
-        up(index, this._elements, this._compare);
+      if (this.compare && this.compare(lastNode, removedElement, [index, newSize,]) < 0) {
+        up(index, this._elements, this.compare);
       } else {
-        down(index, newSize, this._elements, this._compare);
+        down(index, newSize, this._elements, this.compare as Comparer);
       }
     }
 
@@ -273,7 +256,7 @@ export class PriorityQueue<
    * @returns - A new priority queue instance with the same elements.
    */
   clone(): this {
-    return new PriorityQueue(this, this._comparer) as this;
+    return new PriorityQueue(this, this.compare) as this;
   }
 
   /**
