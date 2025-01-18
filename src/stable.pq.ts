@@ -8,8 +8,7 @@ export class StablePriorityQueue<
   Comparer extends IComparer<Node> = IComparer<Node>
 > extends PriorityQueue<T, Node, Comparer> {
   protected override _elements: Node[] = [];
-  protected override _comparer?: Comparer;
-  protected override readonly _compare: (a: Node, b: Node) => number;
+  protected override compare?: Comparer;
   private _index = 0n;
 
   constructor();
@@ -21,33 +20,29 @@ export class StablePriorityQueue<
     if (elements instanceof StablePriorityQueue) {
       this._elements = [...elements._elements];
       this._size = elements._size;
-      this._comparer = elements._comparer;
+      this.compare = elements.compare;
     } else if (Array.isArray(elements)) {
       this._elements = new Array(elements.length);
       for (const element of elements) {
         this.enqueue(element as T, 0);
       }
       this._size = elements.length;
-      this._comparer = comparer;
+      this.compare = comparer;
     } else {
-      this._comparer = comparer;
+      this.compare = comparer ?? ((a, b, _) => {
+        if (a.priority === b.priority) return a.index < b.index ? -1 : 1;
+        return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
+      }) as Comparer
     }
 
-    this._compare = this.compare.bind(this);
-    heapify(this._size, this._elements, this._compare);
-  }
-
-  protected override compare(a: Node, b: Node): number {
-    if (this._comparer) return this._comparer(a, b);
-    if (a.priority === b.priority) return a.index < b.index ? -1 : 1;
-    return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
+    heapify(this._size, this._elements, this.compare as Comparer);
   }
 
   override enqueue(value: T, priority: number): boolean {
     if (typeof priority !== "number") return false;
 
     this._elements.push({ value, priority, index: this._index++ } as Node);
-    up(this._size++, this._elements, this._compare);
+    up(this._size++, this._elements, this.compare as Comparer);
 
     return true;
   }
@@ -64,7 +59,7 @@ export class StablePriorityQueue<
   }
 
   override clone(): this {
-    return new StablePriorityQueue(this, this._comparer) as this;
+    return new StablePriorityQueue(this, this.compare) as this;
   }
 
   override indexOf(value: T, dequeue = false, comparer: IEqualityComparator<T> = (a, b) => a === b): number {
