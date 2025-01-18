@@ -86,9 +86,8 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">StablePriorityQueue.from</span><span class="font-medium"><span>&lt;<span><span>T</span></span>&gt;</span>(<div class="ml-4"><div><span>elements<span>: <a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<span>T</span>&gt;[]</span></span>,</div><div><span>comparer?<span>: <a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<span>T</span>&gt;&gt;</span></span>,</div></div>)<span>: <a href="../././~/StablePriorityQueue.html" class="link">StablePriorityQueue</a>&lt;<span>T</span><span>, </span><a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<span>T</span>&gt;<span>, </span><a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<span>T</span>&gt;&gt;&gt;</span> </span>
-      </code><div class="space-y-7" id=""><div class="markdown"><p>Creates a new instance of a priority queue.</p>
-</div><section class="section" id="type-parameters">
+<span class="font-bold">StablePriorityQueue.from</span><span class="font-medium"><span>&lt;<span><span>T</span></span>&gt;</span>(<div class="ml-4"><div><span>elements<span>: <a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<span>T</span>&gt;[]</span></span>,</div><div><span>comparer?<span>: <a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<span>T</span>&gt;&gt;</span></span>,</div></div>)<span>: <a href="../././~/StablePriorityQueue.html" class="link">StablePriorityQueue</a>&lt;<span>T</span><span>, </span><a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<span>T</span>&gt;<span>, </span><a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<span>T</span>&gt;&gt;&gt;</span> </span>
+      </code><div class="space-y-7" id=""><section class="section" id="type-parameters">
   <div>
 	  <h2 class="anchorable mb-1"><a href="#type-parameters" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -215,7 +214,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<span class="font-bold font-lg">elements</span><span class="font-medium text-stone-500"><span>: <a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;[]</span></span>
+<span class="font-bold font-lg">elements</span><span class="font-medium text-stone-500"><span>: <a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;[]</span></span>
       </code>
     </div><a
   class="context_button relative mr-2"
@@ -242,10 +241,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><ul>
-<li>The elements to add to the queue.</li>
-</ul>
-</div></div></div>
+</div></div>
 <div class="anchorable docEntry" id="function_stablepriorityqueue_from_0_parameters_comparer">
 
   <div class="docEntryHeader">
@@ -272,7 +268,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<span class="font-bold font-lg">comparer</span><span class="font-medium text-stone-500"><span>: <a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;&gt;</span></span>
+<span class="font-bold font-lg">comparer</span><span class="font-medium text-stone-500"><span>: <a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;&gt;</span></span>
       </code>
     </div><a
   class="context_button relative mr-2"
@@ -299,10 +295,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><ul>
-<li>An optional comparison function.</li>
-</ul>
-</div></div></div>
+</div></div>
 </div></section>
 <section class="section" id="return-type">
   <div>
@@ -331,7 +324,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_StablePriorityQueue_from_0_return">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500"><a href="../././~/StablePriorityQueue.html" class="link">StablePriorityQueue</a>&lt;<a href="#type_param_T" class="link">T</a><span>, </span><a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;<span>, </span><a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;&gt;&gt;</span>
+    <div><code><span class="font-medium text-stone-500"><a href="../././~/StablePriorityQueue.html" class="link">StablePriorityQueue</a>&lt;<a href="#type_param_T" class="link">T</a><span>, </span><a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;<span>, </span><a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;&gt;&gt;</span>
       </code>
     </div><a
   class="context_button relative mr-2"
@@ -384,9 +377,8 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   </defs>
 </svg>
 </a>
-<span class="font-bold">StablePriorityQueue.from</span><span class="font-medium"><span>&lt;<span><span>T</span></span>&gt;</span>(<div class="ml-4"><div><span>queue<span>: <a href="../././~/StablePriorityQueue.html" class="link">StablePriorityQueue</a>&lt;<span>T</span><span>, </span><a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<span>T</span>&gt;<span>, </span><a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<span>T</span>&gt;&gt;&gt;</span></span>,</div><div><span>comparer?<span>: <a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<span>T</span>&gt;&gt;</span></span>,</div></div>)<span>: <a href="../././~/StablePriorityQueue.html" class="link">StablePriorityQueue</a>&lt;<span>T</span><span>, </span><a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<span>T</span>&gt;<span>, </span><a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<span>T</span>&gt;&gt;&gt;</span> </span>
-      </code><div class="space-y-7" id=""><div class="markdown"><p>Creates a new instance of a stable priority queue.</p>
-</div><section class="section" id="type-parameters-1">
+<span class="font-bold">StablePriorityQueue.from</span><span class="font-medium"><span>&lt;<span><span>T</span></span>&gt;</span>(<div class="ml-4"><div><span>queue<span>: <a href="../././~/StablePriorityQueue.html" class="link">StablePriorityQueue</a>&lt;<span>T</span><span>, </span><a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<span>T</span>&gt;<span>, </span><a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<span>T</span>&gt;&gt;&gt;</span></span>,</div><div><span>comparer?<span>: <a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<span>T</span>&gt;&gt;</span></span>,</div></div>)<span>: <a href="../././~/StablePriorityQueue.html" class="link">StablePriorityQueue</a>&lt;<span>T</span><span>, </span><a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<span>T</span>&gt;<span>, </span><a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<span>T</span>&gt;&gt;&gt;</span> </span>
+      </code><div class="space-y-7" id=""><section class="section" id="type-parameters-1">
   <div>
 	  <h2 class="anchorable mb-1"><a href="#type-parameters-1" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -513,7 +505,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<span class="font-bold font-lg">queue</span><span class="font-medium text-stone-500"><span>: <a href="../././~/StablePriorityQueue.html" class="link">StablePriorityQueue</a>&lt;<a href="#type_param_T" class="link">T</a><span>, </span><a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;<span>, </span><a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;&gt;&gt;</span></span>
+<span class="font-bold font-lg">queue</span><span class="font-medium text-stone-500"><span>: <a href="../././~/StablePriorityQueue.html" class="link">StablePriorityQueue</a>&lt;<a href="#type_param_T" class="link">T</a><span>, </span><a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;<span>, </span><a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;&gt;&gt;</span></span>
       </code>
     </div><a
   class="context_button relative mr-2"
@@ -540,10 +532,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><ul>
-<li>The queue to copy elements from.</li>
-</ul>
-</div></div></div>
+</div></div>
 <div class="anchorable docEntry" id="function_stablepriorityqueue_from_1_parameters_comparer">
 
   <div class="docEntryHeader">
@@ -570,7 +559,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<span class="font-bold font-lg">comparer</span><span class="font-medium text-stone-500"><span>: <a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;&gt;</span></span>
+<span class="font-bold font-lg">comparer</span><span class="font-medium text-stone-500"><span>: <a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;&gt;</span></span>
       </code>
     </div><a
   class="context_button relative mr-2"
@@ -597,10 +586,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><ul>
-<li>An optional comparison function.</li>
-</ul>
-</div></div></div>
+</div></div>
 </div></section>
 <section class="section" id="return-type-1">
   <div>
@@ -629,7 +615,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_StablePriorityQueue_from_1_return">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500"><a href="../././~/StablePriorityQueue.html" class="link">StablePriorityQueue</a>&lt;<a href="#type_param_T" class="link">T</a><span>, </span><a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;<span>, </span><a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;&gt;&gt;</span>
+    <div><code><span class="font-medium text-stone-500"><a href="../././~/StablePriorityQueue.html" class="link">StablePriorityQueue</a>&lt;<a href="#type_param_T" class="link">T</a><span>, </span><a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;<span>, </span><a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;&gt;&gt;</span>
       </code>
     </div><a
   class="context_button relative mr-2"
@@ -682,9 +668,8 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   </defs>
 </svg>
 </a>
-<span class="font-bold">StablePriorityQueue.from</span><span class="font-medium"><span>&lt;<span><span>T</span></span>&gt;</span>(<div class="ml-4"><div><span>elements<span>: <span>T</span>[]</span></span>,</div><div><span>comparer?<span>: <a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<span>T</span>&gt;</span></span>,</div></div>)<span>: <a href="../././~/StablePriorityQueue.html" class="link">StablePriorityQueue</a>&lt;<span>T</span><span>, </span><a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<span>T</span>&gt;<span>, </span><a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<span>T</span>&gt;&gt;&gt;</span> </span>
-      </code><div class="space-y-7" id=""><div class="markdown"><p>Creates a new instance of a stable priority queue.</p>
-</div><section class="section" id="type-parameters-2">
+<span class="font-bold">StablePriorityQueue.from</span><span class="font-medium"><span>&lt;<span><span>T</span></span>&gt;</span>(<div class="ml-4"><div><span>elements<span>: <span>T</span>[]</span></span>,</div><div><span>comparer?<span>: <a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<span>T</span>&gt;</span></span>,</div></div>)<span>: <a href="../././~/StablePriorityQueue.html" class="link">StablePriorityQueue</a>&lt;<span>T</span><span>, </span><a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<span>T</span>&gt;<span>, </span><a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<span>T</span>&gt;&gt;&gt;</span> </span>
+      </code><div class="space-y-7" id=""><section class="section" id="type-parameters-2">
   <div>
 	  <h2 class="anchorable mb-1"><a href="#type-parameters-2" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -838,10 +823,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><ul>
-<li>The elements to add to the queue.</li>
-</ul>
-</div></div></div>
+</div></div>
 <div class="anchorable docEntry" id="function_stablepriorityqueue_from_2_parameters_comparer">
 
   <div class="docEntryHeader">
@@ -895,10 +877,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><ul>
-<li>An optional comparison function.</li>
-</ul>
-</div></div></div>
+</div></div>
 </div></section>
 <section class="section" id="return-type-2">
   <div>
@@ -927,7 +906,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_StablePriorityQueue_from_2_return">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500"><a href="../././~/StablePriorityQueue.html" class="link">StablePriorityQueue</a>&lt;<a href="#type_param_T" class="link">T</a><span>, </span><a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;<span>, </span><a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/StableHeapNode.html" class="link">StableHeapNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;&gt;&gt;</span>
+    <div><code><span class="font-medium text-stone-500"><a href="../././~/StablePriorityQueue.html" class="link">StablePriorityQueue</a>&lt;<a href="#type_param_T" class="link">T</a><span>, </span><a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;<span>, </span><a href="../././~/IComparer.html" class="link">IComparer</a>&lt;<a href="../././~/IStableNode.html" class="link">IStableNode</a>&lt;<a href="#type_param_T" class="link">T</a>&gt;&gt;&gt;</span>
       </code>
     </div><a
   class="context_button relative mr-2"
