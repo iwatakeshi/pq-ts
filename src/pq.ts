@@ -160,7 +160,7 @@ export class PriorityQueue<
    * @readonly
    */
   get heap(): Node[] {
-    return this._elements;
+    return this._elements
   }
 
   /**
