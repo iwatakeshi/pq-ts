@@ -1,3 +1,14 @@
+export type ReadonlyTuple<T> = readonly [T, T];
+
+interface IComparableState<T> {
+  nodes: ReadonlyTuple<T>;
+  indices: ReadonlyTuple<number>;
+  [key: string]: unknown;
+}
+
+export interface IComparable<T> {
+  compareTo(other: T): number;
+}
 
 /**
  * A type representing a comparison function that determines the order of two elements.
@@ -11,7 +22,11 @@
  * - A positive number if `a` should be sorted after `b`
  * - Zero if `a` equals `b`
  */
-export type IComparer<T> = (a: T, b: T, i: readonly [number, number]) => number;
+export type IComparer<T> = (a: T, b: T, i: ReadonlyTuple<number>) => number;
+// export interface IComparer<T> {
+//   (a: T, b: T, i: ReadonlyTuple<number>): number;
+//   (a: number, b: number, i: ReadonlyTuple<number>): number;
+// }
 
 /**
  * A type representing a function that compares two values for equality.
