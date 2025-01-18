@@ -210,19 +210,17 @@ describe("StablePriorityQueue", () => {
     for (let i = 0; i < 10000; i++) {
       pq.enqueue(i, Math.floor(Math.random() * 1000));
     }
-    let prevIndex = 0;
-    let prevPriority = pq.priorityAt(prevIndex, true);
-    pq.dequeue();
-
-    while (!pq.isEmpty()) {
-      const currentPriority = pq.priorityAt(prevIndex + 1, true);
-      pq.dequeue();
-
-      expect(prevPriority).toBeLessThanOrEqual(currentPriority);
-      prevPriority = currentPriority;
-      prevIndex++;
+    for (let i = 0; i < 10000; i++) {
+      pq.enqueue(i, Math.floor(Math.random() * 1000));
     }
-    // Ensure the priority queue is empty at the end
+    let { priority } = pq.pop() ?? { priority: 0 };
+  
+    while (!pq.isEmpty()) {
+      const { priority: currentPriority } = pq.pop() ?? { priority: 0 };
+      expect(currentPriority).toBeGreaterThanOrEqual(priority);
+      priority = currentPriority;
+    }
+
     expect(pq.isEmpty()).toBe(true);
     expect(pq.count).toBe(0);
   });
