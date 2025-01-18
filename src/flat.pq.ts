@@ -41,11 +41,8 @@ export class FlatPriorityQueue<
     comparerOrBackend?: Comparer | TypedArrayConstructor<Heap>,
     comparer?: Comparer
   ) {
-    const min: IComparer<number> = (a, b, [i, j]) => {
-      // console.log(`a:(${a}:${i}) b:(${b}:${j})`);
-      const nextA = this._priorities[i];
-      const minA = this._priorities[j];
-      return nextA - minA;
+    const min: IComparer<number> = (a, b) => {
+      return a - b;
     }
     if (Array.isArray(backendOrElements) && Array.isArray(sizeOrPriorities)) {
       const elements = backendOrElements;
@@ -56,6 +53,9 @@ export class FlatPriorityQueue<
       this._elements = new backend(elements.length);
       this._priorities = new backend(priorities.length);
       this.compare = comparer;
+      if (elements.length !== priorities.length) {
+        throw new Error("[FlatPriorityQueue] Elements and priorities are out of sync.");
+      }
       for (let i = 0; i < elements.length; i++) {
         this._elements[i] = elements[i];
         this._priorities[i] = priorities[i];
@@ -81,7 +81,7 @@ export class FlatPriorityQueue<
       this._priorities.set(queue._priorities);
       this._size = queue._size;
     } else {
-      throw new Error("Invalid constructor arguments.");
+      throw new Error("[FlatPriorityQueue] Invalid constructor arguments.");
     }
 
     if (!this.compare) {
@@ -90,14 +90,17 @@ export class FlatPriorityQueue<
   }
 
   get heap(): Node[] {
-    return Array.from(this._elements) as unknown as Node[];
+    return Array
+      .from(this._elements)
+      .map((value, index) => ({ value, priority: this._priorities[index] } as Node));
   }
 
   pop(): Node | undefined {
     if (this.isEmpty()) return undefined;
-    const element = this._elements[0];
+    const value = this._elements[0];
+    const priority = this._priorities[0];
     this.removeRootNode();
-    return { value: element, priority: this._priorities[0] } as Node;
+    return { value, priority } as Node;
   }
 
   toArray(): T[] {
@@ -144,15 +147,13 @@ export class FlatPriorityQueue<
     return true;
   }
 
-  indexOf(value: T, dequeue = false, comparer?: IEqualityComparator<T>): number {
-    for (let i = 0; i < this._size; i++) {
-      if ((comparer?.(this._elements[i] as T, value)) || this._elements[i] === value) {
-        if (dequeue) {
-          this._elements[i] = this._elements[--this._size];
-          down(i, this._size, this._elements, this.compare as Comparer, this._priorities);
-        }
-        return i;
-      }
+  indexOf(value: T, dequeue = false, comparer: IEqualityComparator<T> = (a, b) => a === b): number {
+    if (!dequeue) return this._elements.findIndex((v) => comparer?.(v as T, value));
+    const clone = this.clone();
+    let index = 0;
+    while (!clone.isEmpty()) {
+      if (comparer?.(clone.dequeue() as T, value)) return index;
+      index++;
     }
     return -1;
   }
@@ -177,14 +178,12 @@ export class FlatPriorityQueue<
   }
 
   enqueue(value: T, priority: number): boolean {
-    // console.log("enqueue(before):", this._elements);
     if (this._size >= this._elements.length) {
       this.grow(this._elements.length * 2);
     }
     this._elements[this._size] = value;
     this._priorities[this._size] = priority;
     up(this._size++, this._elements, this.compare as Comparer, this._priorities);
-    // console.log("enqueue(after):", this._elements);
     return true;
   }
 
@@ -220,15 +219,18 @@ export class FlatPriorityQueue<
   protected removeRootNode(): void {
     if (this.isEmpty()) return;
     if (this._elements.length !== this._priorities.length) {
-      throw new Error("Invalid state.");
+      throw new Error("[FlatPriorityQueue] Elements and priorities are out of sync.");
     }
-    const lastNode = this._elements[--this._size];
+    this._size = Math.max(0, this._size - 1);
+    const lastNode = this._elements[this._size];
     const lastPriority = this._priorities[this._size];
     if (this._size > 0) {
       this._elements[0] = lastNode;
       this._priorities[0] = lastPriority;
       down(0, this._size, this._elements, this.compare as Comparer, this._priorities);
     }
+    this._elements[this._size] = undefined as unknown as Heap[0];
+    this._priorities[this._size] = undefined as unknown as Heap[0];
   }
 
   protected grow(newSize: number): void {
