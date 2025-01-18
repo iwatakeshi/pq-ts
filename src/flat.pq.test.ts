@@ -109,7 +109,7 @@ describe("FlatPriorityQueue", () => {
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
 
-    expect(pq.toString()).toBe("FlatPriorityQueue(2, 3, 1)");
+    expect(pq.toString()).toBe("2, 3, 1");
   });
 
   it("should iterate over the queue (prioritized)", () => {
