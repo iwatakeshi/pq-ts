@@ -3,7 +3,7 @@
 // Credits: 
 //  * https://andrewlock.net/behind-the-implementation-of-dotnets-priorityqueue/
 //  * https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/PriorityQueue.cs
-import type { IComparer, Indexable, TypedArray, TypedArrayConstructor } from "./types.ts";
+import type { IComparer, Indexable, ReadonlyTuple, TypedArray, TypedArrayConstructor } from "./types.ts";
 
 
 /**
@@ -55,6 +55,11 @@ export const swap = <T>(elements: T[], i: number, j: number): void => {
   elements[j] = temp;
 }
 
+
+const comparePriorities = (comparer: IComparer<number>, priorities: Indexable<number>, aIndex: number, bIndex: number): number => {
+  return comparer(priorities[aIndex], priorities[bIndex], [aIndex, bIndex]);
+};
+
 /**
  * Moves an element up in a 4-ary heap to maintain heap properties.
  * 
@@ -78,53 +83,72 @@ export const swap = <T>(elements: T[], i: number, j: number): void => {
  * compares an element with its parent and swaps them if necessary
  * until the heap property is restored.
  */
-export function up<T, Heap extends Indexable<T>>(index: number, heap: Heap, comparer: IComparer<T>): void;
-export function up<T, Heap extends Indexable<T>>(index: number, heap: Heap, comparer: IComparer<T>, priorities: Indexable<number>, indices?: Indexable<bigint>): void;
-export function up<T, Heap extends Indexable<T>>(
-  index: number,
-  heap: Heap,
-  comparer: IComparer<T>,
-  priorities?: Indexable<number>,
-  indices?: Indexable<bigint>
-): void {
+export const up = <T, Heap extends Indexable<T>>(index: number, heap: Heap, comparer: IComparer<T>): void => {
   const node = heap[index];
-  const nodePriority = priorities ? priorities[index] : undefined;
-  const nodeIndex = indices ? indices[index] : undefined;
-  let currentIndex = index;
+  let nodeIndex = index;
 
-  while (currentIndex > 0) {
-    const parentIndex = (currentIndex - 1) >> LOG2_ARITY;
-    const parent = heap[parentIndex];
-    const parentPriority = priorities ? priorities[parentIndex] : undefined;
-    const parentStableIndex = indices ? indices[parentIndex] : undefined;
+  while (nodeIndex > 0) {
+    const parentIndex = parent(nodeIndex);
+    const parentNode = heap[parentIndex];
 
-    let compareResult: number;
+    if (comparer(node, parentNode, [nodeIndex, parentIndex]) >= 0) break;
 
-    if (priorities && indices) {
-      // Compare with priorities and stable indices
-      compareResult = (comparer as IComparer<number>)(nodePriority as number, parentPriority as number, [currentIndex, parentIndex]);
-    } else if (priorities) {
-      // Compare with priorities only
-      compareResult = (comparer as IComparer<number>)(nodePriority as number, parentPriority as number, [currentIndex, parentIndex]);
-    } else {
-      // Compare elements directly
-      compareResult = comparer(node, parent, [currentIndex, parentIndex]);
-    }
-
-    if (compareResult >= 0) break;
-
-    // Move parent down
-    heap[currentIndex] = parent;
-    if (priorities) priorities[currentIndex] = parentPriority as number;
-    if (indices) indices[currentIndex] = parentStableIndex as bigint;
-    currentIndex = parentIndex;
+    heap[nodeIndex] = parentNode;
+    nodeIndex = parentIndex;
   }
 
-  // Place node in final position
-  heap[currentIndex] = node;
-  if (priorities) priorities[currentIndex] = nodePriority as number;
-  if (indices) indices[currentIndex] = nodeIndex as bigint;
-}
+  heap[nodeIndex] = node;
+};
+
+export const upWithPriorities = <
+  T,
+  Heap extends Indexable<T> = Indexable<T>
+>(
+  input: [T, priority: number],
+  index: number, heap: Heap,
+  comparer: IComparer<number>,
+  priorities: Indexable<number>): void => {
+  // const node = heap[index];
+  // const nodePriority = priorities[index];
+  // let nodeIndex = index;
+
+  // while (nodeIndex > 0) {
+  //   const parentIndex = parent(nodeIndex);
+  //   const parentNode = heap[parentIndex];
+
+  //   if (comparePriorities(comparer, priorities, nodeIndex, parentIndex) >= 0) break;
+
+  //   heap[nodeIndex] = parentNode;
+  //   priorities[nodeIndex] = priorities[parentIndex];
+  //   nodeIndex = parentIndex;
+  // }
+
+  // heap[nodeIndex] = node;
+  // priorities[nodeIndex] = nodePriority;
+};
+
+export const upWithPrioritiesAndIndices = <T, Heap extends Indexable<T>>(index: number, heap: Heap, comparer: IComparer<number>, priorities: Indexable<number>, indices: Indexable<bigint>): void => {
+  const node = heap[index];
+  const nodePriority = priorities[index];
+  const nodeStableIndex = indices[index];
+  let nodeIndex = index;
+
+  while (nodeIndex > 0) {
+    const parentIndex = parent(nodeIndex);;
+    const parentNode = heap[parentIndex];
+
+    if (comparePriorities(comparer, priorities, nodeIndex, parentIndex) >= 0) break;
+
+    heap[nodeIndex] = parentNode;
+    priorities[nodeIndex] = priorities[parentIndex];
+    indices[nodeIndex] = indices[parentIndex];
+    nodeIndex = parentIndex;
+  }
+
+  heap[nodeIndex] = node;
+  priorities[nodeIndex] = nodePriority;
+  indices[nodeIndex] = nodeStableIndex;
+};
 
 /**
  * Moves a node down in a 4-ary heap to maintain the heap property.
@@ -146,77 +170,110 @@ export function up<T, Heap extends Indexable<T>>(
  * // minHeap is now [1, 4, 3, 7, 8, 9, 10]
  * ```
  */
-export function down<T, Heap extends Indexable<T>>(index: number, length: number, heap: Heap, comparer: IComparer<T> | IComparer<number>): void;
-export function down<T, Heap extends Indexable<T>>(index: number, length: number, heap: Heap, comparer: IComparer<T> | IComparer<number>, priorities?: Indexable<number>, indices?: Indexable<bigint>): void;
-export function down<T, Heap extends Indexable<T>>(index: number, length: number, heap: Heap, comparer: IComparer<T> | IComparer<number>, priorities?: Indexable<number>, indices?: Indexable<bigint>): void {
+export const down = <T, Heap extends Indexable<T>>(index: number, length: number, heap: Heap, comparer: IComparer<T>): void => {
   const node = heap[index];
-  const nodePriority = priorities ? priorities[index] : undefined;
-  const nodeIndex = indices ? indices[index] : undefined;
-  let currentIndex = index;
+  let nodeIndex = index;
+  console.assert(0 <= index && index < length, `Index ${index} out of bounds`);
 
-  while (true) {
-    const firstChildIndex = (currentIndex << LOG2_ARITY) + 1;
-    if (firstChildIndex >= length) break;
+  let i = 0;
+  // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+  while ((i = child(nodeIndex)) < length) {
+    let minChild = heap[i];
+    let minChildIndex = i;
+    const childIndexUpperBound = Math.min(i + ARITY, length);
 
-    const lastChildIndex = Math.min(firstChildIndex + ARITY, length);
-    let minChildIndex = firstChildIndex;
-    let minChild = heap[firstChildIndex];
-    let minChildPriority = priorities ? priorities[firstChildIndex] : undefined;
-    let minChildStableIndex = indices ? indices[firstChildIndex] : undefined;
-
-    for (let i = firstChildIndex + 1; i < lastChildIndex; i++) {
+    while (++i < childIndexUpperBound) {
       const nextChild = heap[i];
-      const nextChildPriority = priorities ? priorities[i] : undefined;
-      const nextChildStableIndex = indices ? indices[i] : undefined;
-
-      let compareResult: number;
-
-      if (priorities && indices) {
-        // Compare with priorities and stable indices
-        compareResult = (comparer as IComparer<number>)(nextChildPriority as number, minChildPriority as number, [i, minChildIndex]);
-      } else if (priorities) {
-        // Compare with priorities only
-        compareResult = (comparer as IComparer<number>)(nextChildPriority as number, minChildPriority as number, [i, minChildIndex]);
-      } else {
-        // Compare elements directly
-        compareResult = (comparer as IComparer<T>)(nextChild, minChild, [i, minChildIndex]);
-      }
-
-      if (compareResult < 0) {
+      if (comparer(nextChild, minChild, [i, minChildIndex]) < 0) {
         minChild = nextChild;
-        minChildPriority = nextChildPriority;
-        minChildStableIndex = nextChildStableIndex;
         minChildIndex = i;
       }
     }
 
-    let shouldBreak: boolean;
+    if (comparer(node, minChild, [nodeIndex, minChildIndex]) <= 0) break;
 
-    if (priorities && indices) {
-      // Check break condition with priorities and stable indices
-      shouldBreak = (comparer as IComparer<number>)(nodePriority as number, minChildPriority as number, [currentIndex, minChildIndex]) <= 0;
-    } else if (priorities) {
-      // Check break condition with priorities only
-      shouldBreak = (comparer as IComparer<number>)(nodePriority as number, minChildPriority as number, [currentIndex, minChildIndex]) <= 0;
-    } else {
-      // Check break condition with elements
-      shouldBreak = (comparer as IComparer<T>)(node, minChild, [currentIndex, minChildIndex]) <= 0;
-    }
-
-    if (shouldBreak) break;
-
-    // Move child up
-    heap[currentIndex] = minChild;
-    if (priorities) priorities[currentIndex] = minChildPriority as number;
-    if (indices) indices[currentIndex] = minChildStableIndex as bigint;
-    currentIndex = minChildIndex;
+    heap[nodeIndex] = minChild;
+    nodeIndex = minChildIndex;
   }
 
-  // Place node in final position
-  heap[currentIndex] = node;
-  if (priorities) priorities[currentIndex] = nodePriority as number;
-  if (indices) indices[currentIndex] = nodeIndex as bigint;
-}
+  heap[nodeIndex] = node;
+};
+
+export const downWithPriorities = <T, Heap extends Indexable<T>>(index: number, length: number, heap: Heap, comparer: IComparer<number>, priorities: Indexable<number>): void => {
+  const node = heap[index];
+  const nodePriority = priorities[index];
+  let nodeIndex = index;
+  console.assert(0 <= index && index < length, `Index ${index} out of bounds`);
+
+  let i = 0;
+  // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+  while ((i = child(nodeIndex)) < length) {
+    let minChild = heap[i];
+    let minPriority = priorities[i];
+    let minChildIndex = i;
+    const childIndexUpperBound = Math.min(i + ARITY, length);
+
+    while (++i < childIndexUpperBound) {
+      const nextChild = heap[i];
+      const nextPriority = priorities[i];
+      if (comparePriorities(comparer, priorities, i, minChildIndex) < 0) {
+        minChild = nextChild;
+        minChildIndex = i;
+        minPriority = nextPriority;
+      }
+    }
+
+    if (comparePriorities(comparer, priorities, nodeIndex, minChildIndex) <= 0) break;
+
+    heap[nodeIndex] = minChild;
+    priorities[nodeIndex] = minPriority;
+    nodeIndex = minChildIndex;
+  }
+
+  heap[nodeIndex] = node;
+  priorities[nodeIndex] = nodePriority;
+};
+
+export const downWithPrioritiesAndIndices = <T, Heap extends Indexable<T>>(index: number, length: number, heap: Heap, comparer: IComparer<number>, priorities: Indexable<number>, indices: Indexable<bigint>): void => {
+  const node = heap[index];
+  const nodePriority = priorities[index];
+  const nodeStableIndex = indices[index];
+  let nodeIndex = index;
+  console.assert(0 <= index && index < length, `Index ${index} out of bounds`);
+
+  let i = 0;
+  // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+  while ((i = child(nodeIndex)) < length) {
+    let minChild = heap[i];
+    let minPriority = priorities[i];
+    let minStableIndex = indices[i];
+    let minChildIndex = i;
+    const childIndexUpperBound = Math.min(i + ARITY, length);
+
+    while (++i < childIndexUpperBound) {
+      const nextChild = heap[i];
+      const nextPriority = priorities[i];
+      const nextStableIndex = indices[i];
+      if (comparePriorities(comparer, priorities, i, minChildIndex) < 0) {
+        minChild = nextChild;
+        minChildIndex = i;
+        minPriority = nextPriority;
+        minStableIndex = nextStableIndex;
+      }
+    }
+
+    if (comparePriorities(comparer, priorities, nodeIndex, minChildIndex) <= 0) break;
+
+    heap[nodeIndex] = minChild;
+    priorities[nodeIndex] = minPriority;
+    indices[nodeIndex] = minStableIndex;
+    nodeIndex = minChildIndex;
+  }
+
+  heap[nodeIndex] = node;
+  priorities[nodeIndex] = nodePriority;
+  indices[nodeIndex] = nodeStableIndex;
+};
 
 /**
  * Converts an array into a heap data structure using the provided comparison function.
@@ -236,21 +293,28 @@ export function down<T, Heap extends Indexable<T>>(index: number, length: number
  * heapify(numbers, (a, b) => a - b); // Creates a min-heap
  * // numbers is now arranged as a heap
  */
-export function heapify<T, Heap extends Indexable<T>>(length: number, heap: Heap, comparer: IComparer<T>): void;
-export function heapify<T, Heap extends Indexable<T>>(length: number, heap: Heap, comparer: IComparer<T>, priorities: Indexable<number>): void;
-export function heapify<T, Heap extends Indexable<T>>(
-  length: number,
-  heap: Heap,
-  comparer: IComparer<T>,
-  priorities?: Indexable<number>,
-  indices?: Indexable<bigint>
-): void {
-  // Start from the last parent node and move up the tree
+export const heapify = <T, Heap extends Indexable<T>>(length: number, heap: Heap, comparer: IComparer<T>): void => {
   const startIndex = (length - 1 - 1) >> LOG2_ARITY;
   for (let i = startIndex; i >= 0; i--) {
-    down(i, length, heap, comparer, priorities as Indexable<number>, indices as Indexable<bigint>);
+    down(i, length, heap, comparer);
   }
-}
+};
+
+// Function to heapify with priorities
+export const heapifyWithPriorities = <T, Heap extends Indexable<T>>(length: number, heap: Heap, comparer: IComparer<number>, priorities: Indexable<number>): void => {
+  const startIndex = (length - 1 - 1) >> LOG2_ARITY;
+  for (let i = startIndex; i >= 0; i--) {
+    downWithPriorities(i, length, heap, comparer, priorities);
+  }
+};
+
+// Function to heapify with priorities and indices
+export const heapifyWithPrioritiesAndIndices = <T, Heap extends Indexable<T>>(length: number, heap: Heap, comparer: IComparer<number>, priorities: Indexable<number>, indices: Indexable<bigint>): void => {
+  const startIndex = (length - 1 - 1) >> LOG2_ARITY;
+  for (let i = startIndex; i >= 0; i--) {
+    downWithPrioritiesAndIndices(i, length, heap, comparer, priorities, indices);
+  }
+};
 
 /**
  * Grows an array to a new size and copies the elements from the original array.
