@@ -101,9 +101,16 @@ export function up<T, Heap extends Indexable<T>>(
 
     // Compare based on priorities if priorities exist, otherwise compare heap elements
     if (priorities) {
-      result = (comparer as IComparer<number>)(nodePriority as number, parentPriority as number);
+      result = (comparer as IComparer<number>)(
+        nodePriority as number,
+        parentPriority as number,
+        [nodeIndex, parentIndex]
+      );
     } else {
-      result = (comparer as IComparer<T>)(node, parentNode);
+      result = (comparer as IComparer<T>)(node, parentNode, [
+        nodeIndex,
+        parentIndex
+      ]);
     }
     if (result < 0) {
       heap[nodeIndex] = parentNode;
@@ -158,7 +165,7 @@ export function down<T, Heap extends Indexable<T>>(index: number, length: number
     for (let i = firstChildIndex + 1; i < lastChildIndex; i++) {
       const nextChild = heap[i];
       const nextChildPriority = priorities ? priorities[i] : undefined;
-      if (comparer(nextChild, minChild) < 0) {
+      if (comparer(nextChild, minChild, [i, minChildIndex]) < 0) {
         minChild = nextChild;
         minChildPriority = nextChildPriority;
         minChildIndex = i;
@@ -166,7 +173,7 @@ export function down<T, Heap extends Indexable<T>>(index: number, length: number
     }
 
     // Early exit if heap property is satisfied
-    if (comparer(node, minChild) <= 0) break;
+    if (comparer(node, minChild, [currentIndex, minChildIndex]) <= 0) break;
 
     // Single assignment instead of swap
     heap[currentIndex] = minChild;
@@ -198,9 +205,15 @@ export function down<T, Heap extends Indexable<T>>(index: number, length: number
  */
 export function heapify<T, Heap extends Indexable<T>>(length: number, heap: Heap, comparer: IComparer<T>): void;
 export function heapify<T, Heap extends Indexable<T>>(length: number, heap: Heap, comparer: IComparer<T>, priorities: Indexable<number>): void;
-export function heapify<T, Heap extends Indexable<T>>(length: number, heap: Heap, comparer: IComparer<T>, priorities?: Indexable<number>): void {
+export function heapify<T, Heap extends Indexable<T>>(
+  length: number,
+  heap: Heap,
+  comparer: IComparer<T>,
+  priorities?: Indexable<number>
+): void {
   // Start from the last parent node and move up the tree
-  for (let i = (length - 1 - 1) >> LOG2_ARITY; i >= 0; i--) {
+  const startIndex = (length - 1 - 1) >> LOG2_ARITY;
+  for (let i = startIndex; i >= 0; i--) {
     down(i, length, heap, comparer, priorities as Indexable<number>);
   }
 }
