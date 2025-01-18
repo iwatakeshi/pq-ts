@@ -79,36 +79,51 @@ export const swap = <T>(elements: T[], i: number, j: number): void => {
  * until the heap property is restored.
  */
 export function up<T, Heap extends Indexable<T>>(index: number, heap: Heap, comparer: IComparer<T>): void;
-export function up<T, Heap extends Indexable<T>>(index: number, heap: Heap, comparer: IComparer<T>, priorities: Indexable<number>): void;
+export function up<T, Heap extends Indexable<T>>(index: number, heap: Heap, comparer: IComparer<T>, priorities: Indexable<number>, indices?: Indexable<bigint>): void;
 export function up<T, Heap extends Indexable<T>>(
   index: number,
   heap: Heap,
-  comparer: IComparer<T>, // Can be for elements or priorities
-  priorities?: Indexable<number>
+  comparer: IComparer<T>,
+  priorities?: Indexable<number>,
+  indices?: Indexable<bigint>
 ): void {
   const node = heap[index];
   const nodePriority = priorities ? priorities[index] : undefined;
-  let nodeIndex = index;
+  const nodeIndex = indices ? indices[index] : undefined;
+  let currentIndex = index;
 
-    while (nodeIndex > 0) {
-      const parentIndex = (nodeIndex - 1) >> LOG2_ARITY;
-      const parent = heap[parentIndex];
-      const parentPriority = priorities ? priorities[parentIndex] : undefined;
+  while (currentIndex > 0) {
+    const parentIndex = (currentIndex - 1) >> LOG2_ARITY;
+    const parent = heap[parentIndex];
+    const parentPriority = priorities ? priorities[parentIndex] : undefined;
+    const parentStableIndex = indices ? indices[parentIndex] : undefined;
 
-      // Compare using priorities if available, otherwise use elements
-      const result = priorities
-        ? (comparer as IComparer<number>)(nodePriority as number, parentPriority as number, [nodeIndex, parentIndex])
-        : comparer(node, parent, [nodeIndex, parentIndex]);
+    let compareResult: number;
 
-      if (result >= 0) break;
-
-      heap[nodeIndex] = parent;
-      if (priorities) priorities[nodeIndex] = parentPriority as number;
-      nodeIndex = parentIndex;
+    if (priorities && indices) {
+      // Compare with priorities and stable indices
+      compareResult = (comparer as IComparer<number>)(nodePriority as number, parentPriority as number, [currentIndex, parentIndex]);
+    } else if (priorities) {
+      // Compare with priorities only
+      compareResult = (comparer as IComparer<number>)(nodePriority as number, parentPriority as number, [currentIndex, parentIndex]);
+    } else {
+      // Compare elements directly
+      compareResult = comparer(node, parent, [currentIndex, parentIndex]);
     }
 
-    heap[nodeIndex] = node;
-    if (priorities) priorities[nodeIndex] = nodePriority as number;
+    if (compareResult >= 0) break;
+
+    // Move parent down
+    heap[currentIndex] = parent;
+    if (priorities) priorities[currentIndex] = parentPriority as number;
+    if (indices) indices[currentIndex] = parentStableIndex as bigint;
+    currentIndex = parentIndex;
+  }
+
+  // Place node in final position
+  heap[currentIndex] = node;
+  if (priorities) priorities[currentIndex] = nodePriority as number;
+  if (indices) indices[currentIndex] = nodeIndex as bigint;
 }
 
 /**
@@ -132,10 +147,11 @@ export function up<T, Heap extends Indexable<T>>(
  * ```
  */
 export function down<T, Heap extends Indexable<T>>(index: number, length: number, heap: Heap, comparer: IComparer<T> | IComparer<number>): void;
-export function down<T, Heap extends Indexable<T>>(index: number, length: number, heap: Heap, comparer: IComparer<T> | IComparer<number>, priorities: Indexable<number>): void;
-export function down<T, Heap extends Indexable<T>>(index: number, length: number, heap: Heap, comparer: IComparer<T> | IComparer<number>, priorities?: Indexable<number>): void {
+export function down<T, Heap extends Indexable<T>>(index: number, length: number, heap: Heap, comparer: IComparer<T> | IComparer<number>, priorities?: Indexable<number>, indices?: Indexable<bigint>): void;
+export function down<T, Heap extends Indexable<T>>(index: number, length: number, heap: Heap, comparer: IComparer<T> | IComparer<number>, priorities?: Indexable<number>, indices?: Indexable<bigint>): void {
   const node = heap[index];
   const nodePriority = priorities ? priorities[index] : undefined;
+  const nodeIndex = indices ? indices[index] : undefined;
   let currentIndex = index;
 
   while (true) {
@@ -146,35 +162,60 @@ export function down<T, Heap extends Indexable<T>>(index: number, length: number
     let minChildIndex = firstChildIndex;
     let minChild = heap[firstChildIndex];
     let minChildPriority = priorities ? priorities[firstChildIndex] : undefined;
+    let minChildStableIndex = indices ? indices[firstChildIndex] : undefined;
 
     for (let i = firstChildIndex + 1; i < lastChildIndex; i++) {
       const nextChild = heap[i];
       const nextChildPriority = priorities ? priorities[i] : undefined;
+      const nextChildStableIndex = indices ? indices[i] : undefined;
 
-      const compareResult = priorities
-        ? (comparer as IComparer<number>)(nextChildPriority as number, minChildPriority as number, [i, minChildIndex])  // Use comparer with priorities
-        : (comparer as IComparer<T>)(nextChild as T, minChild, [i, minChildIndex]);
+      let compareResult: number;
+
+      if (priorities && indices) {
+        // Compare with priorities and stable indices
+        compareResult = (comparer as IComparer<number>)(nextChildPriority as number, minChildPriority as number, [i, minChildIndex]);
+      } else if (priorities) {
+        // Compare with priorities only
+        compareResult = (comparer as IComparer<number>)(nextChildPriority as number, minChildPriority as number, [i, minChildIndex]);
+      } else {
+        // Compare elements directly
+        compareResult = (comparer as IComparer<T>)(nextChild, minChild, [i, minChildIndex]);
+      }
 
       if (compareResult < 0) {
         minChild = nextChild;
         minChildPriority = nextChildPriority;
+        minChildStableIndex = nextChildStableIndex;
         minChildIndex = i;
       }
     }
 
-    const shouldBreak = priorities
-      ? (comparer as IComparer<number>)(nodePriority as number, minChildPriority as number, [currentIndex, minChildIndex])  // Use comparer with priorities
-      : (comparer as IComparer<T>)(node, minChild, [currentIndex, minChildIndex]);
+    let shouldBreak: boolean;
 
-    if (shouldBreak <= 0) break;
+    if (priorities && indices) {
+      // Check break condition with priorities and stable indices
+      shouldBreak = (comparer as IComparer<number>)(nodePriority as number, minChildPriority as number, [currentIndex, minChildIndex]) <= 0;
+    } else if (priorities) {
+      // Check break condition with priorities only
+      shouldBreak = (comparer as IComparer<number>)(nodePriority as number, minChildPriority as number, [currentIndex, minChildIndex]) <= 0;
+    } else {
+      // Check break condition with elements
+      shouldBreak = (comparer as IComparer<T>)(node, minChild, [currentIndex, minChildIndex]) <= 0;
+    }
 
+    if (shouldBreak) break;
+
+    // Move child up
     heap[currentIndex] = minChild;
     if (priorities) priorities[currentIndex] = minChildPriority as number;
+    if (indices) indices[currentIndex] = minChildStableIndex as bigint;
     currentIndex = minChildIndex;
   }
 
+  // Place node in final position
   heap[currentIndex] = node;
   if (priorities) priorities[currentIndex] = nodePriority as number;
+  if (indices) indices[currentIndex] = nodeIndex as bigint;
 }
 
 /**
@@ -201,12 +242,13 @@ export function heapify<T, Heap extends Indexable<T>>(
   length: number,
   heap: Heap,
   comparer: IComparer<T>,
-  priorities?: Indexable<number>
+  priorities?: Indexable<number>,
+  indices?: Indexable<bigint>
 ): void {
   // Start from the last parent node and move up the tree
   const startIndex = (length - 1 - 1) >> LOG2_ARITY;
   for (let i = startIndex; i >= 0; i--) {
-    down(i, length, heap, comparer, priorities as Indexable<number>);
+    down(i, length, heap, comparer, priorities as Indexable<number>, indices as Indexable<bigint>);
   }
 }
 
