@@ -55,7 +55,7 @@ export class StablePriorityQueue<
   }
 
   override get heap(): Node[] {
-    return this._elements.map(({ value, priority, index: ___index }) => ({ value, priority, index: ___index } as Node));
+    return this._elements.map(({ value, priority, index }) => ({ value, priority, index } as Node));
   }
 
   override clone(): this {
