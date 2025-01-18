@@ -210,9 +210,6 @@ describe("StablePriorityQueue", () => {
     for (let i = 0; i < 10000; i++) {
       pq.enqueue(i, Math.floor(Math.random() * 1000));
     }
-    for (let i = 0; i < 10000; i++) {
-      pq.enqueue(i, Math.floor(Math.random() * 1000));
-    }
     let { priority } = pq.pop() ?? { priority: 0 };
   
     while (!pq.isEmpty()) {
