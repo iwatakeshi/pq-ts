@@ -1,6 +1,6 @@
 import type { IComparer, IEqualityComparator, TypedArray, TypedArrayConstructor, IStableNode } from "./types.ts";
 import { FlatPriorityQueue } from "./flat.pq.ts";
-import { down, up } from "./primitive.ts";
+import { down, downWithPrioritiesAndIndices, up, upWithPrioritiesAndIndices } from "./primitive.ts";
 
 export class StableFlatPriorityQueue<
   T extends number = number,
@@ -23,10 +23,10 @@ export class StableFlatPriorityQueue<
   ) {
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     super(backendOrElements as any, sizeOrPriorities as any, comparerOrBackend as any, comparer);
-    
+
     // Initialize indices array
     this._indices = [];
-    
+
     if (backendOrElements instanceof StableFlatPriorityQueue) {
       this._indices = [...backendOrElements._indices];
       this._nextIndex = backendOrElements._nextIndex;
@@ -51,8 +51,8 @@ export class StableFlatPriorityQueue<
     this._elements[this._size] = value;
     this._priorities[this._size] = priority;
     this._indices[this._size] = this._nextIndex++;
-    
-    up(this._size++, this._elements, this.compare as Comparer, this._priorities);
+
+    upWithPrioritiesAndIndices(this._size++, this._elements, this.compare as Comparer, this._priorities, this._indices);
     return true;
   }
 
@@ -60,7 +60,6 @@ export class StableFlatPriorityQueue<
     const index = this._elements.findIndex((v) => comparer(value, v as T));
     if (index === -1) return false;  // Element not found.
 
-    const removedElement = this._elements[index];
     const newSize = --this._size;
 
     // If the element is not the last one, replace it with the last element.
@@ -76,10 +75,10 @@ export class StableFlatPriorityQueue<
 
       // If the last element should be "bubbled up" (preserve heap property)
       if (this.compare && this.compare(this._priorities[newSize], this._priorities[index], [newSize, index]) < 0) {
-        up(index, this._elements, this.compare, this._priorities);
+        upWithPrioritiesAndIndices(index, this._elements, this.compare as Comparer, this._priorities, this._indices);
       } else {
         // Otherwise, it should "bubble down"
-        down(this._priorities[newSize], this._priorities[index], this._elements, this.compare as Comparer, this._priorities);
+        downWithPrioritiesAndIndices(index, newSize, this._elements, this.compare as Comparer, this._priorities, this._indices);
       }
     } else {
       // If the element is the last one, just clear it
@@ -105,22 +104,22 @@ export class StableFlatPriorityQueue<
     const newIndices = new Array(newSize);
     for (let i = 0; i < this._indices.length; i++) {
       newIndices[i] = this._indices[i];
-  }
+    }
     this._indices = newIndices;
   }
 
   protected override removeRootNode(): void {
     if (this.isEmpty()) return;
     this._size = Math.max(0, this._size - 1);
-    
+
     if (this._size > 0) {
       this._elements[0] = this._elements[this._size];
       this._priorities[0] = this._priorities[this._size];
       this._indices[0] = this._indices[this._size];
-      
-      down(0, this._size, this._elements, this.compare as Comparer, this._priorities);
+
+      downWithPrioritiesAndIndices(0, this._size, this._elements, this.compare as Comparer, this._priorities, this._indices);
     }
-    
+
     this._elements[this._size] = undefined as unknown as Heap[0];
     this._priorities[this._size] = undefined as unknown as Heap[0];
     this._indices[this._size] = undefined as unknown as bigint;
