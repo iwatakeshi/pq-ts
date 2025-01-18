@@ -80,7 +80,6 @@ function doSearch(val) {
     showPage();
   } else {
     const results = searchInIndex(val);
-    // console.log("results", results);
     updateCurrentLocation(val);
     renderResults(results);
     showSearchResults();
