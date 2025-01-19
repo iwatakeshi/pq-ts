@@ -1,17 +1,17 @@
-import { PriorityQueue, StablePriorityQueue, TypedPriorityQueue, StableFlatPriorityQueue } from "./main";
+import { PriorityQueue, StablePriorityQueue, TypedPriorityQueue, StableTypedPriorityQueue } from "./main";
 import { run, bench, boxplot, summary } from "mitata";
 
 const ITEMS_COUNT = 1000000;
 
 bench(`PriorityQueue enqueue ${ITEMS_COUNT} items`, () => {
-  const pq = new PriorityQueue<number>(); // Reset queue
+  const pq = new PriorityQueue(); // Reset queue
   for (let i = 0; i < ITEMS_COUNT; i++) {
     pq.enqueue(i, i); // Use integer priorities instead of Math.random()
   }
 });
 
 bench(`PriorityQueue dequeue ${ITEMS_COUNT} items`, () => {
-  const pq = new PriorityQueue<number>();
+  const pq = new PriorityQueue();
   for (let i = 0; i < ITEMS_COUNT; i++) {
     pq.enqueue(i, i);
   }
@@ -21,14 +21,14 @@ bench(`PriorityQueue dequeue ${ITEMS_COUNT} items`, () => {
 });
 
 bench(`StablePriorityQueue enqueue ${ITEMS_COUNT} items`, () => {
-  const spq = new StablePriorityQueue<number>();
+  const spq = new StablePriorityQueue();
   for (let i = 0; i < ITEMS_COUNT; i++) {
     spq.enqueue(i, i);
   }
 });
 
 bench(`StablePriorityQueue dequeue ${ITEMS_COUNT} items`, () => {
-  const spq = new StablePriorityQueue<number>();
+  const spq = new StablePriorityQueue();
   for (let i = 0; i < ITEMS_COUNT; i++) {
     spq.enqueue(i, i);
   }
@@ -38,14 +38,14 @@ bench(`StablePriorityQueue dequeue ${ITEMS_COUNT} items`, () => {
 });
 
 bench(`FlatPriorityQueue enqueue ${ITEMS_COUNT} items`, () => {
-  const fpq = new TypedPriorityQueue<number>(Uint32Array, ITEMS_COUNT); // Preallocate capacity
+  const fpq = new TypedPriorityQueue(Uint32Array, ITEMS_COUNT); // Preallocate capacity
   for (let i = 0; i < ITEMS_COUNT; i++) {
     fpq.enqueue(i, i);
   }
 });
 
 bench(`FlatPriorityQueue dequeue ${ITEMS_COUNT} items`, () => {
-  const fpq = new TypedPriorityQueue<number>(Uint32Array, ITEMS_COUNT);
+  const fpq = new TypedPriorityQueue(Uint32Array, ITEMS_COUNT);
   for (let i = 0; i < ITEMS_COUNT; i++) {
     fpq.enqueue(i, i);
   }
@@ -54,15 +54,15 @@ bench(`FlatPriorityQueue dequeue ${ITEMS_COUNT} items`, () => {
   }
 });
 
-bench(`StableFlatPriorityQueue enqueue ${ITEMS_COUNT} items`, () => {
-  const sfpq = new StableFlatPriorityQueue<number>(Uint32Array, ITEMS_COUNT); // Preallocate
+bench(`StableTypedPriorityQueue enqueue ${ITEMS_COUNT} items`, () => {
+  const sfpq = new StableTypedPriorityQueue(Uint32Array, ITEMS_COUNT); // Preallocate
   for (let i = 0; i < ITEMS_COUNT; i++) {
     sfpq.enqueue(i, i);
   }
 });
 
-bench(`StableFlatPriorityQueue dequeue ${ITEMS_COUNT} items`, () => {
-  const sfpq = new StableFlatPriorityQueue<number>(Uint32Array, ITEMS_COUNT);
+bench(`StableTypedPriorityQueue dequeue ${ITEMS_COUNT} items`, () => {
+  const sfpq = new StableTypedPriorityQueue(Uint32Array, ITEMS_COUNT);
   for (let i = 0; i < ITEMS_COUNT; i++) {
     sfpq.enqueue(i, i);
   }
