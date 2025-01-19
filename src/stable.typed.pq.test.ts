@@ -1,9 +1,9 @@
 import { expect, describe, it } from "vitest";
-import { StableFlatPriorityQueue } from "./stable.flat.pq.ts";
+import { StableTypedPriorityQueue } from "./stable.typed.pq.ts";
 
-describe("StableFlatPriorityQueue", () => {
+describe("StableTypedPriorityQueue", () => {
   it("should enqueue elements with priorities", () => {
-    const pq = new StableFlatPriorityQueue<number>(Uint32Array, 10);
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
@@ -13,7 +13,7 @@ describe("StableFlatPriorityQueue", () => {
   });
 
   it("should dequeue elements in priority order", () => {
-    const pq = new StableFlatPriorityQueue<number>(Uint32Array, 10);
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
@@ -27,7 +27,7 @@ describe("StableFlatPriorityQueue", () => {
   });
 
   it("should peek the highest priority element without removing it", () => {
-    const pq = new StableFlatPriorityQueue<number>(Uint32Array, 10);
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
@@ -37,7 +37,7 @@ describe("StableFlatPriorityQueue", () => {
   });
 
   it("should clear all elements", () => {
-    const pq = new StableFlatPriorityQueue<number>(Uint32Array, 10);
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
@@ -48,7 +48,7 @@ describe("StableFlatPriorityQueue", () => {
   });
 
   it("should return the correct count and isEmpty status", () => {
-    const pq = new StableFlatPriorityQueue<number>(Uint32Array, 10);
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
     expect(pq.count).toBe(0);
     expect(pq.isEmpty()).toBe(true);
 
@@ -58,7 +58,7 @@ describe("StableFlatPriorityQueue", () => {
   });
 
   it("should return values in the queue (unordered)", () => {
-    const pq = new StableFlatPriorityQueue<number>(Uint32Array, 10);
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
@@ -67,7 +67,7 @@ describe("StableFlatPriorityQueue", () => {
   });
 
   it("should convert to array (prioritized)", () => {
-    const pq = new StableFlatPriorityQueue<number>(Uint32Array, 10);
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
@@ -77,7 +77,7 @@ describe("StableFlatPriorityQueue", () => {
   });
 
   it("should remove a specific element", () => {
-    const pq = new StableFlatPriorityQueue<number>(Uint32Array, 10);
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
@@ -90,7 +90,7 @@ describe("StableFlatPriorityQueue", () => {
   });
 
   it("should clone the queue", () => {
-    const pq = new StableFlatPriorityQueue<number>(Uint32Array, 10);
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
@@ -103,7 +103,7 @@ describe("StableFlatPriorityQueue", () => {
   });
 
   it("should return a string representation of the queue (prioritized)", () => {
-    const pq = new StableFlatPriorityQueue<number>(Uint32Array, 10);
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
@@ -113,7 +113,7 @@ describe("StableFlatPriorityQueue", () => {
   });
 
   it("should iterate over the queue (prioritized)", () => {
-    const pq = new StableFlatPriorityQueue<number>(Uint32Array, 10);
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
@@ -128,7 +128,7 @@ describe("StableFlatPriorityQueue", () => {
   });
 
   it("should return the index of a specific element", () => {
-    const pq = new StableFlatPriorityQueue<number>(Uint32Array, 10);
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
@@ -153,7 +153,7 @@ describe("StableFlatPriorityQueue", () => {
   });
 
   it("should return the index of a specific element by dequeuing elements", () => {
-    const pq = new StableFlatPriorityQueue<number>(Uint32Array, 10);
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
 
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
@@ -170,7 +170,7 @@ describe("StableFlatPriorityQueue", () => {
   });
 
   it("should return the priority of an element at a specific index", () => {
-    const pq = new StableFlatPriorityQueue<number>(Uint32Array, 10);
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
@@ -189,7 +189,7 @@ describe("StableFlatPriorityQueue", () => {
   });
 
   it("should return the priority of an element at a specific index by dequeuing elements", () => {
-    const pq = new StableFlatPriorityQueue<number>(Uint32Array, 10);
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
 
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
@@ -207,7 +207,7 @@ describe("StableFlatPriorityQueue", () => {
 
   it("should handle stress test", () => {
     const SIZE = 10000;
-    const pq = new StableFlatPriorityQueue<number>(Uint32Array, SIZE);
+    const pq = new StableTypedPriorityQueue(Uint32Array, SIZE);
     for (let i = 0; i < SIZE; i++) {
       pq.enqueue(i, Math.floor(Math.random() * 1000));
     }
@@ -224,7 +224,7 @@ describe("StableFlatPriorityQueue", () => {
   });
 
   it("should maintain the same priority sequence and stability when dequeue is enabled", () => {
-    const pq = new StableFlatPriorityQueue<number>(Uint32Array, 10);
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);

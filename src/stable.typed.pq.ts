@@ -1,6 +1,6 @@
 import type { IComparer, IEqualityComparator, TypedArray, TypedArrayConstructor, IPriorityQueueLike, IPriorityNode, ITypedPriorityNode, IStableTypedPriorityNode } from "./types.ts";
 import { grow, upWithPriorities as moveUpWithPriorities, downWithPriorities, heapifyWithPriorities, upWithPriorities, upWithPrioritiesAndIndices, downWithPrioritiesAndIndices, heapifyWithPrioritiesAndIndices } from "./primitive.ts";
-import { TypedPriorityQueue } from "./flat.pq.ts";
+import { TypedPriorityQueue } from "./typed.pq.ts";
 
 export class StableTypedPriorityQueue<
   Node extends IStableTypedPriorityNode = IStableTypedPriorityNode,
