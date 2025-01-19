@@ -3,21 +3,21 @@ import { grow, upWithPriorities as moveUpWithPriorities, downWithPriorities, hea
 import { TypedPriorityQueue } from "./flat.pq.ts";
 
 export class StableTypedPriorityQueue<
-  P extends IStableTypedPriorityNode = IStableTypedPriorityNode,
-  Comparer extends IComparer<P> = IComparer<P>,
-> extends TypedPriorityQueue<P, Comparer> {
+  Node extends IStableTypedPriorityNode = IStableTypedPriorityNode,
+  Comparer extends IComparer<Node> = IComparer<Node>,
+> extends TypedPriorityQueue<Node, Comparer> {
   protected _indices: BigInt64Array = new BigInt64Array(this._defaultSize);
   protected _sindex = 0n;
   protected _size = 0;
   protected compare?: Comparer;
 
-  protected readonly _up = (node: P, index: number) => {
+  protected readonly _up = (node: Node, index: number) => {
     return upWithPrioritiesAndIndices(this._elements, this._priorities, this._indices)(
       node, index, this.compare as Comparer
     );
   }
 
-  protected readonly _down = (node: P, index: number) => {
+  protected readonly _down = (node: Node, index: number) => {
     return downWithPrioritiesAndIndices(this._elements, this._priorities, this._indices, this._size)(
       node,
       index, 
@@ -51,9 +51,9 @@ export class StableTypedPriorityQueue<
    * @param queue - The queue to copy elements from.
    * @param comparer - An optional comparison function.
    */
-  constructor(queue: StableTypedPriorityQueue<P, Comparer>, comparer?: Comparer);
+  constructor(queue: StableTypedPriorityQueue<Node, Comparer>, comparer?: Comparer);
   constructor(
-    backendOrElements: TypedArrayConstructor | number[] | StableTypedPriorityQueue<P, Comparer>,
+    backendOrElements: TypedArrayConstructor | number[] | StableTypedPriorityQueue<Node, Comparer>,
     sizeOrPriorities?: number | number[],
     comparerOrBackend?: Comparer | TypedArrayConstructor,
     comparer?: Comparer
@@ -83,7 +83,7 @@ export class StableTypedPriorityQueue<
 
     // Set default comparer if none provided
     if (!this.compare) {
-      this.compare = ((a: P, b: P) => {
+      this.compare = ((a: Node, b: Node) => {
         if (a.priority === b.priority) {
           return a.sindex < b.sindex ? -1 : 1;
         }
@@ -116,7 +116,7 @@ export class StableTypedPriorityQueue<
   }
 
   clone(): this {
-    const clone = new StableTypedPriorityQueue<P, Comparer>(this);
+    const clone = new StableTypedPriorityQueue<Node, Comparer>(this);
     return clone as this;
   }
 
@@ -133,7 +133,7 @@ export class StableTypedPriorityQueue<
       value: removedElement,
       priority: removedPriority,
       index: index
-    } as const as P;
+    } as const as Node;
 
     // If the element is not the last one, replace it with the last element.
     if (index < newSize) {
@@ -141,7 +141,7 @@ export class StableTypedPriorityQueue<
         value: this._elements[newSize] as number,
         priority: this._priorities[newSize],
         index: newSize
-      } as const as P;
+      } as const as Node;
 
       // If the last element should be "bubbled up" (preserve heap property)
       if (this.compare(removedNode, lastNode) < 0) {
@@ -196,7 +196,7 @@ export class StableTypedPriorityQueue<
     this._size = currentSize + 1;
     this._indices[currentSize] = this._sindex++;
   
-    this._up({ value, priority, sindex: this._indices[currentSize] } as const as P, currentSize);
+    this._up({ value, priority, sindex: this._indices[currentSize] } as const as Node, currentSize);
     return true;
   }
 
@@ -244,12 +244,12 @@ export class StableTypedPriorityQueue<
       this._indices[0] = this._indices[lastNodeIndex];
       
       // Down heapify from root
-      const rootNode: P = {
+      const rootNode: Node = {
         value: this._elements[0] as number,
         priority: this._priorities[0] as number,
         index: 0,
         sindex: this._indices[0]
-      } as const as P;
+      } as const as Node;
       
       this._down(rootNode, 0);
     }
