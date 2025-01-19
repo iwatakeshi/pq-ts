@@ -1,9 +1,3 @@
-
-export type ReadonlyTuplePair<T, P = T> = readonly [T, P];
-export type ReadonlyTupleTriple<T, P = T, Q = T> = readonly [T, P, Q];
-export type ReadonlyTupleQuad<T, P = T, Q = T, R = T> = readonly [T, P, Q, R];
-
-
 /**
  * A type representing a comparison function that determines the order of two elements.
  * 
@@ -55,10 +49,24 @@ export interface INode<T> {
  */
 export interface IPriorityNode<T = unknown> extends INode<T> {
   priority: number;
+   /**
+   * The index of the node in the heap.
+   * @remarks `nindex` is short for "node index".
+   */
+   nindex: number;
 }
 
-export interface ITypedPriorityNode extends IPriorityNode<number> {
-  index: number;
+export interface IStableNode<T> extends IPriorityNode<T> {
+   /**
+   * An index used to maintain insertion order stability.
+   * @remarks `sindex` is short for "stability index".
+   */
+  sindex: bigint;
+}
+
+export interface ITypedPriorityNode extends IPriorityNode<number> {}
+
+export interface IStableTypedPriorityNode extends IStableNode<number> {
 }
 
 export interface IPriorityQueueLike<
