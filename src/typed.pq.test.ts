@@ -18,9 +18,9 @@ describe("TypedPriorityQueue", () => {
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
 
-    console.log('1.', pq.heap);
+    // console.log('1.', pq.heap);
     expect(pq.dequeue()).toBe(2);
-    console.log('2.', pq.heap);
+    // console.log('2.', pq.heap);
     expect(pq.dequeue()).toBe(3);
     expect(pq.dequeue()).toBe(1);
     expect(pq.dequeue()).toBeUndefined();
@@ -187,12 +187,12 @@ describe("TypedPriorityQueue", () => {
     for (let i = 0; i < SIZE; i++) {
       pq.enqueue(i, Math.floor(Math.random() * 1000));
     }
-    console.log("Initial heap:", pq.heap);
+    // console.log("Initial heap:", pq.heap);
     let { priority } = pq.pop() ?? { priority: 0 };
-    console.log("Popped:", priority);
+    // console.log("Popped:", priority);
     while (!pq.isEmpty()) {
       const { priority: currentPriority } = pq.pop() ?? { priority: 0 };
-      console.log("Popped:", currentPriority);
+      // console.log("Popped:", currentPriority);
       expect(currentPriority).toBeGreaterThanOrEqual(priority);
       priority = currentPriority;
     }
