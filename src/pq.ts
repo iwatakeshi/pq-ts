@@ -6,6 +6,10 @@ export class PriorityQueue<
   Node extends IPriorityNode<T> = IPriorityNode<T>,
   Comparer extends IComparer<Node> = IComparer<Node>
 > implements IPriorityQueue<T, Node> {
+  private static readonly GROW_FACTOR = 2;
+  private static readonly MINIMUM_GROW = 4;
+  private static readonly MAX_SIZE = 2 ** 32 - 1;
+
   /**
    * The elements in the queue used internally.
    * @protected
@@ -40,6 +44,26 @@ export class PriorityQueue<
 
   protected _heapify = (size: number) => {
     return heapify(this._elements, size)(this.compare as Comparer);
+  }
+
+  protected _grow(
+    minCapacity: number,
+  ) {
+    console.assert(this._elements.length < minCapacity, 'Min capacity must be greater than the current capacity.');
+
+    let newCapacity = PriorityQueue.GROW_FACTOR * this._elements.length;
+
+    if (newCapacity > PriorityQueue.MAX_SIZE) {
+      newCapacity = PriorityQueue.MAX_SIZE;
+    }
+
+    newCapacity = Math.max(newCapacity, this._elements.length + PriorityQueue.MINIMUM_GROW);
+
+    if (newCapacity < minCapacity) {
+      newCapacity = minCapacity;
+    }
+
+    this._elements.length = newCapacity;
   }
 
   /**
@@ -102,7 +126,7 @@ export class PriorityQueue<
   protected removeRootNode(): void {
     if (this.isEmpty()) return;
     const lastNodeIndex = --this._size;
-    
+
     if (lastNodeIndex > 0) {
       // Store last node
       const lastNode = this._elements[lastNodeIndex];
@@ -124,10 +148,9 @@ export class PriorityQueue<
     if (typeof priority !== "number") return false;
     const currentSize = this._size;
     if (this._elements.length === currentSize) {
-      this._elements.length = currentSize * 2;
+      this._grow(currentSize + 1);
     }
     const element = { value, priority, nindex: currentSize } as Node;
-    this._elements[currentSize] = { value, priority, nindex: currentSize } as Node;
     this._size = currentSize + 1;
     this._up(element, currentSize);
 
