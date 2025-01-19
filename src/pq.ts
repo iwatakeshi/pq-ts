@@ -205,7 +205,11 @@ export class PriorityQueue<
    * @readonly
    */
   get values(): T[] {
-    return this._elements.map((node) => node.value);
+    const results: T[] = [];
+    for (let i = 0; i < this._size; i++) {
+      results.push(this._elements[i].value);
+    }
+    return results;
   }
   /**
    * The heap array containing the elements.
