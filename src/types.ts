@@ -23,11 +23,14 @@ export type IEqualityComparator<T> = (a: T, b: T) => boolean;
 /**
  * A type representing a typed array.
  */
-export type TypedArray = Uint8Array | Uint16Array | Uint32Array | Float32Array | Float64Array;
+export type TypedArray = Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array | Float32Array | Float64Array
 /**
  * A type representing a constructor for a typed array.
  */
-export type TypedArrayConstructor<T extends TypedArray = TypedArray> = new (...args: unknown[]) => T;
+export interface TypedArrayConstructor<T extends TypedArray = TypedArray> {
+  new(length: number): T;
+  from(arrayLike: ArrayLike<number>): T;
+}
 
 /**
  * A type representing an indexable object with a length property.
@@ -49,22 +52,22 @@ export interface INode<T> {
  */
 export interface IPriorityNode<T = unknown> extends INode<T> {
   priority: number;
-   /**
-   * The index of the node in the heap.
-   * @remarks `nindex` is short for "node index".
-   */
-   nindex: number;
+  /**
+  * The index of the node in the heap.
+  * @remarks `nindex` is short for "node index".
+  */
+  nindex: number;
 }
 
 export interface IStableNode<T> extends IPriorityNode<T> {
-   /**
-   * An index used to maintain insertion order stability.
-   * @remarks `sindex` is short for "stability index".
-   */
+  /**
+  * An index used to maintain insertion order stability.
+  * @remarks `sindex` is short for "stability index".
+  */
   sindex: bigint;
 }
 
-export interface ITypedPriorityNode extends IPriorityNode<number> {}
+export interface ITypedPriorityNode extends IPriorityNode<number> { }
 
 export interface IStableTypedPriorityNode extends IStableNode<number> {
 }
