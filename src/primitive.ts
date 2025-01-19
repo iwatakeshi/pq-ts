@@ -104,7 +104,10 @@ export const up = <T, P extends IPriorityNode<T> = IPriorityNode<T>>(
   ): void => {
     let nodeIndex = index;
     while (nodeIndex > 0) {
-      const parentNode = nodes[parent(nodeIndex)] as P;
+      const parentNode: P = {
+        ...nodes[parent(nodeIndex)],
+        nindex: parent(nodeIndex)
+      } as const as P;
 
       if (comparer(node, parentNode) >= 0) break;
 
@@ -507,9 +510,30 @@ export const heapifyWithPrioritiesAndIndices = (
  * @param backend - The constructor for the new array
  * @returns A new array with the copied elements
  */
-export const grow = <T extends TypedArray>(elements: T, size: number, backend: TypedArrayConstructor<T>): T => {
-  if (size <= elements.length) return elements;
-  const _elements = new backend(size) as T;
-  _elements.set(elements);
-  return _elements;
+export const growTyped = <T extends TypedArray | BigInt64Array>(
+  elements: T,
+  minCapacity: number,
+  backend: T extends BigInt64Array ? BigInt64ArrayConstructor : TypedArrayConstructor,
+  growFactor = 2,
+  minimumGrow = 4,
+  maxSize = 2 ** 32 - 1
+): T => {
+  console.assert(elements.length < minCapacity, 'Min capacity must be greater than the current capacity.');
+
+  let newCapacity = growFactor * elements.length;
+
+  if (newCapacity > maxSize) {
+    newCapacity = maxSize;
+  }
+
+  newCapacity = Math.max(newCapacity, elements.length + minimumGrow);
+
+  if (newCapacity < minCapacity) {
+    newCapacity = minCapacity;
+  }
+
+  const newElements = new backend(newCapacity);
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  newElements.set(elements as any);
+  return newElements as T;
 }
