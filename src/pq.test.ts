@@ -176,9 +176,10 @@ describe("PriorityQueue", () => {
     const pq = new PriorityQueue<number>();
     for (let i = 0; i < 10; i++) {
       pq.enqueue(i, Math.floor(Math.random() * 1000));
+      console.log(pq.heap);
     }
     let { priority } = pq.pop() ?? { priority: 0 };
-  
+
     while (!pq.isEmpty()) {
       const { priority: currentPriority } = pq.pop() ?? { priority: 0 };
       expect(currentPriority).toBeGreaterThanOrEqual(priority);
