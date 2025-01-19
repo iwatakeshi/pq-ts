@@ -71,6 +71,24 @@ bench(`StableTypedPriorityQueue dequeue ${ITEMS_COUNT} items`, () => {
   }
 });
 
+bench(`Native Array enqueue ${ITEMS_COUNT} items`, () => {
+  const arr = [];
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    arr.push({ value: i, priority: i });
+  }
+});
+
+bench(`Native Array dequeue ${ITEMS_COUNT} items`, () => {
+  const arr = [];
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    arr.push({ value: i, priority: i });
+  }
+  arr.sort((a, b) => a.priority - b.priority);
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    arr.shift();
+  }
+});
+
 // Force garbage collection before running benchmarks if supported
 globalThis.gc?.();
 
