@@ -30,7 +30,6 @@ export class StablePriorityQueue<
       this.compare = comparer;
     } else {
       this.compare = comparer ?? ((a, b) => {
-        console.log(a, b);
         if (a.priority === b.priority) return a.index < b.index ? -1 : 1;
         return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
       }) as Comparer
