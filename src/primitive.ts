@@ -104,15 +104,13 @@ export const up = <T, P extends IPriorityNode<T> = IPriorityNode<T>>(
   ): void => {
     let nodeIndex = index;
     while (nodeIndex > 0) {
-      const parentNode: P = {
-        ...nodes[parent(nodeIndex)],
-        nindex: parent(nodeIndex)
-      } as const as P;
+      const parentIndex = parent(nodeIndex);
+      const parentNode = nodes[parentIndex] as P;
 
       if (comparer(node, parentNode) >= 0) break;
 
       nodes[nodeIndex] = parentNode;
-      nodeIndex = parentNode.nindex;
+      nodeIndex = parentIndex;
     }
 
     nodes[nodeIndex] = node;
@@ -133,7 +131,8 @@ export const up = <T, P extends IPriorityNode<T> = IPriorityNode<T>>(
  */
 export const upWithPriorities = (
   nodes: Indexable<number>,
-  priorities: Indexable<number>) => {
+  priorities: Indexable<number>
+) => {
   return <P extends ITypedPriorityNode = ITypedPriorityNode>(
     node: P,
     index: number,
@@ -141,11 +140,13 @@ export const upWithPriorities = (
   ): void => {
     let nodeIndex = index;
     while (nodeIndex > 0) {
+      const parentIndex = parent(nodeIndex);
       const parentNode = {
-        value: nodes[parent(nodeIndex)],
-        priority: priorities[parent(nodeIndex)],
-        nindex: parent(nodeIndex)
-      } as const as P;
+        ...node,
+        value: nodes[parentIndex],
+        priority: priorities[parentIndex],
+        nindex: parentIndex
+      } as P;
 
       if (comparer(node, parentNode) >= 0) break;
 
@@ -184,12 +185,14 @@ export const upWithPrioritiesAndIndices = (
   ): void => {
     let nodeIndex = index;
     while (nodeIndex > 0) {
+      const parentIndex = parent(nodeIndex);
       const parentNode = {
-        value: nodes[parent(nodeIndex)],
-        priority: priorities[parent(nodeIndex)],
-        nindex: parent(nodeIndex),
-        sindex: indices[parent(nodeIndex)]
-      } as const as P;
+        ...node,
+        value: nodes[parentIndex],
+        priority: priorities[parentIndex],
+        nindex: parentIndex,
+        sindex: indices[parentIndex]
+      } as P;
 
       if (comparer(node, parentNode) >= 0) break;
 
@@ -245,33 +248,28 @@ export const down = <T, P extends IPriorityNode<T> = IPriorityNode<T>>(
 
       // Find the minimum priority child
       let minChildIndex = childIndex;
-      let minChildValue = nodes[childIndex].value;
-      let minChildPriority = nodes[childIndex].priority;
+      let minChild = { ...nodes[childIndex] };
 
       const childIndexUpperBound = Math.min(childIndex + ARITY, size);
       for (let i = childIndex + 1; i < childIndexUpperBound; i++) {
-        if (comparer(
-          { value: nodes[i].value, priority: nodes[i].priority, nindex: i } as P,
-          { value: minChildValue, priority: minChildPriority, nindex: minChildIndex } as P) < 0) {
+        const currentChild = { ...nodes[i] };
+        if (comparer(currentChild, minChild) < 0) {
           minChildIndex = i;
-          minChildValue = nodes[i].value;
-          minChildPriority = nodes[i].priority;
+          minChild = currentChild;
         }
       }
 
       // If the current node is in the correct position, stop.
-      if (comparer(
-        { value: nodeValue, priority: nodePriority, nindex: nodeIndex } as P,
-        { value: minChildValue, priority: minChildPriority, nindex: minChildIndex } as P) <= 0) {
+      if (comparer({ ...node, value: nodeValue, priority: nodePriority, nindex: nodeIndex }, minChild) <= 0) {
         break;
       }
 
       // Swap values
-      nodes[nodeIndex] = { value: minChildValue, priority: minChildPriority, nindex: minChildIndex } as P;
+      nodes[nodeIndex] = { ...minChild, nindex: minChildIndex };
       nodeIndex = minChildIndex;
     }
 
-    nodes[nodeIndex] = { value: nodeValue, priority: nodePriority, nindex: nodeIndex } as P;
+    nodes[nodeIndex] = { ...node, value: nodeValue, priority: nodePriority, nindex: nodeIndex };
   }
 }
 
@@ -288,55 +286,57 @@ export const down = <T, P extends IPriorityNode<T> = IPriorityNode<T>>(
  *                    zero if first = second,
  *                    positive if first > second
  */
-export const downWithPriorities =
-  (nodes: Indexable<number>, priorities: Indexable<number>, size: number) => {
-    return <P extends ITypedPriorityNode = ITypedPriorityNode>(
-      node: P,
-      index: number,
-      comparer: IComparer<P>
-    ): void => {
+export const downWithPriorities = (
+  nodes: Indexable<number>,
+  priorities: Indexable<number>,
+  size: number
+) => {
+  return <P extends ITypedPriorityNode = ITypedPriorityNode>(
+    node: P,
+    index: number,
+    comparer: IComparer<P>
+  ): void => {
+    let nodeIndex = index;
+    const nodeValue = node.value;
+    const nodePriority = node.priority;
 
-      let nodeIndex = index;
-      const nodeValue = node.value;
-      const nodePriority = node.priority;
+    while (true) {
+      const childIndex = child(nodeIndex);
+      if (childIndex >= size) break;
 
-      while (true) {
-        const childIndex = child(nodeIndex);
-        if (childIndex >= size) break;
+      // Find the minimum priority child
+      let minChildIndex = childIndex;
+      let minChildValue = nodes[childIndex];
+      let minChildPriority = priorities[childIndex];
 
-        // Find the minimum priority child
-        let minChildIndex = childIndex;
-        let minChildValue = nodes[childIndex];
-        let minChildPriority = priorities[childIndex];
-
-        const childIndexUpperBound = Math.min(childIndex + ARITY, size);
-        for (let i = childIndex + 1; i < childIndexUpperBound; i++) {
-          if (comparer(
-            { value: nodes[i], priority: priorities[i], nindex: i } as P,
-            { value: minChildValue, priority: minChildPriority, nindex: minChildIndex } as P) < 0) {
-            minChildIndex = i;
-            minChildValue = nodes[i];
-            minChildPriority = priorities[i];
-          }
-        }
-
-        // If the current node is in the correct position, stop.
+      const childIndexUpperBound = Math.min(childIndex + ARITY, size);
+      for (let i = childIndex + 1; i < childIndexUpperBound; i++) {
         if (comparer(
-          { value: nodeValue, priority: nodePriority, nindex: nodeIndex } as P,
-          { value: minChildValue, priority: minChildPriority, nindex: minChildIndex } as P) <= 0) {
-          break;
+          { ...node, value: nodes[i], priority: priorities[i], nindex: i } as P,
+          { ...node, value: minChildValue, priority: minChildPriority, nindex: minChildIndex } as P) < 0) {
+          minChildIndex = i;
+          minChildValue = nodes[i];
+          minChildPriority = priorities[i];
         }
-
-        // Swap values
-        nodes[nodeIndex] = minChildValue;
-        priorities[nodeIndex] = minChildPriority;
-        nodeIndex = minChildIndex;
       }
 
-      nodes[nodeIndex] = nodeValue;
-      priorities[nodeIndex] = nodePriority;
+      // If the current node is in the correct position, stop.
+      if (comparer(
+        { ...node, value: nodeValue, priority: nodePriority, nindex: nodeIndex } as P,
+        { ...node, value: minChildValue, priority: minChildPriority, nindex: minChildIndex } as P) <= 0) {
+        break;
+      }
+
+      // Swap values
+      nodes[nodeIndex] = minChildValue;
+      priorities[nodeIndex] = minChildPriority;
+      nodeIndex = minChildIndex;
     }
+
+    nodes[nodeIndex] = nodeValue;
+    priorities[nodeIndex] = nodePriority;
   }
+}
 
 /**
  * Moves a node down in a 4-ary heap with separate priority and index arrays to maintain the heap property.
@@ -356,7 +356,8 @@ export const downWithPrioritiesAndIndices = (
   nodes: Indexable<number>,
   priorities: Indexable<number>,
   indices: Indexable<bigint>,
-  size: number) => {
+  size: number
+) => {
   return <P extends IStableTypedPriorityNode = IStableTypedPriorityNode>(
     node: P,
     index: number,
@@ -381,8 +382,8 @@ export const downWithPrioritiesAndIndices = (
       const childIndexUpperBound = Math.min(childIndex + ARITY, size);
       for (let i = childIndex + 1; i < childIndexUpperBound; i++) {
         if (comparer(
-          { value: nodes[i], priority: priorities[i], nindex: i, sindex: indices[i] } as P,
-          { value: minChildValue, priority: minChildPriority, nindex: minChildIndex, sindex: minChildSIndex } as P) < 0) {
+          { ...node, value: nodes[i], priority: priorities[i], nindex: i, sindex: indices[i] } as P,
+          { ...node, value: minChildValue, priority: minChildPriority, nindex: minChildIndex, sindex: minChildSIndex } as P) < 0) {
           minChildIndex = i;
           minChildValue = nodes[i];
           minChildPriority = priorities[i];
@@ -392,8 +393,8 @@ export const downWithPrioritiesAndIndices = (
 
       // If the current node is in the correct position, stop.
       if (comparer(
-        { value: nodeValue, priority: nodePriority, nindex: nodeIndex, sindex: nodeSIndex } as P,
-        { value: minChildValue, priority: minChildPriority, nindex: minChildIndex, sindex: minChildSIndex } as P) <= 0) {
+        { ...node, value: nodeValue, priority: nodePriority, nindex: nodeIndex, sindex: nodeSIndex } as P,
+        { ...node, value: minChildValue, priority: minChildPriority, nindex: minChildIndex, sindex: minChildSIndex } as P) <= 0) {
         break;
       }
 
