@@ -20,7 +20,7 @@ export class StableTypedPriorityQueue<
   protected readonly _down = (node: Node, index: number) => {
     return downWithPrioritiesAndIndices(this._elements, this._priorities, this._indices, this._size)(
       node,
-      index, 
+      index,
       this.compare as Comparer
     );
   }
@@ -61,9 +61,9 @@ export class StableTypedPriorityQueue<
     if (backendOrElements instanceof StableTypedPriorityQueue) {
       const queue = backendOrElements;
       super(
-        Array.from(queue._elements), 
-        Array.from(queue._priorities), 
-        queue._backend, 
+        Array.from(queue._elements),
+        Array.from(queue._priorities),
+        queue._backend,
         comparer ?? queue.compare
       );
       this._indices.set(queue._indices);
@@ -95,7 +95,9 @@ export class StableTypedPriorityQueue<
   get heap(): IPriorityNode<number>[] {
     return Array
       .from(this._elements)
-      .map((value, index) => ({ value, priority: this._priorities[index] }));
+      .map((value, index) => ({
+        value, priority: this._priorities[index], nindex: index
+      }));
   }
 
   pop(): IPriorityNode<number> | undefined {
@@ -103,7 +105,7 @@ export class StableTypedPriorityQueue<
     const value = this._elements[0];
     const priority = this._priorities[0];
     this.removeRootNode();
-    return { value, priority };
+    return { value, priority, nindex: 0 };
   }
 
   toArray(): number[] {
@@ -132,7 +134,7 @@ export class StableTypedPriorityQueue<
     const removedNode = {
       value: removedElement,
       priority: removedPriority,
-      index: index
+      nindex: index
     } as const as Node;
 
     // If the element is not the last one, replace it with the last element.
@@ -140,7 +142,7 @@ export class StableTypedPriorityQueue<
       const lastNode = {
         value: this._elements[newSize] as number,
         priority: this._priorities[newSize],
-        index: newSize
+        nindex: newSize
       } as const as Node;
 
       // If the last element should be "bubbled up" (preserve heap property)
@@ -152,7 +154,7 @@ export class StableTypedPriorityQueue<
       }
     }
 
-    this._elements[newSize] = 0;
+    this._elements[newSize] = undefined as unknown as number;
 
 
     return true;
@@ -195,7 +197,7 @@ export class StableTypedPriorityQueue<
     }
     this._size = currentSize + 1;
     this._indices[currentSize] = this._sindex++;
-  
+
     this._up({ value, priority, sindex: this._indices[currentSize] } as const as Node, currentSize);
     return true;
   }
@@ -234,23 +236,23 @@ export class StableTypedPriorityQueue<
     if (this._elements.length !== this._priorities.length) {
       throw new Error("[FlatPriorityQueue] Elements and priorities are out of sync.");
     }
-    
+
     const lastNodeIndex = --this._size;
-    
+
     if (lastNodeIndex > 0) {
       // Move last node to root first
       this._elements[0] = this._elements[lastNodeIndex];
       this._priorities[0] = this._priorities[lastNodeIndex];
       this._indices[0] = this._indices[lastNodeIndex];
-      
+
       // Down heapify from root
       const rootNode: Node = {
         value: this._elements[0] as number,
         priority: this._priorities[0] as number,
-        index: 0,
+        nindex: 0,
         sindex: this._indices[0]
       } as const as Node;
-      
+
       this._down(rootNode, 0);
     }
 
