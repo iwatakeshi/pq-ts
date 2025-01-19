@@ -1,5 +1,5 @@
 import type { IComparer, IEqualityComparator, TypedArray, TypedArrayConstructor, IPriorityQueueLike, IPriorityNode, ITypedPriorityNode } from "./types.ts";
-import { grow, upWithPriorities, downWithPriorities, heapifyWithPriorities } from "./primitive.ts";
+import { growTyped, upWithPriorities, downWithPriorities, heapifyWithPriorities } from "./primitive.ts";
 
 export class TypedPriorityQueue<
   Node extends ITypedPriorityNode = ITypedPriorityNode,
@@ -21,7 +21,7 @@ export class TypedPriorityQueue<
   protected readonly _down = (node: Node, index: number) => {
     return downWithPriorities(this._elements, this._priorities, this._size)(
       node,
-      index, 
+      index,
       this.compare as Comparer
     );
   }
@@ -205,8 +205,8 @@ export class TypedPriorityQueue<
 
   enqueue(value: number, priority: number): boolean {
     const currentSize = this._size;
-    if (currentSize >= this._elements.length) {
-      this.grow(this._elements.length * 2);
+    if (currentSize === this._elements.length) {
+      this.grow(currentSize + 1);
     }
     this._size = currentSize + 1;
     this._up({ value, priority } as const as Node, currentSize);
@@ -247,21 +247,21 @@ export class TypedPriorityQueue<
     if (this._elements.length !== this._priorities.length) {
       throw new Error("[FlatPriorityQueue] Elements and priorities are out of sync.");
     }
-    
+
     const lastNodeIndex = --this._size;
-    
+
     if (lastNodeIndex > 0) {
       // Move last node to root first
       this._elements[0] = this._elements[lastNodeIndex];
       this._priorities[0] = this._priorities[lastNodeIndex];
-      
+
       // Down heapify from root
       const rootNode: Node = {
         value: this._elements[0] as number,
         priority: this._priorities[0] as number,
         nindex: 0
       } as const as Node;
-      
+
       this._down(rootNode, 0);
     }
 
@@ -270,9 +270,9 @@ export class TypedPriorityQueue<
     this._priorities[lastNodeIndex] = 0;
   }
 
-  protected grow(newSize: number): void {
-    this._elements = grow(this._elements, newSize, this._backend);
-    this._priorities = grow(this._priorities, newSize, this._backend);
+  protected grow(minCapacity: number): void {
+    this._elements = growTyped(this._elements, minCapacity, this._backend);
+    this._priorities = growTyped(this._priorities, minCapacity, this._backend);
   }
   /**
    * Iterates over the queue in priority order.
