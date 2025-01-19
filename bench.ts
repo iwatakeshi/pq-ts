@@ -1,4 +1,4 @@
-import { PriorityQueue, StablePriorityQueue, FlatPriorityQueue, StableFlatPriorityQueue } from "./main";
+import { PriorityQueue, StablePriorityQueue, TypedPriorityQueue, StableFlatPriorityQueue } from "./main";
 import { run, bench, boxplot, summary } from "mitata";
 
 const ITEMS_COUNT = 1000000;
@@ -38,14 +38,14 @@ bench(`StablePriorityQueue dequeue ${ITEMS_COUNT} items`, () => {
 });
 
 bench(`FlatPriorityQueue enqueue ${ITEMS_COUNT} items`, () => {
-  const fpq = new FlatPriorityQueue<number>(Uint32Array, ITEMS_COUNT); // Preallocate capacity
+  const fpq = new TypedPriorityQueue<number>(Uint32Array, ITEMS_COUNT); // Preallocate capacity
   for (let i = 0; i < ITEMS_COUNT; i++) {
     fpq.enqueue(i, i);
   }
 });
 
 bench(`FlatPriorityQueue dequeue ${ITEMS_COUNT} items`, () => {
-  const fpq = new FlatPriorityQueue<number>(Uint32Array, ITEMS_COUNT);
+  const fpq = new TypedPriorityQueue<number>(Uint32Array, ITEMS_COUNT);
   for (let i = 0; i < ITEMS_COUNT; i++) {
     fpq.enqueue(i, i);
   }
