@@ -1,146 +1,274 @@
-import type { IComparer, IEqualityComparator, TypedArray, TypedArrayConstructor, IStableNode } from "./types.ts";
-import { FlatPriorityQueue } from "./flat.pq.ts";
-import { down, downWithPrioritiesAndIndices, up, upWithPrioritiesAndIndices } from "./primitive.ts";
+import type { IComparer, IEqualityComparator, TypedArray, TypedArrayConstructor, IPriorityQueueLike, IPriorityNode, ITypedPriorityNode, IStableTypedPriorityNode } from "./types.ts";
+import { grow, upWithPriorities as moveUpWithPriorities, downWithPriorities, heapifyWithPriorities, upWithPriorities, upWithPrioritiesAndIndices, downWithPrioritiesAndIndices, heapifyWithPrioritiesAndIndices } from "./primitive.ts";
+import { TypedPriorityQueue } from "./flat.pq.ts";
 
-export class StableFlatPriorityQueue<
-  T extends number = number,
-  Node extends IStableNode<T> = IStableNode<T>,
-  Comparer extends IComparer<number> = IComparer<number>,
-  Heap extends TypedArray = Uint32Array,
-> extends FlatPriorityQueue<T, Node, Comparer, Heap> {
-  // Track insertion order
-  private _indices: bigint[];
-  private _nextIndex = 0n;
+export class StableTypedPriorityQueue<
+  P extends IStableTypedPriorityNode = IStableTypedPriorityNode,
+  Comparer extends IComparer<P> = IComparer<P>,
+> extends TypedPriorityQueue<P, Comparer> {
+  protected _indices: BigInt64Array = new BigInt64Array(this._defaultSize);
+  protected _sindex = 0n;
+  protected _size = 0;
+  protected compare?: Comparer;
 
-  constructor(backend: TypedArrayConstructor<Heap>, size: number, comparer?: Comparer);
-  constructor(elements: T[], priorities: number[], backend: TypedArrayConstructor<Heap>, comparer?: Comparer);
-  constructor(queue: StableFlatPriorityQueue<T, Node, Comparer, Heap>, comparer?: Comparer);
+  protected readonly _up = (node: P, index: number) => {
+    return upWithPrioritiesAndIndices(this._elements, this._priorities, this._indices)(
+      node, index, this.compare as Comparer
+    );
+  }
+
+  protected readonly _down = (node: P, index: number) => {
+    return downWithPrioritiesAndIndices(this._elements, this._priorities, this._indices, this._size)(
+      node,
+      index, 
+      this.compare as Comparer
+    );
+  }
+
+  protected readonly _heapify = (size: number) => {
+    return heapifyWithPrioritiesAndIndices(this._elements, this._priorities, this._indices, size)(
+      this.compare as Comparer
+    );
+  }
+
+  /**
+   * Creates a new instance of a flat priority queue.
+   * @param backend - The typed array constructor for the elements.
+   * @param size - The initial size of the queue.
+   * @param comparer - An optional comparison function.
+   */
+  constructor(backend: TypedArrayConstructor, size: number, comparer?: Comparer);
+  /**
+   * Creates a new instance of a flat priority queue.
+   * @param elements - The elements to add to the queue.
+   * @param priorities - The priorities of the elements.
+   * @param backend - The typed array constructor for the elements.
+   * @param comparer - An optional comparison function.
+   */
+  constructor(elements: number[], priorities: number[], backend: TypedArrayConstructor, comparer?: Comparer);
+  /**
+   * Creates a new instance of a flat priority queue.
+   * @param queue - The queue to copy elements from.
+   * @param comparer - An optional comparison function.
+   */
+  constructor(queue: StableTypedPriorityQueue<P, Comparer>, comparer?: Comparer);
   constructor(
-    backendOrElements: TypedArrayConstructor<Heap> | T[] | StableFlatPriorityQueue<T, Node, Comparer, Heap>,
+    backendOrElements: TypedArrayConstructor | number[] | StableTypedPriorityQueue<P, Comparer>,
     sizeOrPriorities?: number | number[],
-    comparerOrBackend?: Comparer | TypedArrayConstructor<Heap>,
+    comparerOrBackend?: Comparer | TypedArrayConstructor,
     comparer?: Comparer
   ) {
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    super(backendOrElements as any, sizeOrPriorities as any, comparerOrBackend as any, comparer);
-
-    // Initialize indices array
-    this._indices = [];
-
-    if (backendOrElements instanceof StableFlatPriorityQueue) {
-      this._indices = [...backendOrElements._indices];
-      this._nextIndex = backendOrElements._nextIndex;
+    if (backendOrElements instanceof StableTypedPriorityQueue) {
+      const queue = backendOrElements;
+      super(
+        Array.from(queue._elements), 
+        Array.from(queue._priorities), 
+        queue._backend, 
+        comparer ?? queue.compare
+      );
+      this._indices.set(queue._indices);
+      this._sindex = queue._sindex;
+      this._size = queue._size;
+    } else if (Array.isArray(backendOrElements)) {
+      // Elements array constructor
+      super(backendOrElements, sizeOrPriorities as number[], comparerOrBackend as TypedArrayConstructor, comparer);
+      this._indices = new BigInt64Array(this._defaultSize);
+      this._sindex = 0n;
+    } else {
+      // Backend and size constructor
+      super(backendOrElements, sizeOrPriorities as number, comparerOrBackend as Comparer);
+      this._indices = new BigInt64Array(this._defaultSize);
+      this._sindex = 0n;
     }
 
-    // Override default comparer to consider insertion order
+    // Set default comparer if none provided
     if (!this.compare) {
-      this.compare = ((a: number, b: number, [i, j]: readonly [number, number]) => {
-        if (a === b) {
-          return this._indices[i] < this._indices[j] ? -1 : 1;
+      this.compare = ((a: P, b: P) => {
+        if (a.priority === b.priority) {
+          return a.sindex < b.sindex ? -1 : 1;
         }
-        return a - b;
+        return a.priority - b.priority;
       }) as Comparer;
     }
   }
 
-  override enqueue(value: T, priority: number): boolean {
-    if (this._size >= this._elements.length) {
-      this.grow(this._elements.length * 2);
-    }
-    // Store value, priority, and insertion order
-    this._elements[this._size] = value;
-    this._priorities[this._size] = priority;
-    this._indices[this._size] = this._nextIndex++;
-
-    upWithPrioritiesAndIndices(this._size++, this._elements, this.compare as Comparer, this._priorities, this._indices);
-    return true;
+  get heap(): IPriorityNode<number>[] {
+    return Array
+      .from(this._elements)
+      .map((value, index) => ({ value, priority: this._priorities[index] }));
   }
 
-  override remove(value: T, comparer: IEqualityComparator<T> = (a, b) => a === b): boolean {
-    const index = this._elements.findIndex((v) => comparer(value, v as T));
-    if (index === -1) return false;  // Element not found.
-
-    const newSize = --this._size;
-
-    // If the element is not the last one, replace it with the last element.
-    if (index < newSize) {
-      const lastElement = this._elements[newSize];
-      const lastPriority = this._priorities[newSize];
-      const lastIndex = this._indices[newSize];
-
-      // Swap the element with the last element
-      this._elements[index] = lastElement;
-      this._priorities[index] = lastPriority;
-      this._indices[index] = lastIndex;
-
-      // If the last element should be "bubbled up" (preserve heap property)
-      if (this.compare && this.compare(this._priorities[newSize], this._priorities[index], [newSize, index]) < 0) {
-        upWithPrioritiesAndIndices(index, this._elements, this.compare as Comparer, this._priorities, this._indices);
-      } else {
-        // Otherwise, it should "bubble down"
-        downWithPrioritiesAndIndices(index, newSize, this._elements, this.compare as Comparer, this._priorities, this._indices);
-      }
-    } else {
-      // If the element is the last one, just clear it
-      this._elements[index] = 0;
-      this._priorities[index] = 0;
-      this._indices[index] = 0n;
-    }
-    return true;
-  }
-
-  override pop(): Node | undefined {
+  pop(): IPriorityNode<number> | undefined {
     if (this.isEmpty()) return undefined;
     const value = this._elements[0];
     const priority = this._priorities[0];
-    const index = this._indices[0];
     this.removeRootNode();
-    return { value, priority, index } as Node;
+    return { value, priority };
   }
 
-  protected override grow(newSize: number): void {
-    super.grow(newSize);
-    // Grow indices array
-    const newIndices = new Array(newSize);
-    for (let i = 0; i < this._indices.length; i++) {
-      newIndices[i] = this._indices[i];
+  toArray(): number[] {
+    const clone = this.clone();
+    const result: number[] = [];
+    while (!clone.isEmpty()) {
+      result.push(clone.dequeue() as number);
     }
-    this._indices = newIndices;
+    return result;
   }
 
-  protected override removeRootNode(): void {
+  clone(): this {
+    const clone = new StableTypedPriorityQueue<P, Comparer>(this);
+    return clone as this;
+  }
+
+  remove(value: number, comparer: IEqualityComparator<number> = (a, b) => a === b): boolean {
+    if (!this.compare) {
+      console.log("[FlatPriorityQueue] No comparison function provided.");
+      return false;
+    }
+    const index = this._elements.findIndex((v) => comparer(value, v));
+    if (index < 0) return false;
+    const [removedElement, removedPriority] = [this._elements[index], this._priorities[index]];
+    const newSize = --this._size;
+    const removedNode = {
+      value: removedElement,
+      priority: removedPriority,
+      index: index
+    } as const as P;
+
+    // If the element is not the last one, replace it with the last element.
+    if (index < newSize) {
+      const lastNode = {
+        value: this._elements[newSize] as number,
+        priority: this._priorities[newSize],
+        index: newSize
+      } as const as P;
+
+      // If the last element should be "bubbled up" (preserve heap property)
+      if (this.compare(removedNode, lastNode) < 0) {
+        this._up(lastNode, index);
+      } else {
+        // Otherwise, it should "bubble down"
+        this._down(lastNode, index);
+      }
+    }
+
+    this._elements[newSize] = 0;
+
+
+    return true;
+  }
+
+  indexOf(value: number, dequeue = false, comparer: IEqualityComparator<number> = (a, b) => a === b): number {
+    if (!dequeue) return this._elements.findIndex((v) => comparer?.(v, value));
+    const clone = this.clone();
+    let index = 0;
+    while (!clone.isEmpty()) {
+      if (comparer?.(clone.dequeue() as number, value)) return index;
+      index++;
+    }
+    return -1;
+  }
+
+  priorityAt(index: number, dequeue = false): number {
+    if (index >= this._size) return Number.MAX_VALUE;
+    if (!dequeue) return this._priorities[index];
+    const clone = this.clone();
+    let i = index;
+    // We don't really know the index of the element
+    // so we will have to dequeue until we find the element
+    while (!clone.isEmpty()) {
+      const node = clone.pop();
+      if (i-- === 0) return node?.priority ?? Number.MAX_VALUE;
+    }
+
+    return Number.MAX_VALUE;
+  }
+
+  toString(): string {
+    return this.toArray().join(", ");
+  }
+
+  override enqueue(value: number, priority: number): boolean {
+    const currentSize = this._size;
+    if (currentSize >= this._elements.length) {
+      this.grow(this._elements.length * 2);
+    }
+    this._size = currentSize + 1;
+    this._indices[currentSize] = this._sindex++;
+  
+    this._up({ value, priority, sindex: this._indices[currentSize] } as const as P, currentSize);
+    return true;
+  }
+
+  dequeue(): number | undefined {
+    if (this.isEmpty()) return undefined;
+    const element = this._elements[0];
+    this.removeRootNode();
+    return element;
+  }
+
+  peek(): number | undefined {
+    return this.isEmpty() ? undefined : this._elements[0];
+  }
+
+  clear(): void {
+    this._elements = new this._backend(this._defaultSize);
+    this._priorities = new this._backend(this._defaultSize);
+    this._size = 0;
+  }
+
+  get count(): number {
+    return this._size;
+  }
+
+  get values(): number[] {
+    return Array.from(this._elements) as number[];
+  }
+
+  isEmpty(): boolean {
+    return this._size === 0;
+  }
+
+  protected removeRootNode(): void {
     if (this.isEmpty()) return;
-    this._size = Math.max(0, this._size - 1);
-
-    if (this._size > 0) {
-      this._elements[0] = this._elements[this._size];
-      this._priorities[0] = this._priorities[this._size];
-      this._indices[0] = this._indices[this._size];
-
-      downWithPrioritiesAndIndices(0, this._size, this._elements, this.compare as Comparer, this._priorities, this._indices);
+    if (this._elements.length !== this._priorities.length) {
+      throw new Error("[FlatPriorityQueue] Elements and priorities are out of sync.");
+    }
+    
+    const lastNodeIndex = --this._size;
+    
+    if (lastNodeIndex > 0) {
+      // Move last node to root first
+      this._elements[0] = this._elements[lastNodeIndex];
+      this._priorities[0] = this._priorities[lastNodeIndex];
+      this._indices[0] = this._indices[lastNodeIndex];
+      
+      // Down heapify from root
+      const rootNode: P = {
+        value: this._elements[0] as number,
+        priority: this._priorities[0] as number,
+        index: 0,
+        sindex: this._indices[0]
+      } as const as P;
+      
+      this._down(rootNode, 0);
     }
 
-    this._elements[this._size] = undefined as unknown as Heap[0];
-    this._priorities[this._size] = undefined as unknown as Heap[0];
-    this._indices[this._size] = undefined as unknown as bigint;
+    // Clear last position
+    this._elements[lastNodeIndex] = 0;
+    this._priorities[lastNodeIndex] = 0;
+    this._indices[lastNodeIndex] = 0n;
   }
 
-  override clone(): this {
-    return new StableFlatPriorityQueue<T, Node, Comparer, Heap>(this) as this;
+  protected grow(newSize: number): void {
+    this._elements = grow(this._elements, newSize, this._backend);
+    this._priorities = grow(this._priorities, newSize, this._backend);
   }
-
-  override get heap(): Node[] {
-    return Array.from(this._elements)
-      .map((value, i) => ({
-        value,
-        priority: this._priorities[i],
-        index: this._indices[i]
-      } as Node));
-  }
-
-  override clear(): void {
-    super.clear();
-    this._indices = [];
-    this._nextIndex = 0n;
+  /**
+   * Iterates over the queue in priority order.
+   * @returns - An iterator for the queue.
+   */
+  [Symbol.iterator](): Iterator<number> {
+    return this.toArray()[Symbol.iterator]();
   }
 }
