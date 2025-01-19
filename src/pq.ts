@@ -22,6 +22,26 @@ export class PriorityQueue<
    */
   protected _size = 0;
 
+  protected _up = (node: Node, index: number) => {
+    return up(this._elements)(
+      node,
+      index,
+      this.compare as Comparer
+    )
+  }
+
+  protected _down = (node: Node, index: number) => {
+    return down(this._elements, this._size)(
+      node,
+      index,
+      this.compare as Comparer
+    )
+  }
+
+  protected _heapify = (size: number) => {
+    return heapify(this._elements, size)(this.compare as Comparer);
+  }
+
   /**
    * Creates a new instance of a priority queue.
    */
@@ -68,10 +88,10 @@ export class PriorityQueue<
       this._size = elements.length;
       this.compare = comparer;
     } else {
-      this.compare = comparer ?? ((a, b, _) => a.priority - b.priority) as Comparer;
+      this.compare = comparer ?? ((a, b) => a.priority - b.priority) as Comparer;
     }
 
-    heapify(this._size, this._elements, this.compare as Comparer);
+    this._heapify(this._size);
   }
 
   /**
@@ -81,12 +101,17 @@ export class PriorityQueue<
    */
   protected removeRootNode(): void {
     if (this.isEmpty()) return;
-    const lastNode = this._elements[--this._size];
-    if (this._size > 0) {
-      this._elements[0] = lastNode;
-      down(0, this._size, this._elements, this.compare as Comparer);
+    const lastNodeIndex = --this._size;
+    
+    if (lastNodeIndex > 0) {
+      // Store last node
+      const lastNode = this._elements[lastNodeIndex];
+      // Move last node to root and down heapify
+      this._down(lastNode, 0);
     }
-    this._elements.pop();
+
+    // Remove last element
+    this._elements[lastNodeIndex] = undefined as unknown as Node;
   }
 
   /**
@@ -97,9 +122,14 @@ export class PriorityQueue<
    */
   enqueue(value: T, priority: number): boolean {
     if (typeof priority !== "number") return false;
-
-    this._elements.push({ value, priority } as Node);
-    up(this._size++, this._elements, this.compare as Comparer);
+    const currentSize = this._size;
+    if (this._elements.length === currentSize) {
+      this._elements.length = currentSize * 2;
+    }
+    const element = { value, priority, nindex: currentSize } as Node;
+    this._elements[currentSize] = { value, priority, nindex: currentSize } as Node;
+    this._size = currentSize + 1;
+    this._up(element, currentSize);
 
     return true;
   }
@@ -152,7 +182,11 @@ export class PriorityQueue<
    * @readonly
    */
   get values(): T[] {
-    return this._elements.map((node) => node.value);
+    const values: T[] = [];
+    for (let i = 0; i < this._size; i++) {
+      values.push(this._elements[i].value);
+    }
+    return values;
   }
   /**
    * The heap array containing the elements.
@@ -194,17 +228,20 @@ export class PriorityQueue<
   remove(value: T, comparer: IEqualityComparator<T> = (a, b) => a === b): boolean {
     const index = this._elements.findIndex((node) => comparer(node.value, value));
     if (index === -1) return false;
+    if (!this.compare) {
+      console.log("[FlatPriorityQueue] No comparison function provided.");
+      return false;
+    }
 
     const removedElement = this._elements[index];
     const newSize = --this._size;
 
     if (index < newSize) {
       const lastNode = this._elements[newSize];
-      this._elements[index] = lastNode;
-      if (this.compare && this.compare(lastNode, removedElement, [index, newSize,]) < 0) {
-        up(index, this._elements, this.compare);
+      if (this.compare(lastNode, removedElement) < 0) {
+        this._down(lastNode, index);
       } else {
-        down(index, newSize, this._elements, this.compare as Comparer);
+        this._up(lastNode, index);
       }
     }
 
@@ -219,7 +256,7 @@ export class PriorityQueue<
    * @returns - The index of the element if it exists, or -1 if the element is not found.
    */
   indexOf(value: T, dequeue?: boolean, comparer: IEqualityComparator<T> = (a, b) => a === b): number {
-    if (!dequeue) return this._elements.findIndex((node) => comparer(node.value, value));
+    if (!dequeue) return this._elements.findIndex((node: Node | undefined) => node && comparer(node.value, value));
     const clone = this.clone();
     let index = 0;
     while (!clone.isEmpty()) {
