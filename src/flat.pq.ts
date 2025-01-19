@@ -2,8 +2,8 @@ import type { IComparer, IEqualityComparator, TypedArray, TypedArrayConstructor,
 import { grow, upWithPriorities as moveUpWithPriorities, downWithPriorities, heapifyWithPriorities, upWithPriorities } from "./primitive.ts";
 
 export class TypedPriorityQueue<
-  P extends ITypedPriorityNode = ITypedPriorityNode,
-  Comparer extends IComparer<P> = IComparer<P>,
+  Node extends ITypedPriorityNode = ITypedPriorityNode,
+  Comparer extends IComparer<Node> = IComparer<Node>,
 > implements IPriorityQueueLike<number> {
   protected _elements: TypedArray;
   protected _priorities: TypedArray;
@@ -12,13 +12,13 @@ export class TypedPriorityQueue<
   protected _backend: TypedArrayConstructor;
   protected readonly _defaultSize: number;
 
-  protected readonly _up = (node: P, index: number) => {
+  protected readonly _up = (node: Node, index: number) => {
     return upWithPriorities(this._elements, this._priorities)(
       node, index, this.compare as Comparer
     );
   }
 
-  protected readonly _down = (node: P, index: number) => {
+  protected readonly _down = (node: Node, index: number) => {
     return downWithPriorities(this._elements, this._priorities, this._size)(
       node,
       index, 
@@ -52,14 +52,14 @@ export class TypedPriorityQueue<
    * @param queue - The queue to copy elements from.
    * @param comparer - An optional comparison function.
    */
-  constructor(queue: TypedPriorityQueue<P, Comparer>, comparer?: Comparer);
+  constructor(queue: TypedPriorityQueue<Node, Comparer>, comparer?: Comparer);
   constructor(
-    backendOrElements: TypedArrayConstructor | number[] | TypedPriorityQueue<P, Comparer>,
+    backendOrElements: TypedArrayConstructor | number[] | TypedPriorityQueue<Node, Comparer>,
     sizeOrPriorities?: number | number[],
     comparerOrBackend?: Comparer | TypedArrayConstructor,
     comparer?: Comparer
   ) {
-    const min: IComparer<P> = (a, b) => {
+    const min: IComparer<Node> = (a, b) => {
       return a.priority - b.priority;
     }
     if (Array.isArray(backendOrElements) && Array.isArray(sizeOrPriorities)) {
@@ -131,7 +131,7 @@ export class TypedPriorityQueue<
   }
 
   clone(): this {
-    const clone = new TypedPriorityQueue<P, Comparer>(this);
+    const clone = new TypedPriorityQueue<Node, Comparer>(this);
     return clone as this;
   }
 
@@ -148,7 +148,7 @@ export class TypedPriorityQueue<
       value: removedElement,
       priority: removedPriority,
       index: index
-    } as const as P;
+    } as const as Node;
 
     // If the element is not the last one, replace it with the last element.
     if (index < newSize) {
@@ -156,7 +156,7 @@ export class TypedPriorityQueue<
         value: this._elements[newSize] as number,
         priority: this._priorities[newSize],
         index: newSize
-      } as const as P;
+      } as const as Node;
 
       // If the last element should be "bubbled up" (preserve heap property)
       if (this.compare(removedNode, lastNode) < 0) {
@@ -209,7 +209,7 @@ export class TypedPriorityQueue<
       this.grow(this._elements.length * 2);
     }
     this._size = currentSize + 1;
-    this._up({ value, priority } as const as P, currentSize);
+    this._up({ value, priority } as const as Node, currentSize);
     return true;
   }
 
@@ -256,11 +256,11 @@ export class TypedPriorityQueue<
       this._priorities[0] = this._priorities[lastNodeIndex];
       
       // Down heapify from root
-      const rootNode: P = {
+      const rootNode: Node = {
         value: this._elements[0] as number,
         priority: this._priorities[0] as number,
         index: 0
-      } as const as P;
+      } as const as Node;
       
       this._down(rootNode, 0);
     }
