@@ -1,7 +1,7 @@
 import { expect, describe, it } from "vitest";
-import { TypedPriorityQueue } from "./flat.pq.ts";
+import { TypedPriorityQueue } from "./typed.pq.ts";
 
-describe("FlatPriorityQueue", () => {
+describe("TypedPriorityQueue", () => {
   it("should enqueue elements with priorities", () => {
     const pq = new TypedPriorityQueue(Uint32Array, 10);
     pq.enqueue(1, 5);
