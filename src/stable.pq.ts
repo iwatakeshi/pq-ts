@@ -1,5 +1,5 @@
 import type { IComparer, IEqualityComparator, IStableNode } from "./types.ts";
-import { up, heapify } from "./primitive.ts";
+import { heapify } from "./primitive.ts";
 import { PriorityQueue } from "./pq.ts";
 
 export class StablePriorityQueue<
@@ -8,15 +8,15 @@ export class StablePriorityQueue<
   Comparer extends IComparer<Node> = IComparer<Node>
 > extends PriorityQueue<T, Node, Comparer> {
   protected override _elements: Node[] = [];
-  protected override compare?: Comparer;
   private _index = 0n;
+  protected override compare?: Comparer;
 
   constructor();
   constructor(elements: Node[], comparer?: Comparer);
   constructor(queue: StablePriorityQueue<T, Node, Comparer>, comparer?: Comparer);
   constructor(elements: T[], comparer?: IComparer<T>);
   constructor(elements?: T[] | StablePriorityQueue<T, Node, Comparer> | Node[], comparer?: Comparer) {
-    super([], comparer);
+    super([]);
     if (elements instanceof StablePriorityQueue) {
       this._elements = [...elements._elements];
       this._size = elements._size;
@@ -29,20 +29,32 @@ export class StablePriorityQueue<
       this._size = elements.length;
       this.compare = comparer;
     } else {
-      this.compare = comparer ?? ((a, b, _) => {
+      this.compare = comparer ?? ((a, b) => {
+        console.log(a, b);
         if (a.priority === b.priority) return a.index < b.index ? -1 : 1;
         return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
       }) as Comparer
     }
 
-    heapify(this._size, this._elements, this.compare as Comparer);
+    this._heapify(this._size);
   }
 
   override enqueue(value: T, priority: number): boolean {
     if (typeof priority !== "number") return false;
+    const currentSize = this._size;
+    if (this._elements.length === currentSize) {
+      this._grow(currentSize + 1);
+    }
+    const element = {
+      value,
+      priority,
+      nindex: currentSize,
+      sindex: this._index
+    } as Node;
 
-    this._elements.push({ value, priority, index: this._index++ } as Node);
-    up(this._size++, this._elements, this.compare as Comparer);
+    this._size = currentSize + 1;
+    this._index += 1n;
+    this._up(element, currentSize);
 
     return true;
   }
@@ -51,11 +63,11 @@ export class StablePriorityQueue<
     if (this.isEmpty()) return undefined;
     const element = this._elements[0];
     this.removeRootNode();
-    return { value: element.value, priority: element.priority, index: element.index } as Node;
+    return element as Node;
   }
 
   override get heap(): Node[] {
-    return this._elements.map(({ value, priority, index }) => ({ value, priority, index } as Node));
+    return this._elements;
   }
 
   override clone(): this {
