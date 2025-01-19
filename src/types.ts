@@ -1,14 +1,8 @@
-export type ReadonlyTuple<T> = readonly [T, T];
 
-interface IComparableState<T> {
-  nodes: ReadonlyTuple<T>;
-  indices: ReadonlyTuple<number>;
-  [key: string]: unknown;
-}
+export type ReadonlyTuplePair<T, P = T> = readonly [T, P];
+export type ReadonlyTupleTriple<T, P = T, Q = T> = readonly [T, P, Q];
+export type ReadonlyTupleQuad<T, P = T, Q = T, R = T> = readonly [T, P, Q, R];
 
-export interface IComparable<T> {
-  compareTo(other: T): number;
-}
 
 /**
  * A type representing a comparison function that determines the order of two elements.
@@ -22,11 +16,7 @@ export interface IComparable<T> {
  * - A positive number if `a` should be sorted after `b`
  * - Zero if `a` equals `b`
  */
-export type IComparer<T> = (a: T, b: T, i: ReadonlyTuple<number>) => number;
-// export interface IComparer<T> {
-//   (a: T, b: T, i: ReadonlyTuple<number>): number;
-//   (a: number, b: number, i: ReadonlyTuple<number>): number;
-// }
+export type IComparer<T> = (a: T, b: T) => number;
 
 /**
  * A type representing a function that compares two values for equality.
@@ -43,7 +33,7 @@ export type TypedArray = Uint8Array | Uint16Array | Uint32Array | Float32Array |
 /**
  * A type representing a constructor for a typed array.
  */
-export type TypedArrayConstructor<T extends TypedArray> = new (...args: unknown[]) => T;
+export type TypedArrayConstructor<T extends TypedArray = TypedArray> = new (...args: unknown[]) => T;
 
 /**
  * A type representing an indexable object with a length property.
@@ -65,6 +55,10 @@ export interface INode<T> {
  */
 export interface IPriorityNode<T = unknown> extends INode<T> {
   priority: number;
+}
+
+export interface ITypedPriorityNode extends IPriorityNode<number> {
+  index: number;
 }
 
 export interface IPriorityQueueLike<
