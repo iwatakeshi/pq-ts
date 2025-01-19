@@ -1,5 +1,5 @@
 import type { IComparer, IEqualityComparator, TypedArray, TypedArrayConstructor, IPriorityQueueLike, IPriorityNode, ITypedPriorityNode } from "./types.ts";
-import { grow, upWithPriorities as moveUpWithPriorities, downWithPriorities, heapifyWithPriorities, upWithPriorities } from "./primitive.ts";
+import { grow, upWithPriorities, downWithPriorities, heapifyWithPriorities } from "./primitive.ts";
 
 export class TypedPriorityQueue<
   Node extends ITypedPriorityNode = ITypedPriorityNode,
@@ -110,7 +110,7 @@ export class TypedPriorityQueue<
   get heap(): IPriorityNode<number>[] {
     return Array
       .from(this._elements)
-      .map((value, index) => ({ value, priority: this._priorities[index] }));
+      .map((value, index) => ({ value, priority: this._priorities[index], nindex: index }));
   }
 
   pop(): IPriorityNode<number> | undefined {
@@ -118,7 +118,7 @@ export class TypedPriorityQueue<
     const value = this._elements[0];
     const priority = this._priorities[0];
     this.removeRootNode();
-    return { value, priority };
+    return { value, priority, nindex: 0 };
   }
 
   toArray(): number[] {
@@ -147,7 +147,7 @@ export class TypedPriorityQueue<
     const removedNode = {
       value: removedElement,
       priority: removedPriority,
-      index: index
+      nindex: index
     } as const as Node;
 
     // If the element is not the last one, replace it with the last element.
@@ -155,7 +155,7 @@ export class TypedPriorityQueue<
       const lastNode = {
         value: this._elements[newSize] as number,
         priority: this._priorities[newSize],
-        index: newSize
+        nindex: newSize
       } as const as Node;
 
       // If the last element should be "bubbled up" (preserve heap property)
@@ -259,7 +259,7 @@ export class TypedPriorityQueue<
       const rootNode: Node = {
         value: this._elements[0] as number,
         priority: this._priorities[0] as number,
-        index: 0
+        nindex: 0
       } as const as Node;
       
       this._down(rootNode, 0);
