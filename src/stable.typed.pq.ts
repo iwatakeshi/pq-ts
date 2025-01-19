@@ -1,5 +1,5 @@
 import type { IComparer, IEqualityComparator, TypedArray, TypedArrayConstructor, IPriorityQueueLike, IPriorityNode, ITypedPriorityNode, IStableTypedPriorityNode } from "./types.ts";
-import { grow, upWithPriorities as moveUpWithPriorities, downWithPriorities, heapifyWithPriorities, upWithPriorities, upWithPrioritiesAndIndices, downWithPrioritiesAndIndices, heapifyWithPrioritiesAndIndices } from "./primitive.ts";
+import { growTyped, upWithPriorities as moveUpWithPriorities, downWithPriorities, heapifyWithPriorities, upWithPriorities, upWithPrioritiesAndIndices, downWithPrioritiesAndIndices, heapifyWithPrioritiesAndIndices } from "./primitive.ts";
 import { TypedPriorityQueue } from "./typed.pq.ts";
 
 export class StableTypedPriorityQueue<
@@ -263,8 +263,9 @@ export class StableTypedPriorityQueue<
   }
 
   protected grow(newSize: number): void {
-    this._elements = grow(this._elements, newSize, this._backend);
-    this._priorities = grow(this._priorities, newSize, this._backend);
+    this._elements = growTyped(this._elements, newSize, this._backend);
+    this._priorities = growTyped(this._priorities, newSize, this._backend);
+    this._indices = growTyped(this._indices, newSize, BigInt64Array);
   }
   /**
    * Iterates over the queue in priority order.
