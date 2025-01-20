@@ -10,9 +10,21 @@ export class StablePriorityQueue<
   private _index = 0n;
   override compare: Comparer;
 
+  /**
+   * Creates a new instance of a stable priority queue.
+   */
   constructor();
-  constructor(elements: Node[], comparer?: Comparer);
+  /**
+   * Creates a new instance of a priority queue.
+   * @param queue - The queue to copy elements from.
+   * @param comparer - An optional comparison function.
+   */
   constructor(queue: StablePriorityQueue<T, Node, Comparer>, comparer?: Comparer);
+  /**
+   * Creates a new instance of a stable priority queue.
+   * @param elements - The elements to add to the queue.
+   * @param comparer - An optional comparison function.
+   */
   constructor(elements: T[], comparer?: IComparer<T>);
   constructor(elements?: T[] | StablePriorityQueue<T, Node, Comparer> | Node[], comparer?: Comparer) {
     super([]);
@@ -93,18 +105,30 @@ export class StablePriorityQueue<
     return clone.pop()?.priority ?? Number.MAX_VALUE;
   }
 
-  static from<T>(
-    elements: IStableNode<T>[],
-    comparer?: IComparer<IStableNode<T>>
-  ): StablePriorityQueue<T, IStableNode<T>, IComparer<IStableNode<T>>>;
+  /**
+   * Creates a new instance of a stable priority queue from another queue.
+   * @param queue - The queue to copy elements from.
+   * @param comparer - An optional comparison function.
+   */
   static from<T>(
     queue: StablePriorityQueue<T, IStableNode<T>, IComparer<IStableNode<T>>>,
     comparer?: IComparer<IStableNode<T>>
   ): StablePriorityQueue<T, IStableNode<T>, IComparer<IStableNode<T>>>;
+  /**
+   * Creates a new instance of a stable priority queue from an array of elements.
+   * @param elements - The elements to add to the queue.
+   * @param comparer - An optional comparison function.
+   */
   static from<T>(
     elements: T[],
     comparer?: IComparer<T>
   ): StablePriorityQueue<T, IStableNode<T>, IComparer<IStableNode<T>>>;
+  /**
+   * Creates a new instance of a stabl epriority queue.
+   * @param elements - The elements to add to the queue.
+   * @param comparer - An optional comparison function.
+   * @returns - A new priority queue instance.
+   */
   static from<T>(
     elements?: T[] | StablePriorityQueue<T, IStableNode<T>, IComparer<IStableNode<T>>>,
     comparer?: IComparer<T>
