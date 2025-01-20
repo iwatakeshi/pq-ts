@@ -3,28 +3,28 @@ import { StableTypedPriorityQueue } from "./stable.typed.pq.ts";
 
 describe("StableTypedPriorityQueue", () => {
   it("should create a typed priority queue from an existing queue", () => {
-      const pq = new StableTypedPriorityQueue(Uint32Array, 10);
-      pq.enqueue(1, 5);
-      pq.enqueue(2, 3);
-      pq.enqueue(3, 4);
-  
-      const pq2 = StableTypedPriorityQueue.from(pq);
-      expect(pq2.count).toBe(3);
-      expect(pq2.values).toEqual(pq.values);
-    });
-  
-    it("should create a typed priority queue from an array", () => {
-      const pq = StableTypedPriorityQueue.from([1, 2, 3], [5, 3, 4], Uint32Array, 10);
-      expect(pq.count).toBe(3);
-      expect(pq.toArray()).toEqual([2, 3, 1]);
-    });
-  
-    it("should create an empty priority queue", () => {
-      const pq = new StableTypedPriorityQueue(Uint32Array, 10);
-      expect(pq.count).toBe(0);
-      expect(pq.isEmpty()).toBe(true);
-      expect(pq.peek()).toBeUndefined();
-    });
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    const pq2 = StableTypedPriorityQueue.from(pq);
+    expect(pq2.count).toBe(3);
+    expect(pq2.values).toEqual(pq.values);
+  });
+
+  it("should create a typed priority queue from an array", () => {
+    const pq = StableTypedPriorityQueue.from([1, 2, 3], [5, 3, 4], Uint32Array, 10);
+    expect(pq.count).toBe(3);
+    expect(pq.toArray()).toEqual([2, 3, 1]);
+  });
+
+  it("should create an empty priority queue", () => {
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
+    expect(pq.count).toBe(0);
+    expect(pq.isEmpty()).toBe(true);
+    expect(pq.peek()).toBeUndefined();
+  });
   it("should enqueue elements with priorities", () => {
     const pq = new StableTypedPriorityQueue(Uint32Array, 10);
     pq.enqueue(1, 5);
@@ -228,6 +228,22 @@ describe("StableTypedPriorityQueue", () => {
     expect(pq.priorityAt(99, true)).toBe(Number.MAX_VALUE);
   });
 
+  it("should accept a custom compare function", () => {
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10, (a, b) => {
+      if (a.priority === b.priority) return a.value - b.value;
+      return a.priority - b.priority;
+    });
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+    pq.enqueue(4, 3);
+
+    expect(pq.dequeue()).toBe(2);
+    expect(pq.dequeue()).toBe(4);
+    expect(pq.dequeue()).toBe(3);
+    expect(pq.dequeue()).toBe(1);
+  });
+
   it("should handle stress test", () => {
     const SIZE = 10000;
     const pq = new StableTypedPriorityQueue(Uint32Array, SIZE);
@@ -235,7 +251,7 @@ describe("StableTypedPriorityQueue", () => {
       pq.enqueue(i, Math.floor(Math.random() * 1000));
     }
     let { priority } = pq.pop() ?? { priority: 0 };
-  
+
     while (!pq.isEmpty()) {
       const { priority: currentPriority } = pq.pop() ?? { priority: 0 };
       expect(currentPriority).toBeGreaterThanOrEqual(priority);

@@ -2,7 +2,7 @@ import { expect, describe, it } from "vitest";
 import { PriorityQueue } from "./pq.ts";
 
 describe("PriorityQueue", () => {
-  
+
   it("should create a priority queue from an existing queue", () => {
     const pq = new PriorityQueue<number>();
     pq.enqueue(1, 5);
@@ -194,7 +194,17 @@ describe("PriorityQueue", () => {
     expect(pq.priorityAt(4, true)).toBe(Number.MAX_VALUE);
   });
 
-  // TODO: Fix this flaky test
+  it("should accept a custom compare function", () => {
+    const pq = new PriorityQueue<number>((a, b) => b.priority - a.priority);
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    expect(pq.dequeue()).toBe(1);
+    expect(pq.dequeue()).toBe(3);
+    expect(pq.dequeue()).toBe(2);
+  });
+
   it("should handle stress test", () => {
     const pq = new PriorityQueue<number>();
     for (let i = 0; i < 10; i++) {

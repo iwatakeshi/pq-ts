@@ -211,8 +211,19 @@ describe("TypedPriorityQueue", () => {
     expect(pq.priorityAt(4, true)).toBe(Number.MAX_VALUE);
   });
 
+  it("should accept a custom compare function", () => {
+    const pq = new TypedPriorityQueue(Uint32Array, 10, (a, b) => b.priority - a.priority);
+
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    expect(pq.dequeue()).toBe(1);
+    expect(pq.dequeue()).toBe(3);
+    expect(pq.dequeue()).toBe(2);
+  });
+
   it("should handle stress test", () => {
-    // TODO: Fix flaky test
     const SIZE = 4;
     const pq = new TypedPriorityQueue(Uint32Array, SIZE);
     for (let i = 0; i < SIZE; i++) {

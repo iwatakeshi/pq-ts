@@ -3,21 +3,21 @@ import { StablePriorityQueue } from "./stable.pq.ts";
 
 describe("StablePriorityQueue", () => {
   it("should create a stable priority queue from an existing queue", () => {
-      const pq = new StablePriorityQueue<number>();
-      pq.enqueue(1, 5);
-      pq.enqueue(2, 3);
-      pq.enqueue(3, 4);
-  
-      const pq2 = StablePriorityQueue.from(pq);
-      expect(pq2.count).toBe(3);
-      expect(pq2.values).toEqual(pq.values);
-    });
-  
-    it("should create a priority stable queue from an array", () => {
-      const pq = StablePriorityQueue.from([1, 2, 3]);
-      expect(pq.count).toBe(3);
-      expect(pq.values).toEqual([1, 2, 3]);
-    });
+    const pq = new StablePriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    const pq2 = StablePriorityQueue.from(pq);
+    expect(pq2.count).toBe(3);
+    expect(pq2.values).toEqual(pq.values);
+  });
+
+  it("should create a priority stable queue from an array", () => {
+    const pq = StablePriorityQueue.from([1, 2, 3]);
+    expect(pq.count).toBe(3);
+    expect(pq.values).toEqual([1, 2, 3]);
+  });
 
   it("should create an empty stable priority queue", () => {
     const pq = new StablePriorityQueue<number>();
@@ -232,13 +232,30 @@ describe("StablePriorityQueue", () => {
     expect(pq.priorityAt(99, true)).toBe(Number.MAX_VALUE);
   });
 
+  it("should accept a custom compare function", () => {
+    const pq = new StablePriorityQueue<number>((a, b) => {
+      if (a.priority === b.priority) return a.value - b.value;
+      return a.priority - b.priority;
+    });
+
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+    pq.enqueue(4, 3);
+
+    expect(pq.dequeue()).toBe(2);
+    expect(pq.dequeue()).toBe(4);
+    expect(pq.dequeue()).toBe(3);
+    expect(pq.dequeue()).toBe(1);
+  });
+
   it("should handle stress test", () => {
     const pq = new StablePriorityQueue<number>();
     for (let i = 0; i < 10000; i++) {
       pq.enqueue(i, Math.floor(Math.random() * 1000));
     }
     let { priority } = pq.pop() ?? { priority: 0 };
-  
+
     while (!pq.isEmpty()) {
       const { priority: currentPriority } = pq.pop() ?? { priority: 0 };
       expect(currentPriority).toBeGreaterThanOrEqual(priority);
