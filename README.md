@@ -259,7 +259,7 @@ const customComparer = (
   return b.priority - a.priority; // Max-heap
 };
 
-const pq = new PriorityQueue<number>([], customComparer);
+const pq = new PriorityQueue<number>(customComparer);
 pq.enqueue(1, 5);
 pq.enqueue(2, 3);
 pq.enqueue(3, 4);
