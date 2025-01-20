@@ -9,7 +9,7 @@ export class StablePriorityQueue<
 > extends PriorityQueue<T, Node, Comparer> {
   protected override _elements: Node[] = [];
   private _index = 0n;
-  protected override compare?: Comparer;
+  override compare: Comparer;
 
   constructor();
   constructor(elements: Node[], comparer?: Comparer);
@@ -27,7 +27,7 @@ export class StablePriorityQueue<
         this.enqueue(element as T, 0);
       }
       this._size = elements.length;
-      this.compare = comparer;
+      this.compare = comparer as Comparer;
     } else {
       this.compare = comparer ?? ((a, b) => {
         if (a.priority === b.priority) return a.sindex < b.sindex ? -1 : 1;
