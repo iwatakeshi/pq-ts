@@ -17,9 +17,8 @@ export class PriorityQueue<
   protected _elements: Node[] = [];
   /**
    * The compare function used internally.
-   * @protected
    */
-  protected compare?: Comparer;
+  compare: Comparer;
   /**
    * The size of elements in the queue used internally.
    * @protected
@@ -101,6 +100,7 @@ export class PriorityQueue<
     elements?: T[] | PriorityQueue<T, Node>,
     comparer?: Comparer
   ) {
+    const min = (a: Node, b: Node) => a.priority - b.priority;
     if (elements instanceof PriorityQueue) {
       this._elements = [...elements._elements];
       this._size = elements._size;
@@ -110,9 +110,9 @@ export class PriorityQueue<
         this.enqueue(element, 0);
       }
       this._size = elements.length;
-      this.compare = comparer;
+      this.compare = comparer ?? min as Comparer;
     } else {
-      this.compare = comparer ?? ((a, b) => a.priority - b.priority) as Comparer;
+      this.compare = comparer ?? min as Comparer;
     }
 
     this._heapify(this._size);
@@ -228,8 +228,7 @@ export class PriorityQueue<
     const clone = this.clone();
     const result: T[] = [];
     while (!clone.isEmpty()) {
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
-      result.push(clone.dequeue()!);
+      result.push(clone.dequeue() as T);
     }
     return result;
   }
