@@ -2,6 +2,31 @@ import { expect, describe, it } from "vitest";
 import { StablePriorityQueue } from "./stable.pq.ts";
 
 describe("StablePriorityQueue", () => {
+  it("should create a stable priority queue from an existing queue", () => {
+      const pq = new StablePriorityQueue<number>();
+      pq.enqueue(1, 5);
+      pq.enqueue(2, 3);
+      pq.enqueue(3, 4);
+  
+      const pq2 = StablePriorityQueue.from(pq);
+      expect(pq2.count).toBe(3);
+      expect(pq2.values).toEqual(pq.values);
+    });
+  
+    it("should create a priority stable queue from an array", () => {
+      const pq = StablePriorityQueue.from([1, 2, 3]);
+      expect(pq.count).toBe(3);
+      expect(pq.values).toEqual([1, 2, 3]);
+    });
+
+  it("should create an empty stable priority queue", () => {
+    const pq = new StablePriorityQueue<number>();
+    expect(pq.count).toBe(0);
+    expect(pq.isEmpty()).toBe(true);
+    expect(pq.peek()).toBeUndefined();
+  });
+
+
   it("should enqueue elements with priorities", () => {
     const pq = new StablePriorityQueue<number>();
     pq.enqueue(1, 5);
