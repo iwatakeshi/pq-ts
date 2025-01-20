@@ -7,9 +7,11 @@ describe("StablePriorityQueue", () => {
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
+    pq.enqueue(4, 3);
 
-    expect(pq.count).toBe(3);
+    expect(pq.count).toBe(4);
     expect(pq.peek()).toBe(2);
+    expect(pq.toArray()).toEqual([2, 4, 3, 1]);
   });
 
   it("should dequeue elements in priority order", () => {
@@ -179,7 +181,7 @@ describe("StablePriorityQueue", () => {
 
     const priorities = pq.heap.map(e => e.priority);
 
-    expect(pq.priorityAt(0, false)).toBe(Math.min(...priorities));
+    expect(pq.priorityAt(0, false)).toBe(3);
 
     expect(priorities).toContain(3);
     expect(priorities).toContain(4);
