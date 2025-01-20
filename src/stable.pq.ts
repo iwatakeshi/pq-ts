@@ -1,5 +1,4 @@
 import type { IComparer, IEqualityComparator, IStableNode } from "./types.ts";
-import { heapify } from "./primitive.ts";
 import { PriorityQueue } from "./pq.ts";
 
 export class StablePriorityQueue<
