@@ -58,18 +58,21 @@ export interface IPriorityNode<T = unknown> extends INode<T> {
   */
   nindex: number;
 }
-
+/**
+ * Represents a node in a stable heap data structure.
+ * Extends the base INode interface with an additional index property for stability.
+ * 
+ * @template T The type of value stored in the node
+ * @interface IStableNode
+ * @extends {IPriorityNode<T>}
+ * @property {bigint} sindex An index used to maintain insertion order stability
+ */
 export interface IStableNode<T> extends IPriorityNode<T> {
   /**
   * An index used to maintain insertion order stability.
   * @remarks `sindex` is short for "stability index".
   */
   sindex: bigint;
-}
-
-export interface ITypedPriorityNode extends IPriorityNode<number> { }
-
-export interface IStableTypedPriorityNode extends IStableNode<number> {
 }
 
 export interface IPriorityQueueLike<
@@ -148,7 +151,7 @@ export interface IPriorityQueueLike<
   /**
    * The comparison function used to determine the order of elements in the queue.
    */
-  comparer?: Comparer;
+  compare: Comparer;
 }
 
 /**
@@ -163,16 +166,3 @@ export interface IPriorityQueue<
   Node extends IPriorityNode<T> = IPriorityNode<T>,
   Comparer extends IComparer<Node> = IComparer<Node>,
 > extends IPriorityQueueLike<T, Node, Comparer> { }
-
-/**
- * Represents a node in a stable heap data structure.
- * Extends the base INode interface with an additional index property for stability.
- * 
- * @template T The type of value stored in the node
- * @interface IStableNode
- * @extends {IPriorityNode<T>}
- * @property {bigint} index An index used to maintain insertion order stability
- */
-export interface IStableNode<T> extends IPriorityNode<T> {
-  index: bigint;
-}
