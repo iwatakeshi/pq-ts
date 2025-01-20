@@ -1,16 +1,17 @@
-import type { IComparer, IEqualityComparator, TypedArray, TypedArrayConstructor, IPriorityQueueLike, IPriorityNode, ITypedPriorityNode } from "./types.ts";
+import type { IComparer, IEqualityComparator, TypedArray, TypedArrayConstructor, IPriorityQueueLike, IPriorityNode } from "./types.ts";
 import { growTyped, upWithPriorities, downWithPriorities, heapifyWithPriorities } from "./primitive.ts";
 
+
 export class TypedPriorityQueue<
-  Node extends ITypedPriorityNode = ITypedPriorityNode,
+  Node extends IPriorityNode<number> = IPriorityNode<number>,
   Comparer extends IComparer<Node> = IComparer<Node>,
-> implements IPriorityQueueLike<number> {
+> implements IPriorityQueueLike<number, Node, Comparer> {
   protected _elements: TypedArray;
   protected _priorities: TypedArray;
   protected _size = 0;
-  protected compare?: Comparer;
   protected _backend: TypedArrayConstructor;
   protected readonly _defaultSize: number;
+  compare: Comparer;
 
   protected readonly _up = (node: Node, index: number) => {
     return upWithPriorities(this._elements, this._priorities)(
@@ -38,87 +39,32 @@ export class TypedPriorityQueue<
    * @param size - The initial size of the queue.
    * @param comparer - An optional comparison function.
    */
-  constructor(backend: TypedArrayConstructor, size: number, comparer?: Comparer);
-  /**
-   * Creates a new instance of a flat priority queue.
-   * @param elements - The elements to add to the queue.
-   * @param priorities - The priorities of the elements.
-   * @param backend - The typed array constructor for the elements.
-   * @param comparer - An optional comparison function.
-   */
-  constructor(elements: number[], priorities: number[], backend: TypedArrayConstructor, comparer?: Comparer);
-  /**
-   * Creates a new instance of a flat priority queue.
-   * @param queue - The queue to copy elements from.
-   * @param comparer - An optional comparison function.
-   */
-  constructor(queue: TypedPriorityQueue<Node, Comparer>, comparer?: Comparer);
-  constructor(
-    backendOrElements: TypedArrayConstructor | number[] | TypedPriorityQueue<Node, Comparer>,
-    sizeOrPriorities?: number | number[],
-    comparerOrBackend?: Comparer | TypedArrayConstructor,
-    comparer?: Comparer
-  ) {
-    const min: IComparer<Node> = (a, b) => {
-      return a.priority - b.priority;
-    }
-    if (Array.isArray(backendOrElements) && Array.isArray(sizeOrPriorities)) {
-      const elements = backendOrElements;
-      const priorities = sizeOrPriorities;
-      const backend = comparerOrBackend as TypedArrayConstructor;
-      this._backend = backend;
-      this._defaultSize = elements.length;
-      this._elements = new backend(elements.length);
-      this._priorities = new backend(priorities.length);
-      this.compare = comparer;
-      if (elements.length !== priorities.length) {
-        throw new Error("[FlatPriorityQueue] Elements and priorities are out of sync.");
-      }
-      for (let i = 0; i < elements.length; i++) {
-        this._elements[i] = elements[i];
-        this._priorities[i] = priorities[i];
-      }
-      this._size = elements.length;
-      this._heapify(elements.length);
-    } else if (typeof backendOrElements === "function" && typeof sizeOrPriorities === "number") {
-      const backend = backendOrElements;
-      const size = sizeOrPriorities;
-      this._backend = backend;
-      this._defaultSize = size;
-      this._elements = new backend(size);
-      this._priorities = new backend(size);
-      this.compare = comparerOrBackend as Comparer;
-    } else if (backendOrElements instanceof TypedPriorityQueue) {
-      const queue = backendOrElements;
-      this._backend = queue._backend;
-      this._defaultSize = queue._defaultSize;
-      this._elements = new this._backend(queue._elements.length);
-      this._priorities = new this._backend(queue._priorities.length);
-      this.compare = comparer ?? queue.compare;
-      this._elements.set(queue._elements);
-      this._priorities.set(queue._priorities);
-      this._size = queue._size;
-    } else {
-      throw new Error("[FlatPriorityQueue] Invalid constructor arguments.");
-    }
-
-    if (!this.compare) {
-      this.compare = min as Comparer;
-    }
+  constructor(backend: TypedArrayConstructor, size: number, comparer?: Comparer) {
+    this._backend = backend;
+    this._defaultSize = size;
+    this._elements = new backend(size);
+    this._priorities = new backend(size);
+    this.compare = comparer ?? ((a, b) => a.priority - b.priority) as Comparer;
   }
 
-  get heap(): IPriorityNode<number>[] {
+  get heap(): Node[] {
     return Array
       .from(this._elements)
-      .map((value, index) => ({ value, priority: this._priorities[index], nindex: index }));
+      .map((value, index) => ({
+        value,
+        priority:
+          this._priorities[index],
+        nindex: index,
+
+      }) as Node);
   }
 
-  pop(): IPriorityNode<number> | undefined {
+  pop(): Node | undefined {
     if (this.isEmpty()) return undefined;
     const value = this._elements[0];
     const priority = this._priorities[0];
     this.removeRootNode();
-    return { value, priority, nindex: 0 };
+    return { value, priority, nindex: 0 } as Node;
   }
 
   toArray(): number[] {
@@ -131,7 +77,10 @@ export class TypedPriorityQueue<
   }
 
   clone(): this {
-    const clone = new TypedPriorityQueue<Node, Comparer>(this);
+    const clone = new TypedPriorityQueue<Node, Comparer>(this._backend, this._defaultSize, this.compare);
+    clone._elements.set(this._elements);
+    clone._priorities.set(this._priorities);
+    clone._size = this._size;
     return clone as this;
   }
 
@@ -168,7 +117,7 @@ export class TypedPriorityQueue<
     }
 
     this._elements[newSize] = 0;
-
+    this._priorities[newSize] = 0;
 
     return true;
   }
@@ -274,11 +223,121 @@ export class TypedPriorityQueue<
     this._elements = growTyped(this._elements, minCapacity, this._backend);
     this._priorities = growTyped(this._priorities, minCapacity, this._backend);
   }
+
   /**
    * Iterates over the queue in priority order.
    * @returns - An iterator for the queue.
    */
   [Symbol.iterator](): Iterator<number> {
     return this.toArray()[Symbol.iterator]();
+  }
+
+   /**
+   * Create a queue from elements and priorities.
+   * 
+   * @param elements - An array of elements to be added to the queue.
+   * @param priorities - An array of priorities corresponding to the elements.
+   * @param backend - The typed array constructor to be used for the queue.
+   * @param size - The initial size of the queue.
+   * @param comparer - (Optional) A custom comparer for the queue elements.
+   * @returns A new instance of the queue.
+   */
+  static from<
+    Node extends IPriorityNode<number>,
+    Comparer extends IComparer<Node>,
+    Self extends typeof TypedPriorityQueue<Node, Comparer>
+  >(
+    this: Self,
+    elements: number[],
+    priorities: number[],
+    backend: TypedArrayConstructor,
+    size: number,
+    comparer?: Comparer
+  ): InstanceType<Self>;
+  
+  /**
+   * Create a queue from an existing queue.
+   * 
+   * @param queue - An existing queue to copy.
+   * @param size - The initial size of the new queue.
+   * @param comparer - (Optional) A custom comparer for the queue elements.
+   * @returns A new instance of the queue.
+   */
+  static from<
+    Node extends IPriorityNode<number>,
+    Comparer extends IComparer<Node>,
+    Self extends typeof TypedPriorityQueue<Node, Comparer>
+  >(
+    this: Self,
+    queue: Self,
+    size: number,
+    comparer?: Comparer
+  ): InstanceType<Self>;
+  
+  /**
+   * Implementation of the `from` method to create a queue from elements and priorities or from an existing queue.
+   * 
+   * @param elementsOrQueue - An array of elements or an existing queue.
+   * @param prioritiesOrSize - An array of priorities or the initial size of the queue.
+   * @param backendOrComparer - The typed array constructor or a custom comparer.
+   * @param size - (Optional) The initial size of the queue if not provided in `prioritiesOrSize`.
+   * @param comparer - (Optional) A custom comparer for the queue elements.
+   * @returns A new instance of the queue.
+   */
+  static from<
+    Node extends IPriorityNode<number>,
+    Comparer extends IComparer<Node>,
+    Self extends typeof TypedPriorityQueue<Node, Comparer>
+  >(
+    this: Self,
+    elementsOrQueue: number[] | Self,
+    prioritiesOrSize?: number[] | number,
+    backendOrComparer?: TypedArrayConstructor | Comparer,
+    size?: number,
+    comparer?: Comparer
+  ): InstanceType<Self> {
+    const fromElements = (
+      elements: number[],
+      priorities: number[],
+      backend: TypedArrayConstructor,
+      size: number,
+      comparer?: Comparer
+    ) => {
+      // biome-ignore lint/complexity/noThisInStatic: <explanation>
+      const queue = new this(backend, size, comparer);
+      for (let i = 0; i < elements.length; i++) {
+        queue.enqueue(elements[i], priorities[i]);
+      }
+      return queue;
+    };
+
+    const fromQueue = (
+      queue: TypedPriorityQueue<Node>,
+      size: number,
+      comparer?: Comparer
+    ) => {
+      // biome-ignore lint/complexity/noThisInStatic: <explanation>
+      const newQueue = new this(queue._backend, size, comparer);
+      newQueue._elements.set(queue._elements);
+      newQueue._priorities.set(queue._priorities);
+      newQueue._size = queue._size;
+      return newQueue;
+    };
+
+    if (Array.isArray(elementsOrQueue)) {
+      return fromElements(
+        elementsOrQueue as number[],
+        prioritiesOrSize as number[],
+        backendOrComparer as TypedArrayConstructor,
+        size as number,
+        comparer
+      ) as InstanceType<Self>;
+    }
+
+    return fromQueue(
+      elementsOrQueue as InstanceType<Self>,
+      prioritiesOrSize as number,
+      backendOrComparer as Comparer
+    ) as InstanceType<Self>;
   }
 }
