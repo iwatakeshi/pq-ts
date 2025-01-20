@@ -17,7 +17,6 @@ import type {
   IComparer,
   Indexable,
   IPriorityNode,
-  IStableNode,
   TypedArray, TypedArrayConstructor
 } from "./types.ts";
 
