@@ -95,7 +95,7 @@ for (let i = 0; i < ITEMS_COUNT; i++) {
 arrPreFilled.sort((a, b) => a.priority - b.priority);
 bench(`Native Array dequeue ${ITEMS_COUNT} items`, () => {
   for (let i = 0; i < ITEMS_COUNT; i++) {
-    arrPreFilled.shift();
+    // Note: Native Array shift() has O(n) complexity, unlike other dequeue operations which are O(log n)
   }
 });
 
