@@ -116,7 +116,8 @@ export const up = <T, P extends IPriorityNode<T> = IPriorityNode<T>>(
  */
 export const upWithPriorities = (
   nodes: Indexable<number>,
-  priorities: Indexable<number>
+  priorities: Indexable<number>,
+  indices?: Indexable<bigint>
 ) => {
   return <P extends IPriorityNode<number> = IPriorityNode<number>>(
     node: P,
@@ -127,11 +128,14 @@ export const upWithPriorities = (
     while (nodeIndex > 0) {
       const parentIndex = parent(nodeIndex);
       const parentNode = {
-        ...node,
         value: nodes[parentIndex],
         priority: priorities[parentIndex],
         nindex: parentIndex
       } as P;
+      if (indices) {
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        (parentNode as any).sindex = indices[parentIndex];
+      }
 
       if (comparer(node, parentNode) >= 0) break;
 
@@ -142,54 +146,9 @@ export const upWithPriorities = (
 
     nodes[nodeIndex] = node.value;
     priorities[nodeIndex] = node.priority;
-  }
-}
-
-/**
- * Moves an element up in a 4-ary heap with separate priority and index arrays to maintain heap properties.
- * 
- * @param nodes - The array representing the heap
- * @param priorities - The array representing the priorities
- * @param indices - The array representing the stable indices
- * @param node - The node to move up
- * @param index - The starting index of the element to move up
- * @param comparer - A function that compares two elements, returning:
- *                    - negative if first arg should be higher in heap
- *                    - positive if first arg should be lower in heap
- *                    - zero if elements are equal
- */
-export const upWithPrioritiesAndIndices = (
-  nodes: Indexable<number>,
-  priorities: Indexable<number>,
-  indices: Indexable<bigint>
-) => {
-  return <P extends IStableNode<number> = IStableNode<number>>(
-    node: P,
-    index: number,
-    comparer: IComparer<P>
-  ): void => {
-    let nodeIndex = index;
-    while (nodeIndex > 0) {
-      const parentIndex = parent(nodeIndex);
-      const parentNode = {
-        ...node,
-        value: nodes[parentIndex],
-        priority: priorities[parentIndex],
-        nindex: parentIndex,
-        sindex: indices[parentIndex]
-      } as P;
-
-      if (comparer(node, parentNode) >= 0) break;
-
-      nodes[nodeIndex] = parentNode.value;
-      priorities[nodeIndex] = parentNode.priority;
-      indices[nodeIndex] = parentNode.sindex;
-      nodeIndex = parentNode.nindex;
+    if (indices && 'sindex' in node) {
+      indices[nodeIndex] = node.sindex as bigint;
     }
-
-    nodes[nodeIndex] = node.value;
-    priorities[nodeIndex] = node.priority;
-    indices[nodeIndex] = node.sindex;
   }
 }
 
