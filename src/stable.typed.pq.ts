@@ -1,5 +1,6 @@
 import type { IComparer, IEqualityComparator, IStableNode, TypedArrayConstructor } from "./types.ts";
 import { growTyped, upWithPrioritiesAndIndices, heapifyWithPrioritiesAndIndices, downWithPriorities } from "./primitive.ts";
+import { growTyped, upWithPriorities, downWithPrioritiesAndIndices, heapifyWithPrioritiesAndIndices } from "./primitive.ts";
 import { TypedPriorityQueue } from "./typed.pq.ts";
 
 export class StableTypedPriorityQueue<
@@ -10,7 +11,7 @@ export class StableTypedPriorityQueue<
   protected _sindex = 0n;
 
   protected readonly _up = (node: Node, index: number) => {
-    return upWithPrioritiesAndIndices(this._elements, this._priorities, this._indices)(
+    return upWithPriorities(this._elements, this._priorities, this._indices)(
       node, index, this.compare as Comparer
     );
   }
