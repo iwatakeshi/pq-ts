@@ -40,6 +40,9 @@ export type Indexable<T> = {
   [index: number]: T;
 };
 
+/**
+ * Represents a basic node in a data structure.
+ */
 export interface INode<T> {
   value: T;
 }
