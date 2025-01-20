@@ -1,4 +1,4 @@
-import { parent, child, up, upWithPriorities, upWithPrioritiesAndIndices, down, downWithPriorities, downWithPrioritiesAndIndices, heapify, heapifyWithPriorities, heapifyWithPrioritiesAndIndices, growTyped } from './primitive';
+import { parent, child, up, upWithPriorities, upWithPrioritiesAndIndices, down, downWithPriorities, heapify, heapifyWithPriorities, heapifyWithPrioritiesAndIndices, growTyped } from './primitive';
 import { describe, it, expect } from 'vitest';
 
 describe('Primitive Functions', () => {
@@ -57,7 +57,7 @@ describe('Primitive Functions', () => {
     const heap = [1, 4, 3, 2];
     const priorities = [1, 4, 3, 2];
     const indices = [0n, 1n, 2n, 3n];
-    downWithPrioritiesAndIndices(heap, priorities, indices, heap.length)({
+    downWithPriorities(heap, priorities, heap.length, indices)({
       value: 1,
       priority: 1,
       nindex: 0,

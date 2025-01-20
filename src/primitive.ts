@@ -274,8 +274,15 @@ export const down = <T, P extends IPriorityNode<T> = IPriorityNode<T>>(
 export const downWithPriorities = (
   nodes: Indexable<number>,
   priorities: Indexable<number>,
-  size: number
+  size: number,
+  indices?: Indexable<bigint>
 ) => {
+  const swap = (elements: Indexable<unknown> | undefined, i: number, j: number) => {
+    if (!elements) return;
+    const temp = elements[i];
+    elements[i] = elements[j];
+    elements[j] = temp;
+  }
   return <P extends IPriorityNode<number> = IPriorityNode<number>>(
     node: P,
     index: number,
@@ -284,6 +291,7 @@ export const downWithPriorities = (
     let nodeIndex = index;
     const nodeValue = node.value;
     const nodePriority = node.priority;
+    const nodeSIndex = indices ? indices[index] : undefined;
 
     while (true) {
       const childIndex = child(nodeIndex);
@@ -293,86 +301,29 @@ export const downWithPriorities = (
       let minChildIndex = childIndex;
       let minChildValue = nodes[childIndex];
       let minChildPriority = priorities[childIndex];
+      let minChildSIndex = indices ? indices[childIndex] : undefined;
 
       const childIndexUpperBound = Math.min(childIndex + ARITY, size);
       for (let i = childIndex + 1; i < childIndexUpperBound; i++) {
-        if (comparer(
-          { ...node, value: nodes[i], priority: priorities[i], nindex: i } as P,
-          { ...node, value: minChildValue, priority: minChildPriority, nindex: minChildIndex } as P) < 0) {
-          minChildIndex = i;
-          minChildValue = nodes[i];
-          minChildPriority = priorities[i];
+        const currentChildValue = nodes[i];
+        const currentChildPriority = priorities[i];
+        const currentChildSIndex = indices ? indices[i] : undefined;
+
+        const currentChild = { value: currentChildValue, priority: currentChildPriority, nindex: i } as P;
+        const minChild = { value: minChildValue, priority: minChildPriority, nindex: minChildIndex } as P;
+
+        if (indices) {
+          // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+          (currentChild as any).sindex = currentChildSIndex;
+          // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+          (minChild as any).sindex = minChildSIndex;
         }
-      }
 
-      // If the current node is in the correct position, stop.
-      if (comparer(
-        { ...node, value: nodeValue, priority: nodePriority, nindex: nodeIndex } as P,
-        { ...node, value: minChildValue, priority: minChildPriority, nindex: minChildIndex } as P) <= 0) {
-        break;
-      }
-
-      // Swap values
-      nodes[nodeIndex] = minChildValue;
-      priorities[nodeIndex] = minChildPriority;
-      nodeIndex = minChildIndex;
-    }
-
-    nodes[nodeIndex] = nodeValue;
-    priorities[nodeIndex] = nodePriority;
-  }
-}
-
-/**
- * Moves a node down in a 4-ary heap with separate priority and index arrays to maintain the heap property.
- * 
- * @param nodes - The array representing the heap
- * @param priorities - The array representing the priorities
- * @param indices - The array representing the stable indices
- * @param size - The size of the heap
- * @param node - The node to move down
- * @param index - The starting index of the node to move down
- * @param comparer - A function that compares two elements and returns a number:
- *                    negative if first < second,
- *                    zero if first = second,
- *                    positive if first > second
- */
-export const downWithPrioritiesAndIndices = (
-  nodes: Indexable<number>,
-  priorities: Indexable<number>,
-  indices: Indexable<bigint>,
-  size: number
-) => {
-  return <P extends IStableNode<number> = IStableNode<number>>(
-    node: P,
-    index: number,
-    comparer: IComparer<P>
-  ) => {
-
-    let nodeIndex = index;
-    const nodeValue = node.value;
-    const nodePriority = node.priority;
-    const nodeSIndex = node.sindex;
-
-    while (true) {
-      const childIndex = child(nodeIndex);
-      if (childIndex >= size) break;
-
-      // Find the minimum priority child
-      let minChildIndex = childIndex;
-      let minChildValue = nodes[childIndex];
-      let minChildPriority = priorities[childIndex];
-      let minChildSIndex = indices[childIndex];
-
-      const childIndexUpperBound = Math.min(childIndex + ARITY, size);
-      for (let i = childIndex + 1; i < childIndexUpperBound; i++) {
-        if (comparer(
-          { ...node, value: nodes[i], priority: priorities[i], nindex: i, sindex: indices[i] } as P,
-          { ...node, value: minChildValue, priority: minChildPriority, nindex: minChildIndex, sindex: minChildSIndex } as P) < 0) {
+        if (comparer(currentChild, minChild) < 0) {
           minChildIndex = i;
-          minChildValue = nodes[i];
-          minChildPriority = priorities[i];
-          minChildSIndex = indices[i];
+          minChildValue = currentChildValue;
+          minChildPriority = currentChildPriority;
+          minChildSIndex = currentChildSIndex;
         }
       }
 
@@ -386,14 +337,18 @@ export const downWithPrioritiesAndIndices = (
       // Swap values
       nodes[nodeIndex] = minChildValue;
       priorities[nodeIndex] = minChildPriority;
-      indices[nodeIndex] = minChildSIndex;
+      if (indices && minChildSIndex !== undefined) {
+        indices[nodeIndex] = minChildSIndex;
+      }
       nodeIndex = minChildIndex;
     }
 
     nodes[nodeIndex] = nodeValue;
     priorities[nodeIndex] = nodePriority;
-    indices[nodeIndex] = nodeSIndex;
-  };
+    if (indices && nodeSIndex !== undefined) {
+      indices[nodeIndex] = nodeSIndex;
+    }
+  }
 }
 
 /**
@@ -484,7 +439,7 @@ export const heapifyWithPrioritiesAndIndices = (
     const lastParentWithChildren = parent(size - 1);
     for (let i = lastParentWithChildren; i >= 0; --i) {
       const node: P = { value: nodes[i], priority: priorities[i], nindex: i, sindex: indices[i] } as const as P;
-      downWithPrioritiesAndIndices(nodes, priorities, indices, size)(node, i, comparer);
+      downWithPriorities(nodes, priorities, size, indices)(node, i, comparer);
     }
   }
 };
