@@ -71,20 +71,11 @@ export class PriorityQueue<
   constructor();
   /**
    * Creates a new instance of a priority queue.
-   * @param elements - The elements to add to the queue.
-   * @param comparer - An optional comparison function.
-   */
-  constructor(
-    elements: Node[],
-    comparer?: Comparer
-  );
-  /**
-   * Creates a new instance of a priority queue.
    * @param queue - The queue to copy elements from.
    * @param comparer - An optional comparison function.
    */
   constructor(
-    queue: PriorityQueue<T, Node>,
+    queue: PriorityQueue<T, Node, Comparer>,
     comparer?: Comparer
   );
   /**
@@ -97,7 +88,7 @@ export class PriorityQueue<
     comparer?: IComparer<T>
   );
   constructor(
-    elements?: T[] | PriorityQueue<T, Node>,
+    elements?: T[] | PriorityQueue<T, Node, Comparer>,
     comparer?: Comparer
   ) {
     const min = (a: Node, b: Node) => a.priority - b.priority;
@@ -334,43 +325,52 @@ export class PriorityQueue<
   }
 
   /**
-   * Creates a new instance of a priority queue.
-   * @param elements - The elements to add to the queue.
-   * @param comparer - An optional comparison function.
-   */
-  static from<T, Node extends IPriorityNode<T> = IPriorityNode<T>>(
-    elements: IPriorityNode<T>[],
-    comparer?: IComparer<IPriorityNode<T>>
-  ): PriorityQueue<T, Node>;
-  /**
-   * Creates a new instance of a priority queue.
+   * Creates a new instance of a priority queue from another queue.
    * @param queue - The queue to copy elements from.
    * @param comparer - An optional comparison function.
    */
-  static from<T, Node extends IPriorityNode<T> = IPriorityNode<T>>(
-    queue: PriorityQueue<T, Node>,
-    comparer?: IComparer<IPriorityNode<T>>
-  ): PriorityQueue<T, Node>;
+  static from<
+    T,
+    Node extends IPriorityNode<T>,
+    Comparer extends IComparer<Node>,
+    Self extends typeof PriorityQueue<T, Node, Comparer>
+  >(
+    this: Self,
+    queue: PriorityQueue<T, Node, Comparer>,
+    comparer?: Comparer
+  ): InstanceType<typeof PriorityQueue<T, Node, Comparer>>;
   /**
-   * Creates a new instance of a priority queue.
+   * Creates a new instance of a priority queue from an array of elements.
    * @param elements - The elements to add to the queue.
    * @param comparer - An optional comparison function.
    */
-  static from<T, Node extends IPriorityNode<T> = IPriorityNode<T>>(
+  static from<
+    T,
+    Node extends IPriorityNode<T>,
+    Comparer extends IComparer<Node>,
+    Self extends typeof PriorityQueue<T, Node, Comparer>
+  >(
+    this: Self,
     elements: T[],
-    comparer?: IComparer<T>
-  ): PriorityQueue<T, Node>;
+    comparer?: Comparer
+  ): InstanceType<typeof PriorityQueue<T, Node, Comparer>>;
   /**
    * Creates a new instance of a priority queue.
    * @param elements - The elements to add to the queue.
    * @param comparer - An optional comparison function.
    * @returns - A new priority queue instance.
    */
-  static from<T, Node extends IPriorityNode<T> = IPriorityNode<T>>(
-    elements?: T[] | PriorityQueue<T, Node>,
-    comparer?: IComparer<T>
-  ): PriorityQueue<T, Node> {
+  static from<
+    T,
+    Node extends IPriorityNode<T>,
+    Comparer extends IComparer<Node>,
+    Self extends typeof PriorityQueue<T, Node, Comparer>
+  >(
+    elements?: T[] | Self,
+    comparer?: Comparer
+  ): InstanceType<typeof PriorityQueue<T, Node, Comparer>> {
+    // biome-ignore lint/complexity/noThisInStatic: <explanation>
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    return new PriorityQueue(elements as any, comparer as any);
+    return new this(elements as any, comparer);
   }
 }
