@@ -15,6 +15,11 @@ export class StablePriorityQueue<
    */
   constructor();
   /**
+   * Creates a new instance of a stable priority queue.
+   * @param comparer - An optional comparison function.
+   */
+  constructor(comparer: Comparer);
+  /**
    * Creates a new instance of a priority queue.
    * @param queue - The queue to copy elements from.
    * @param comparer - An optional comparison function.
@@ -43,8 +48,10 @@ export class StablePriorityQueue<
         this.enqueue(element as T, 0);
       }
       this._size = elements.length;
+    } else if (typeof elements === "function") {
+      this.compare = elements ?? min as Comparer;
     } else {
-      this.compare = comparer ?? min as Comparer
+      this.compare = comparer ?? min as Comparer;
     }
 
     this._heapify(this._size);
