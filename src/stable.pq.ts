@@ -30,7 +30,7 @@ export class StablePriorityQueue<
       this.compare = comparer;
     } else {
       this.compare = comparer ?? ((a, b) => {
-        if (a.priority === b.priority) return a.index < b.index ? -1 : 1;
+        if (a.priority === b.priority) return a.sindex < b.sindex ? -1 : 1;
         return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
       }) as Comparer
     }
@@ -74,7 +74,7 @@ export class StablePriorityQueue<
   }
 
   override indexOf(value: T, dequeue = false, comparer: IEqualityComparator<T> = (a, b) => a === b): number {
-    if (!dequeue) return this._elements.findIndex((node) => comparer(node.value, value));
+    if (!dequeue) return this._elements.findIndex((node: Node | undefined) => node && comparer(node.value, value));
     const clone = this.clone();
     let index = 0;
     while (!clone.isEmpty()) {
