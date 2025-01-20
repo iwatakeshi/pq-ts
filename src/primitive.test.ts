@@ -1,4 +1,4 @@
-import { parent, child, swap, up, upWithPriorities, upWithPrioritiesAndIndices, down, downWithPriorities, downWithPrioritiesAndIndices, heapify, heapifyWithPriorities, heapifyWithPrioritiesAndIndices, growTyped } from './primitive';
+import { parent, child, up, upWithPriorities, upWithPrioritiesAndIndices, down, downWithPriorities, downWithPrioritiesAndIndices, heapify, heapifyWithPriorities, heapifyWithPrioritiesAndIndices, growTyped } from './primitive';
 import { describe, it, expect } from 'vitest';
 
 describe('Primitive Functions', () => {
@@ -12,12 +12,6 @@ describe('Primitive Functions', () => {
     expect(child(0)).toBe(1);
     expect(child(0, 1)).toBe(2);
     expect(child(1)).toBe(5);
-  });
-
-  it('should swap elements in an array', () => {
-    const arr = [1, 2, 3];
-    swap(arr, 0, 2);
-    expect(arr).toEqual([3, 2, 1]);
   });
 
   it('should move element up in a 4-ary heap', () => {
