@@ -93,18 +93,21 @@ export class PriorityQueue<
   ) {
     const min = (a: Node, b: Node) => a.priority - b.priority;
     if (elements instanceof PriorityQueue) {
-      this._elements = [...elements._elements];
-      this._size = elements._size;
-      this.compare = elements.compare as Comparer;
+      const self = elements as PriorityQueue<T, Node, Comparer>;
+      this._elements = [...self._elements];
+      this._size = self._size;
+      this.compare = self.compare ?? min as Comparer;
     } else if (Array.isArray(elements)) {
+      this.compare = comparer ?? min as Comparer;
       for (const element of elements) {
         this.enqueue(element, 0);
       }
       this._size = elements.length;
-      this.compare = comparer ?? min as Comparer;
     } else {
       this.compare = comparer ?? min as Comparer;
     }
+
+    console.assert(this.compare, 'No comparison function provided.');
 
     this._heapify(this._size);
   }
@@ -338,7 +341,7 @@ export class PriorityQueue<
     this: Self,
     queue: PriorityQueue<T, Node, Comparer>,
     comparer?: Comparer
-  ): InstanceType<typeof PriorityQueue<T, Node, Comparer>>;
+  ): InstanceType<Self>;
   /**
    * Creates a new instance of a priority queue from an array of elements.
    * @param elements - The elements to add to the queue.
@@ -353,7 +356,7 @@ export class PriorityQueue<
     this: Self,
     elements: T[],
     comparer?: Comparer
-  ): InstanceType<typeof PriorityQueue<T, Node, Comparer>>;
+  ): InstanceType<Self>;
   /**
    * Creates a new instance of a priority queue.
    * @param elements - The elements to add to the queue.
@@ -366,11 +369,11 @@ export class PriorityQueue<
     Comparer extends IComparer<Node>,
     Self extends typeof PriorityQueue<T, Node, Comparer>
   >(
-    elements?: T[] | Self,
+    elements?: T[] | PriorityQueue<T, Node, Comparer>,
     comparer?: Comparer
-  ): InstanceType<typeof PriorityQueue<T, Node, Comparer>> {
+  ): InstanceType<Self> {
     // biome-ignore lint/complexity/noThisInStatic: <explanation>
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    return new this(elements as any, comparer);
+    return new this(elements as any, comparer) as InstanceType<Self>;
   }
 }
