@@ -56,20 +56,6 @@ export const parent = (index: number): number => (index - 1) >> LOG2_ARITY;
 export const child = (index: number, i = 0): number => (index << LOG2_ARITY) + i + 1;
 
 /**
- * Swaps two elements in an array.
- * 
- * @template T - The type of elements in the array
- * @param elements - The array in which elements will be swapped
- * @param i - The index of the first element to swap
- * @param j - The index of the second element to swap
- */
-export const swap = <T>(elements: T[], i: number, j: number): void => {
-  const temp = elements[i];
-  elements[i] = elements[j];
-  elements[j] = temp;
-}
-
-/**
  * Moves an element up in a 4-ary heap to maintain heap properties.
  * 
  * @template T - The type of elements in the heap
