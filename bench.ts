@@ -1,4 +1,4 @@
-import { PriorityQueue, StablePriorityQueue, TypedPriorityQueue, StableTypedPriorityQueue, type IPriorityNode } from "./main";
+import { PriorityQueue, StablePriorityQueue, TypedPriorityQueue, StableTypedPriorityQueue, type IPriorityNode } from "./main.ts";
 import { run, bench, boxplot, summary } from "mitata";
 
 const ITEMS_COUNT = 1000000;
