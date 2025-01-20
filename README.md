@@ -1,10 +1,15 @@
 # pq-ts
 
+[![CI](https://github.com/iwatakeshi/pq-ts/actions/workflows/test.yml/badge.svg)](https://github.com/iwatakeshi/pq-ts/actions/workflows/test.yml)
+[![npm version](https://badge.fury.io/js/pq-ts.svg)](https://badge.fury.io/js/pq-ts)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![codecov](https://codecov.io/gh/iwatakeshi/pq-ts/graph/badge.svg?token=TPtnuh2TqY)](https://codecov.io/gh/iwatakeshi/pq-ts)
+
 `pq-ts` is a TypeScript library that provides efficient and flexible priority
 queue implementations. It includes both standard and stable priority queues,
 ensuring that elements with the same priority maintain their relative order of
-insertion. Additionally, it supports typed priority queues for better type
-safety.
+insertion. Additionally, it supports typed priority queues which use typed
+arrays.
 
 ## Features
 
@@ -12,8 +17,8 @@ safety.
   their priority.
 - **Stable Priority Queue**: A stable priority queue that maintains the relative
   order of elements with the same priority.
-- **Typed Priority Queue**: A priority queue with type safety.
-- **Stable Typed Priority Queue**: A stable priority queue with type safety.
+- **Typed Priority Queue**: A priority queue with typed arrays.
+- **Stable Typed Priority Queue**: A stable priority queue with typed arrays.
 - **Custom Comparer**: Support for custom comparison functions to define the
   order of elements.
 - **Efficient Operations**: Optimized for efficient enqueue, dequeue, and heap
@@ -148,7 +153,7 @@ console.log(spq.peek()); // 2
 #### Creating a Typed Priority Queue
 
 ```typescript
-const tpq = new TypedPriorityQueue<number>();
+const tpq = new TypedPriorityQueue<number>(Int32Array, 10);
 ```
 
 #### Enqueuing Elements
@@ -196,7 +201,7 @@ console.log(tpq.peek()); // 2
 #### Creating a Stable Typed Priority Queue
 
 ```typescript
-const stpq = new StableTypedPriorityQueue<number>();
+const stpq = new StableTypedPriorityQueue<number>(Int32Array, 10);
 ```
 
 #### Enqueuing Elements
