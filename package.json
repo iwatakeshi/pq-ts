@@ -1,11 +1,15 @@
 {
 	"name": "pq-ts",
-	"version": "0.7.0",
+	"version": "1.0.0",
 	"description": "A priority queue written in TypeScript.",
 	"main": "dist/main.js",
 	"module": "dist/main.mjs",
 	"types": "dist/main.d.ts",
-	"files": ["main.ts", "src", "dist"],
+	"files": [
+		"main.ts",
+		"src",
+		"dist"
+	],
 	"exports": {
 		".": {
 			"import": "./dist/main.mjs",
@@ -23,7 +27,12 @@
 		"docs:publish": "npm run docs:generate && npx gh-pages -d docs",
 		"prepublishOnly": "npm run build && npm run docs:generate"
 	},
-	"keywords": ["priority-queue", "typescript", "browser", "node"],
+	"keywords": [
+		"priority-queue",
+		"typescript",
+		"browser",
+		"node"
+	],
 	"author": {
 		"name": "Takeshi Iwana",
 		"email": "iwatakeshi@gmail.com"
