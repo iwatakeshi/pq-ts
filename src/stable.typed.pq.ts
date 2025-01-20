@@ -1,4 +1,4 @@
-import type { IComparer, IEqualityComparator, IStableNode, TypedArray, TypedArrayConstructor } from "./types.ts";
+import type { IComparer, IEqualityComparator, IStableNode, TypedArrayConstructor } from "./types.ts";
 import { growTyped, upWithPrioritiesAndIndices, downWithPrioritiesAndIndices, heapifyWithPrioritiesAndIndices } from "./primitive.ts";
 import { TypedPriorityQueue } from "./typed.pq.ts";
 
