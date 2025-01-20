@@ -21,16 +21,17 @@ safety.
 
 ## Installation
 
-You can install `pq-ts` using npm:
+You can install `pq-ts` using npm, yarn, or bun:
 
 ```sh
+# Using npm
 npm install pq-ts
-```
 
-Or using yarn:
-
-```sh
+# Using yarn
 yarn add pq-ts
+
+# Using bun
+bun add pq-ts
 ```
 
 ## Usage
