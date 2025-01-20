@@ -1,39 +1,107 @@
-import { PriorityQueue, StablePriorityQueue, type IPriorityQueue } from './main';
+import { PriorityQueue, StablePriorityQueue, TypedPriorityQueue, StableTypedPriorityQueue, type IPriorityNode } from "./main.ts";
+import { run, bench, boxplot, summary } from "mitata";
 
-function bench<T extends IPriorityQueue<number>>(queue: T, operations: number) {
-  console.time(`${queue.constructor.name} enqueue`);
-  for (let i = 0; i < operations; i++) {
-    const value = Math.random();
-    const priority = Math.random(); // Generate a priority for each enqueue operation
-    queue.enqueue(value, priority);
-  }
-  console.timeEnd(`${queue.constructor.name} enqueue`);
+const ITEMS_COUNT = 1000000;
 
-  console.time(`${queue.constructor.name} dequeue`);
-  for (let i = 0; i < operations; i++) {
-    queue.dequeue();
+// PriorityQueue Enqueue
+bench(`PriorityQueue enqueue ${ITEMS_COUNT} items`, () => {
+  const pq = new PriorityQueue();
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    pq.enqueue(i, i);
   }
-  console.timeEnd(`${queue.constructor.name} dequeue`);
+});
+
+// PriorityQueue Dequeue (Pre-fill before measuring)
+const pqPreFilled = new PriorityQueue();
+for (let i = 0; i < ITEMS_COUNT; i++) {
+  pqPreFilled.enqueue(i, i);
 }
-
-const run = (queue: IPriorityQueue<number>, operations: number[], count: number) => {
-  console.log(`Running benchmarks for ${queue.constructor.name}`);
-  for (let i = 0; i < count; i++) {
-    console.log(`Run ${i + 1}`);
-    for (let j = 0; j < operations.length; j++) {
-      bench(queue, operations[j]);
-    }
+bench(`PriorityQueue dequeue ${ITEMS_COUNT} items`, () => {
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    pqPreFilled.dequeue();
   }
+});
+
+// StablePriorityQueue Enqueue
+bench(`StablePriorityQueue enqueue ${ITEMS_COUNT} items`, () => {
+  const spq = new StablePriorityQueue();
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    spq.enqueue(i, i);
+  }
+});
+
+// StablePriorityQueue Dequeue
+const spqPreFilled = new StablePriorityQueue();
+for (let i = 0; i < ITEMS_COUNT; i++) {
+  spqPreFilled.enqueue(i, i);
 }
+bench(`StablePriorityQueue dequeue ${ITEMS_COUNT} items`, () => {
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    spqPreFilled.dequeue();
+  }
+});
 
-// const operations = 1_000_000;
-const priorityQueue = new PriorityQueue<number>();
-const stablePriorityQueue = new StablePriorityQueue<number>();
-const operations = [10, 100, 1000, 10000, 100000, 1000000];
-const count = 100;
+// TypedPriorityQueue Enqueue
+bench(`TypedPriorityQueue enqueue ${ITEMS_COUNT} items`, () => {
+  const tpq = new TypedPriorityQueue(Uint32Array, ITEMS_COUNT);
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    tpq.enqueue(i, i);
+  }
+});
 
-bench(priorityQueue, operations[5]);
-bench(stablePriorityQueue, operations[5]);
+// TypedPriorityQueue Dequeue
+const tpqPreFilled = new TypedPriorityQueue(Uint32Array, ITEMS_COUNT);
+for (let i = 0; i < ITEMS_COUNT; i++) {
+  tpqPreFilled.enqueue(i, i);
+}
+bench(`TypedPriorityQueue dequeue ${ITEMS_COUNT} items`, () => {
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    tpqPreFilled.dequeue();
+  }
+});
 
-// run(priorityQueue, operations, count);
-// run(stablePriorityQueue, operations, count);
+// StableTypedPriorityQueue Enqueue
+bench(`StableTypedPriorityQueue enqueue ${ITEMS_COUNT} items`, () => {
+  const stpq = new StableTypedPriorityQueue(Uint32Array, ITEMS_COUNT);
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    stpq.enqueue(i, i);
+  }
+});
+
+// StableTypedPriorityQueue Dequeue
+const stpqPreFilled = new StableTypedPriorityQueue(Uint32Array, ITEMS_COUNT);
+for (let i = 0; i < ITEMS_COUNT; i++) {
+  stpqPreFilled.enqueue(i, i);
+}
+bench(`StableTypedPriorityQueue dequeue ${ITEMS_COUNT} items`, () => {
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    stpqPreFilled.dequeue();
+  }
+});
+
+// Native Array Enqueue
+bench(`Native Array enqueue ${ITEMS_COUNT} items`, () => {
+  const arr: IPriorityNode[] = [];
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    arr.push({ value: i, priority: i, nindex: i });
+  }
+});
+
+// Native Array Dequeue
+const arrPreFilled: IPriorityNode[] = [];
+for (let i = 0; i < ITEMS_COUNT; i++) {
+  arrPreFilled.push({ value: i, priority: i, nindex: i });
+}
+arrPreFilled.sort((a, b) => a.priority - b.priority);
+bench(`Native Array dequeue ${ITEMS_COUNT} items`, () => {
+  for (let i = 0; i < ITEMS_COUNT; i++) {
+    // Note: Native Array shift() has O(n) complexity, unlike other dequeue operations which are O(log n)
+    arrPreFilled.shift();
+  }
+});
+
+// Force garbage collection before running benchmarks if supported
+globalThis.gc?.();
+
+// Run benchmarks
+await run();

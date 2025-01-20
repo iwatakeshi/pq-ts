@@ -9,7 +9,8 @@ const exclude = [
   'docs',
   'coverage',
   'dist',
-  'example'
+  'example',
+  '.tsup',
 ];
 
 export default defineConfig({

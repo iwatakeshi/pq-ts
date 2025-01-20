@@ -1,10 +1,10 @@
-
 /**
  * A type representing a comparison function that determines the order of two elements.
  * 
  * @typeParam T - The type of elements being compared
  * @param a - First element to compare
  * @param b - Second element to compare
+ * @param i - An optional tuple containing the indices of the elements in the heap
  * @returns 
  * - A negative number if `a` should be sorted before `b`
  * - A positive number if `a` should be sorted after `b`
@@ -20,7 +20,32 @@ export type IComparer<T> = (a: T, b: T) => number;
  * @returns True if the values are considered equal, false otherwise
  */
 export type IEqualityComparator<T> = (a: T, b: T) => boolean;
+/**
+ * A type representing a typed array.
+ */
+export type TypedArray = Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array | Float32Array | Float64Array
+/**
+ * A type representing a constructor for a typed array.
+ */
+export interface TypedArrayConstructor<T extends TypedArray = TypedArray> {
+  new(length: number): T;
+  from(arrayLike: ArrayLike<number>): T;
+}
 
+/**
+ * A type representing an indexable object with a length property.
+ */
+export type Indexable<T> = {
+  length: number;
+  [index: number]: T;
+};
+
+/**
+ * Represents a basic node in a data structure.
+ */
+export interface INode<T> {
+  value: T;
+}
 
 /**
  * Represents a node in a priority queue that extends a basic Node type with priority information.
@@ -28,22 +53,35 @@ export type IEqualityComparator<T> = (a: T, b: T) => boolean;
  * @template T The type of value stored in the node
  * @property {number} priority The priority value of the node used for queue ordering
  */
-export interface INode<T> {
-  value: T;
+export interface IPriorityNode<T = unknown> extends INode<T> {
   priority: number;
+  /**
+  * The index of the node in the heap.
+  * @remarks `nindex` is short for "node index".
+  */
+  nindex: number;
+}
+/**
+ * Represents a node in a stable heap data structure.
+ * Extends the base INode interface with an additional index property for stability.
+ * 
+ * @template T The type of value stored in the node
+ * @interface IStableNode
+ * @extends {IPriorityNode<T>}
+ * @property {bigint} sindex An index used to maintain insertion order stability
+ */
+export interface IStableNode<T> extends IPriorityNode<T> {
+  /**
+  * An index used to maintain insertion order stability.
+  * @remarks `sindex` is short for "stability index".
+  */
+  sindex: bigint;
 }
 
-/**
- * Represents a generic priority queue interface.
- * Elements in the queue are ordered based on their priority values.
- * 
- * @template T - The type of elements stored in the priority queue
- * @interface IPriorityQueue
- */
-export interface IPriorityQueue<
+export interface IPriorityQueueLike<
   T,
   Node extends INode<T> = INode<T>,
-  Comparer extends IComparer<Node> = IComparer<Node>
+  Comparer extends IComparer<Node> = IComparer<Node>,
 > {
   /** The number of elements in the queue */
   readonly count: number;
@@ -80,7 +118,7 @@ export interface IPriorityQueue<
    * Creates a shallow copy of the priority queue.
    * @returns A new priority queue instance with the same elements.
    */
-  clone(): IPriorityQueue<T>;
+  clone(): this;
   /**
    * Removes the first occurrence of a specific element from the queue.
    * @param value - The element to remove.
@@ -93,7 +131,11 @@ export interface IPriorityQueue<
    * @param dequeue - If true, searches for the element by dequeuing elements from a cloned queue, preserving the original queue's order.
    * @param comparer - An optional equality comparison function.
    */
-  indexOf(value: T, dequeue?: boolean, comparer?: IEqualityComparator<T>): number;
+  indexOf(
+    value: T,
+    dequeue?: boolean,
+    comparer?: IEqualityComparator<T>,
+  ): number;
   /**
    * Returns the priority of the element at the specified index.
    * @param index - The index of the element.
@@ -102,7 +144,7 @@ export interface IPriorityQueue<
    */
   priorityAt(index: number, dequeue?: boolean): number;
   /**
-   * Determine whether the queue is empty 
+   * Determine whether the queue is empty
    */
   isEmpty(): boolean;
   /**
@@ -112,18 +154,18 @@ export interface IPriorityQueue<
   /**
    * The comparison function used to determine the order of elements in the queue.
    */
-  comparer?: Comparer
+  compare: Comparer;
 }
 
 /**
- * Represents a node in a stable heap data structure.
- * Extends the base INode interface with an additional index property for stability.
+ * Represents a generic priority queue interface.
+ * Elements in the queue are ordered based on their priority values.
  * 
- * @template T The type of value stored in the node
- * @interface StableHeapNode
- * @extends {INode<T>}
- * @property {bigint} index An index used to maintain insertion order stability
+ * @template T - The type of elements stored in the priority queue
+ * @interface IPriorityQueue
  */
-export interface StableHeapNode<T> extends INode<T> {
-  index: bigint;
-}
+export interface IPriorityQueue<
+  T,
+  Node extends IPriorityNode<T> = IPriorityNode<T>,
+  Comparer extends IComparer<Node> = IComparer<Node>,
+> extends IPriorityQueueLike<T, Node, Comparer> { }

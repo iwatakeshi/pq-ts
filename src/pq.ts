@@ -1,11 +1,15 @@
-import type { IPriorityQueue, IComparer, INode, IEqualityComparator } from "./types.ts";
+import type { IPriorityQueue, IComparer, IPriorityNode, IEqualityComparator } from "./types.ts";
 import { up, down, heapify } from "./primitive.ts";
 
 export class PriorityQueue<
   T,
-  Node extends INode<T> = INode<T>,
+  Node extends IPriorityNode<T> = IPriorityNode<T>,
   Comparer extends IComparer<Node> = IComparer<Node>
 > implements IPriorityQueue<T, Node> {
+  private static readonly GROW_FACTOR = 2;
+  private static readonly MINIMUM_GROW = 4;
+  private static readonly MAX_SIZE = 2 ** 32 - 1;
+
   /**
    * The elements in the queue used internally.
    * @protected
@@ -13,14 +17,53 @@ export class PriorityQueue<
   protected _elements: Node[] = [];
   /**
    * The compare function used internally.
-   * @protected
    */
-  protected _comparer?: Comparer;
+  compare: Comparer;
   /**
    * The size of elements in the queue used internally.
    * @protected
    */
   protected _size = 0;
+
+  protected _up = (node: Node, index: number) => {
+    return up(this._elements)(
+      node,
+      index,
+      this.compare as Comparer
+    )
+  }
+
+  protected _down = (node: Node, index: number) => {
+    return down(this._elements, this._size)(
+      node,
+      index,
+      this.compare as Comparer
+    )
+  }
+
+  protected _heapify = (size: number) => {
+    return heapify(this._elements, size)(this.compare as Comparer);
+  }
+
+  protected _grow(
+    minCapacity: number,
+  ) {
+    console.assert(this._elements.length < minCapacity, 'Min capacity must be greater than the current capacity.');
+
+    let newCapacity = PriorityQueue.GROW_FACTOR * this._elements.length;
+
+    if (newCapacity > PriorityQueue.MAX_SIZE) {
+      newCapacity = PriorityQueue.MAX_SIZE;
+    }
+
+    newCapacity = Math.max(newCapacity, this._elements.length + PriorityQueue.MINIMUM_GROW);
+
+    if (newCapacity < minCapacity) {
+      newCapacity = minCapacity;
+    }
+
+    this._elements.length = newCapacity;
+  }
 
   /**
    * Creates a new instance of a priority queue.
@@ -28,20 +71,16 @@ export class PriorityQueue<
   constructor();
   /**
    * Creates a new instance of a priority queue.
-   * @param elements - The elements to add to the queue.
    * @param comparer - An optional comparison function.
    */
-  constructor(
-    elements: Node[],
-    comparer?: Comparer
-  );
+  constructor(compare: Comparer);
   /**
    * Creates a new instance of a priority queue.
    * @param queue - The queue to copy elements from.
    * @param comparer - An optional comparison function.
    */
   constructor(
-    queue: PriorityQueue<T, Node>,
+    queue: PriorityQueue<T, Node, Comparer>,
     comparer?: Comparer
   );
   /**
@@ -54,37 +93,31 @@ export class PriorityQueue<
     comparer?: IComparer<T>
   );
   constructor(
-    elements?: T[] | PriorityQueue<T, Node>,
+    elements?: T[] | PriorityQueue<T, Node, Comparer>,
     comparer?: Comparer
   ) {
+    const min = (a: Node, b: Node) => a.priority - b.priority;
     if (elements instanceof PriorityQueue) {
-      this._elements = [...elements._elements];
-      this._size = elements._size;
-      this._comparer = elements._comparer as Comparer;
+      const self = elements as PriorityQueue<T, Node, Comparer>;
+      this._elements = [...self._elements];
+      this._size = self._size;
+      this.compare = self.compare ?? min as Comparer;
     } else if (Array.isArray(elements)) {
+      this.compare = comparer ?? min as Comparer;
       for (const element of elements) {
         this.enqueue(element, 0);
       }
       this._size = elements.length;
-      this._comparer = comparer;
+    } else if (typeof elements === "function") {
+      this.compare = elements ?? min as Comparer;
     } else {
-      this._comparer = comparer;
+      this.compare = comparer ?? min as Comparer;
     }
+    console.assert(this.compare, "No comparison function provided.");
 
-    heapify(this._size, this._elements, this.compare.bind(this));
+    this._heapify(this._size);
   }
 
-  /**
-   * Compares two nodes based on their priority values.
-   * @param a - The first node to compare
-   * @param b - The second node to compare
-   * @returns - A negative number if the first node has a lower priority,
-   * @protected
-   */
-  protected compare(a: Node, b: Node): number {
-    if (this._comparer) return this._comparer(a, b);
-    return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
-  }
   /**
    * Removes the root node from the heap.
    * @returns - The removed node.
@@ -92,12 +125,17 @@ export class PriorityQueue<
    */
   protected removeRootNode(): void {
     if (this.isEmpty()) return;
-    const lastNode = this._elements[--this._size];
-    if (this._size > 0) {
-      this._elements[0] = lastNode;
-      down(0, this._size, this._elements, this.compare.bind(this));
+    const lastNodeIndex = --this._size;
+
+    if (lastNodeIndex > 0) {
+      // Store last node
+      const lastNode = this._elements[lastNodeIndex];
+      // Move last node to root and down heapify
+      this._down(lastNode, 0);
     }
-    this._elements.pop();
+
+    // Remove last element
+    this._elements[lastNodeIndex] = undefined as unknown as Node;
   }
 
   /**
@@ -108,9 +146,13 @@ export class PriorityQueue<
    */
   enqueue(value: T, priority: number): boolean {
     if (typeof priority !== "number") return false;
-
-    this._elements.push({ value, priority } as Node);
-    up(this._size++, this._elements, this.compare.bind(this));
+    const currentSize = this._size;
+    if (this._elements.length === currentSize) {
+      this._grow(currentSize + 1);
+    }
+    const element = { value, priority, nindex: currentSize } as Node;
+    this._size = currentSize + 1;
+    this._up(element, currentSize);
 
     return true;
   }
@@ -163,7 +205,11 @@ export class PriorityQueue<
    * @readonly
    */
   get values(): T[] {
-    return this._elements.map((node) => node.value);
+    const results: T[] = [];
+    for (let i = 0; i < this._size; i++) {
+      results.push(this._elements[i].value);
+    }
+    return results;
   }
   /**
    * The heap array containing the elements.
@@ -171,7 +217,7 @@ export class PriorityQueue<
    * @readonly
    */
   get heap(): Node[] {
-    return this._elements;
+    return this._elements
   }
 
   /**
@@ -182,8 +228,7 @@ export class PriorityQueue<
     const clone = this.clone();
     const result: T[] = [];
     while (!clone.isEmpty()) {
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
-      result.push(clone.dequeue()!);
+      result.push(clone.dequeue() as T);
     }
     return result;
   }
@@ -211,11 +256,10 @@ export class PriorityQueue<
 
     if (index < newSize) {
       const lastNode = this._elements[newSize];
-      this._elements[index] = lastNode;
       if (this.compare(lastNode, removedElement) < 0) {
-        up(index, this._elements, this.compare.bind(this));
+        this._down(lastNode, index);
       } else {
-        down(index, newSize, this._elements, this.compare.bind(this));
+        this._up(lastNode, index);
       }
     }
 
@@ -230,7 +274,7 @@ export class PriorityQueue<
    * @returns - The index of the element if it exists, or -1 if the element is not found.
    */
   indexOf(value: T, dequeue?: boolean, comparer: IEqualityComparator<T> = (a, b) => a === b): number {
-    if (!dequeue) return this._elements.findIndex((node) => comparer(node.value, value));
+    if (!dequeue) return this._elements.findIndex((node: Node | undefined) => node && comparer(node.value, value));
     const clone = this.clone();
     let index = 0;
     while (!clone.isEmpty()) {
@@ -249,7 +293,7 @@ export class PriorityQueue<
    */
   priorityAt(index: number, dequeue = false): number {
     if (index >= this._size) return Number.MAX_VALUE;
-    if (!dequeue) return this._elements[index].priority;
+    if (!dequeue || index === 0) return this._elements[index].priority;
     const clone = this.clone();
     let i = index;
     // Once we dequeue, we don't really know the index of the element
@@ -266,8 +310,8 @@ export class PriorityQueue<
    * Creates a shallow copy of the priority queue.
    * @returns - A new priority queue instance with the same elements.
    */
-  clone(): PriorityQueue<T, Node> {
-    return new PriorityQueue(this, this._comparer);
+  clone(): this {
+    return new PriorityQueue(this, this.compare) as this;
   }
 
   /**
@@ -286,43 +330,52 @@ export class PriorityQueue<
   }
 
   /**
-   * Creates a new instance of a priority queue.
-   * @param elements - The elements to add to the queue.
-   * @param comparer - An optional comparison function.
-   */
-  static from<T, Node extends INode<T> = INode<T>>(
-    elements: INode<T>[],
-    comparer?: IComparer<INode<T>>
-  ): PriorityQueue<T, Node>;
-  /**
-   * Creates a new instance of a priority queue.
+   * Creates a new instance of a priority queue from another queue.
    * @param queue - The queue to copy elements from.
    * @param comparer - An optional comparison function.
    */
-  static from<T, Node extends INode<T> = INode<T>>(
-    queue: PriorityQueue<T, Node>,
-    comparer?: IComparer<INode<T>>
-  ): PriorityQueue<T, Node>;
+  static from<
+    T,
+    Node extends IPriorityNode<T>,
+    Comparer extends IComparer<Node>,
+    Self extends typeof PriorityQueue<T, Node, Comparer>
+  >(
+    this: Self,
+    queue: PriorityQueue<T, Node, Comparer>,
+    comparer?: Comparer
+  ): InstanceType<Self>;
   /**
-   * Creates a new instance of a priority queue.
+   * Creates a new instance of a priority queue from an array of elements.
    * @param elements - The elements to add to the queue.
    * @param comparer - An optional comparison function.
    */
-  static from<T, Node extends INode<T> = INode<T>>(
+  static from<
+    T,
+    Node extends IPriorityNode<T>,
+    Comparer extends IComparer<Node>,
+    Self extends typeof PriorityQueue<T, Node, Comparer>
+  >(
+    this: Self,
     elements: T[],
-    comparer?: IComparer<T>
-  ): PriorityQueue<T, Node>;
+    comparer?: Comparer
+  ): InstanceType<Self>;
   /**
    * Creates a new instance of a priority queue.
    * @param elements - The elements to add to the queue.
    * @param comparer - An optional comparison function.
    * @returns - A new priority queue instance.
    */
-  static from<T, Node extends INode<T> = INode<T>>(
-    elements?: T[] | PriorityQueue<T, Node>,
-    comparer?: IComparer<T>
-  ): PriorityQueue<T, Node> {
+  static from<
+    T,
+    Node extends IPriorityNode<T>,
+    Comparer extends IComparer<Node>,
+    Self extends typeof PriorityQueue<T, Node, Comparer>
+  >(
+    elements?: T[] | PriorityQueue<T, Node, Comparer>,
+    comparer?: Comparer
+  ): InstanceType<Self> {
+    // biome-ignore lint/complexity/noThisInStatic: <explanation>
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    return new PriorityQueue(elements as any, comparer as any);
+    return new this(elements as any, comparer) as InstanceType<Self>;
   }
 }

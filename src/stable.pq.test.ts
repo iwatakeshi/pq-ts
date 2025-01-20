@@ -2,14 +2,41 @@ import { expect, describe, it } from "vitest";
 import { StablePriorityQueue } from "./stable.pq.ts";
 
 describe("StablePriorityQueue", () => {
-  it("should enqueue elements with priorities", () => {
+  it("should create a stable priority queue from an existing queue", () => {
     const pq = new StablePriorityQueue<number>();
     pq.enqueue(1, 5);
     pq.enqueue(2, 3);
     pq.enqueue(3, 4);
 
+    const pq2 = StablePriorityQueue.from(pq);
+    expect(pq2.count).toBe(3);
+    expect(pq2.values).toEqual(pq.values);
+  });
+
+  it("should create a priority stable queue from an array", () => {
+    const pq = StablePriorityQueue.from([1, 2, 3]);
     expect(pq.count).toBe(3);
+    expect(pq.values).toEqual([1, 2, 3]);
+  });
+
+  it("should create an empty stable priority queue", () => {
+    const pq = new StablePriorityQueue<number>();
+    expect(pq.count).toBe(0);
+    expect(pq.isEmpty()).toBe(true);
+    expect(pq.peek()).toBeUndefined();
+  });
+
+
+  it("should enqueue elements with priorities", () => {
+    const pq = new StablePriorityQueue<number>();
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+    pq.enqueue(4, 3);
+
+    expect(pq.count).toBe(4);
     expect(pq.peek()).toBe(2);
+    expect(pq.toArray()).toEqual([2, 4, 3, 1]);
   });
 
   it("should dequeue elements in priority order", () => {
@@ -179,7 +206,7 @@ describe("StablePriorityQueue", () => {
 
     const priorities = pq.heap.map(e => e.priority);
 
-    expect(pq.priorityAt(0, false)).toBe(Math.min(...priorities));
+    expect(pq.priorityAt(0, false)).toBe(3);
 
     expect(priorities).toContain(3);
     expect(priorities).toContain(4);
@@ -205,24 +232,36 @@ describe("StablePriorityQueue", () => {
     expect(pq.priorityAt(99, true)).toBe(Number.MAX_VALUE);
   });
 
+  it("should accept a custom compare function", () => {
+    const pq = new StablePriorityQueue<number>((a, b) => {
+      if (a.priority === b.priority) return a.value - b.value;
+      return a.priority - b.priority;
+    });
+
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+    pq.enqueue(4, 3);
+
+    expect(pq.dequeue()).toBe(2);
+    expect(pq.dequeue()).toBe(4);
+    expect(pq.dequeue()).toBe(3);
+    expect(pq.dequeue()).toBe(1);
+  });
+
   it("should handle stress test", () => {
     const pq = new StablePriorityQueue<number>();
     for (let i = 0; i < 10000; i++) {
       pq.enqueue(i, Math.floor(Math.random() * 1000));
     }
-    let prevIndex = 0;
-    let prevPriority = pq.priorityAt(prevIndex, true);
-    pq.dequeue();
+    let { priority } = pq.pop() ?? { priority: 0 };
 
     while (!pq.isEmpty()) {
-      const currentPriority = pq.priorityAt(prevIndex + 1, true);
-      pq.dequeue();
-
-      expect(prevPriority).toBeLessThanOrEqual(currentPriority);
-      prevPriority = currentPriority;
-      prevIndex++;
+      const { priority: currentPriority } = pq.pop() ?? { priority: 0 };
+      expect(currentPriority).toBeGreaterThanOrEqual(priority);
+      priority = currentPriority;
     }
-    // Ensure the priority queue is empty at the end
+
     expect(pq.isEmpty()).toBe(true);
     expect(pq.count).toBe(0);
   });
