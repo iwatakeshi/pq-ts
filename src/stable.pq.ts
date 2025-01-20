@@ -27,6 +27,10 @@ export class StablePriorityQueue<
    */
   constructor(elements: T[], comparer?: IComparer<T>);
   constructor(elements?: T[] | StablePriorityQueue<T, Node, Comparer> | Node[], comparer?: Comparer) {
+    const min = ((a, b) => {
+      if (a.priority === b.priority) return a.sindex < b.sindex ? -1 : 1;
+      return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
+    }) as Comparer;
     super([]);
     if (elements instanceof StablePriorityQueue) {
       this._elements = [...elements._elements];
@@ -34,16 +38,13 @@ export class StablePriorityQueue<
       this.compare = elements.compare;
     } else if (Array.isArray(elements)) {
       this._elements = new Array(elements.length);
+      this.compare = comparer ?? min as Comparer;
       for (const element of elements) {
         this.enqueue(element as T, 0);
       }
       this._size = elements.length;
-      this.compare = comparer as Comparer;
     } else {
-      this.compare = comparer ?? ((a, b) => {
-        if (a.priority === b.priority) return a.sindex < b.sindex ? -1 : 1;
-        return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
-      }) as Comparer
+      this.compare = comparer ?? min as Comparer
     }
 
     this._heapify(this._size);
