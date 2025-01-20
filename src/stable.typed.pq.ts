@@ -244,16 +244,16 @@ export class StableTypedPriorityQueue<
     return this.toArray()[Symbol.iterator]();
   }
 
-    /**
-   * Create a queue from elements and priorities.
-   * 
-   * @param elements - An array of elements to be added to the queue.
-   * @param priorities - An array of priorities corresponding to the elements.
-   * @param backend - The typed array constructor to be used for the queue.
-   * @param size - The initial size of the queue.
-   * @param comparer - (Optional) A custom comparer for the queue elements.
-   * @returns A new instance of the stable typed priority queue.
-   */
+  /**
+ * Create a queue from elements and priorities.
+ * 
+ * @param elements - An array of elements to be added to the queue.
+ * @param priorities - An array of priorities corresponding to the elements.
+ * @param backend - The typed array constructor to be used for the queue.
+ * @param size - The initial size of the queue.
+ * @param comparer - (Optional) A custom comparer for the queue elements.
+ * @returns A new instance of the stable typed priority queue.
+ */
   static override from(
     elements: number[],
     priorities: number[],
@@ -261,7 +261,7 @@ export class StableTypedPriorityQueue<
     size: number,
     comparer?: IComparer<IStableNode<number>>
   ): StableTypedPriorityQueue<IStableNode<number>>;
-  
+
   /**
    * Create a queue from an existing queue.
    * 
@@ -275,17 +275,6 @@ export class StableTypedPriorityQueue<
     size: number,
     comparer?: IComparer<Node>
   ): StableTypedPriorityQueue<Node>;
-  
-  /**
-   * Implementation of the `from` method to create a queue from elements and priorities or from an existing queue.
-   * 
-   * @param elementsOrQueue - An array of elements or an existing queue.
-   * @param prioritiesOrSize - An array of priorities or the initial size of the queue.
-   * @param backendOrComparer - The typed array constructor or a custom comparer.
-   * @param size - (Optional) The initial size of the queue if not provided in `prioritiesOrSize`.
-   * @param comparer - (Optional) A custom comparer for the queue elements.
-   * @returns A new instance of the stable typed priority queue.
-   */
   static override from<Node extends IStableNode<number>>(
     elementsOrQueue: number[] | StableTypedPriorityQueue<Node>,
     prioritiesOrSize?: number[] | number,

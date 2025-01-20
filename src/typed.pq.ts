@@ -273,17 +273,6 @@ export class TypedPriorityQueue<
     size: number,
     comparer?: Comparer
   ): InstanceType<Self>;
-
-  /**
-   * Implementation of the `from` method to create a queue from elements and priorities or from an existing queue.
-   * 
-   * @param elementsOrQueue - An array of elements or an existing queue.
-   * @param prioritiesOrSize - An array of priorities or the initial size of the queue.
-   * @param backendOrComparer - The typed array constructor or a custom comparer.
-   * @param size - (Optional) The initial size of the queue if not provided in `prioritiesOrSize`.
-   * @param comparer - (Optional) A custom comparer for the queue elements.
-   * @returns A new instance of the queue.
-   */
   static from<
     Node extends IPriorityNode<number>,
     Comparer extends IComparer<Node>,
