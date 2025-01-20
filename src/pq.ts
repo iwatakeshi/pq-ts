@@ -293,7 +293,7 @@ export class PriorityQueue<
    */
   priorityAt(index: number, dequeue = false): number {
     if (index >= this._size) return Number.MAX_VALUE;
-    if (!dequeue) return this._elements[index].priority;
+    if (!dequeue || index === 0) return this._elements[index].priority;
     const clone = this.clone();
     let i = index;
     // Once we dequeue, we don't really know the index of the element

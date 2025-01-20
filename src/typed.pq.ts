@@ -131,7 +131,7 @@ export class TypedPriorityQueue<
 
   priorityAt(index: number, dequeue = false): number {
     if (index >= this._size) return Number.MAX_VALUE;
-    if (!dequeue) return this._priorities[index];
+    if (!dequeue || index === 0) return this._priorities[index];
     const clone = this.clone();
     let i = index;
     // We don't really know the index of the element

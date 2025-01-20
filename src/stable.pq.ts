@@ -105,7 +105,7 @@ export class StablePriorityQueue<
 
   override priorityAt(index: number, dequeue = false): number {
     if (index < 0 || index >= this._size) return Number.MAX_VALUE;
-    if (!dequeue) return this._elements[index].priority;
+    if (!dequeue || index === 0) return this._elements[index].priority;
     const clone = this.clone();
     for (let i = 0; i < index; i++) {
       clone.dequeue();
