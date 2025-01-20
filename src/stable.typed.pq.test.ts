@@ -155,11 +155,11 @@ describe("StableTypedPriorityQueue", () => {
   it("should return the index of a specific element by dequeuing elements", () => {
     const pq = new StableTypedPriorityQueue(Uint32Array, 10);
 
-    pq.enqueue(1, 5);
-    pq.enqueue(2, 3);
-    pq.enqueue(3, 4);
-    pq.enqueue(4, 3);
-    pq.enqueue(5, 4);
+    pq.enqueue(1, 5); // 4
+    pq.enqueue(2, 3); // 0
+    pq.enqueue(3, 4); // 2
+    pq.enqueue(4, 3); // 1
+    pq.enqueue(5, 4); // 3
 
     expect(pq.indexOf(2, true)).toBe(0);
     expect(pq.indexOf(4, true)).toBe(1);
@@ -179,7 +179,7 @@ describe("StableTypedPriorityQueue", () => {
 
     const priorities = pq.heap.map(e => e.priority);
 
-    expect(pq.priorityAt(0, false)).toBe(Math.min(...priorities));
+    expect(pq.priorityAt(0, false)).toBe(3);
 
     expect(priorities).toContain(3);
     expect(priorities).toContain(4);
