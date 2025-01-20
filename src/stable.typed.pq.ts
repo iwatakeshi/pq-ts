@@ -83,7 +83,7 @@ export class StableTypedPriorityQueue<
 
   remove(value: number, comparer: IEqualityComparator<number> = (a, b) => a === b): boolean {
     if (!this.compare) {
-      console.log("[StableTypedPriorityQueue] No comparison function provided.");
+      console.log("[pq-ts] No comparison function provided.");
       return false;
     }
     const index = this._elements.findIndex((v) => comparer(value, v));
@@ -202,7 +202,7 @@ export class StableTypedPriorityQueue<
   protected removeRootNode(): void {
     if (this.isEmpty()) return;
     if (this._elements.length !== this._priorities.length) {
-      throw new Error("[StableTypedPriorityQueue] Elements and priorities are out of sync.");
+      throw new Error("[pq-ts] Elements and priorities are out of sync.");
     }
 
     const lastNodeIndex = --this._size;
@@ -244,89 +244,89 @@ export class StableTypedPriorityQueue<
     return this.toArray()[Symbol.iterator]();
   }
 
-   /**
-   * Create a queue from elements and priorities.
+  /**
+  * Create a queue from elements and priorities.
+  * 
+  * @param elements - An array of elements to be added to the queue.
+  * @param priorities - An array of priorities corresponding to the elements.
+  * @param backend - The typed array constructor to be used for the queue.
+  * @param size - The initial size of the queue.
+  * @param comparer - (Optional) A custom comparer for the queue elements.
+  * @returns A new instance of the stable typed priority queue.
+  */
+  static override from(
+    elements: number[],
+    priorities: number[],
+    backend: TypedArrayConstructor,
+    size: number,
+    comparer?: IComparer<IStableNode<number>>
+  ): StableTypedPriorityQueue<IStableNode<number>>;
+
+  /**
+   * Create a queue from an existing queue.
    * 
-   * @param elements - An array of elements to be added to the queue.
-   * @param priorities - An array of priorities corresponding to the elements.
-   * @param backend - The typed array constructor to be used for the queue.
-   * @param size - The initial size of the queue.
+   * @param queue - An existing queue to copy.
    * @param comparer - (Optional) A custom comparer for the queue elements.
    * @returns A new instance of the stable typed priority queue.
    */
-    static override from(
+  static override from<Node extends IStableNode<number>>(
+    queue: StableTypedPriorityQueue<Node>,
+    comparer?: IComparer<Node>
+  ): StableTypedPriorityQueue<Node>;
+  static override from<Node extends IStableNode<number>>(
+    elementsOrQueue: number[] | StableTypedPriorityQueue<Node>,
+    prioritiesOrSize?: number[] | IComparer<Node>,
+    backendOrComparer?: TypedArrayConstructor | IComparer<Node>,
+    size?: number,
+    comparer?: IComparer<Node>
+  ): StableTypedPriorityQueue<Node> {
+    const fromElements = (
       elements: number[],
       priorities: number[],
       backend: TypedArrayConstructor,
       size: number,
-      comparer?: IComparer<IStableNode<number>>
-    ): StableTypedPriorityQueue<IStableNode<number>>;
-  
-    /**
-     * Create a queue from an existing queue.
-     * 
-     * @param queue - An existing queue to copy.
-     * @param comparer - (Optional) A custom comparer for the queue elements.
-     * @returns A new instance of the stable typed priority queue.
-     */
-    static override from<Node extends IStableNode<number>>(
+      comparer?: IComparer<Node>
+    ) => {
+      const queue = new StableTypedPriorityQueue<Node>(backend, size, comparer);
+      for (let i = 0; i < elements.length; i++) {
+        queue.enqueue(elements[i], priorities[i]);
+      }
+      return queue;
+    };
+
+    const fromQueue = (
       queue: StableTypedPriorityQueue<Node>,
       comparer?: IComparer<Node>
-    ): StableTypedPriorityQueue<Node>;
-    static override from<Node extends IStableNode<number>>(
-      elementsOrQueue: number[] | StableTypedPriorityQueue<Node>,
-      prioritiesOrSize?: number[] | IComparer<Node>,
-      backendOrComparer?: TypedArrayConstructor | IComparer<Node>,
-      size?: number,
-      comparer?: IComparer<Node>
-    ): StableTypedPriorityQueue<Node> {
-      const fromElements = (
-        elements: number[],
-        priorities: number[],
-        backend: TypedArrayConstructor,
-        size: number,
-        comparer?: IComparer<Node>
-      ) => {
-        const queue = new StableTypedPriorityQueue<Node>(backend, size, comparer);
-        for (let i = 0; i < elements.length; i++) {
-          queue.enqueue(elements[i], priorities[i]);
-        }
-        return queue;
-      };
-  
-      const fromQueue = (
-        queue: StableTypedPriorityQueue<Node>,
-        comparer?: IComparer<Node>
-      ) => {
-        const size = queue._size > queue._defaultSize ? queue._size : queue._defaultSize;
-        const newQueue = new StableTypedPriorityQueue<Node>(queue._backend, size, comparer);
-        if (newQueue._elements.length !== queue._elements.length) {
-          console.log(newQueue._elements.length, queue._elements.length);
-          throw new Error("[StableTypedPriorityQueue] Elements and priorities are out of sync.");
-        }
-        newQueue._elements.set(queue._elements);
-        newQueue._priorities.set(queue._priorities);
-        newQueue._indices.set(queue._indices);
-        newQueue._size = queue._size;
-        newQueue._sindex = queue._sindex;
-        newQueue._indices.set(queue._indices);
-        return newQueue;
-      };
-  
-      if (Array.isArray(elementsOrQueue)) {
-        return fromElements(
-          elementsOrQueue as number[],
-          prioritiesOrSize as number[],
-          backendOrComparer as TypedArrayConstructor,
-          size as number,
-          comparer as IComparer<IStableNode<number>>
-        );
+    ) => {
+      const size = queue._size > queue._defaultSize ? queue._size : queue._defaultSize;
+      const newQueue = new StableTypedPriorityQueue<Node>(queue._backend, size, comparer);
+      if (newQueue._elements.length !== queue._elements.length) {
+        console.log(newQueue._elements.length, queue._elements.length);
+        throw new Error("[pq-ts] Elements and priorities are out of sync.");
       }
-  
-      return fromQueue(
-        elementsOrQueue as StableTypedPriorityQueue<Node>,
-        prioritiesOrSize as IComparer<Node>
+      newQueue._elements.set(queue._elements);
+      newQueue._priorities.set(queue._priorities);
+      newQueue._indices.set(queue._indices);
+      newQueue._size = queue._size;
+      newQueue._sindex = queue._sindex;
+      newQueue._indices.set(queue._indices);
+      return newQueue;
+    };
+
+    if (Array.isArray(elementsOrQueue)) {
+      return fromElements(
+        elementsOrQueue as number[],
+        prioritiesOrSize as number[],
+        backendOrComparer as TypedArrayConstructor,
+        size as number,
+        comparer as IComparer<IStableNode<number>>
       );
     }
+
+    return fromQueue(
+      elementsOrQueue as StableTypedPriorityQueue<Node>,
+      prioritiesOrSize as IComparer<Node>
+    );
+  }
 
 }
