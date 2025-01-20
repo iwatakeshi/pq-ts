@@ -242,7 +242,7 @@ export class PriorityQueue<
     const index = this._elements.findIndex((node) => comparer(node.value, value));
     if (index === -1) return false;
     if (!this.compare) {
-      console.log("[FlatPriorityQueue] No comparison function provided.");
+      console.log("[pq-ts] No comparison function provided.");
       return false;
     }
 

@@ -86,7 +86,7 @@ export class TypedPriorityQueue<
 
   remove(value: number, comparer: IEqualityComparator<number> = (a, b) => a === b): boolean {
     if (!this.compare) {
-      console.log("[FlatPriorityQueue] No comparison function provided.");
+      console.log("[pq-ts] No comparison function provided.");
       return false;
     }
     const index = this._elements.findIndex((v) => comparer(value, v));
@@ -194,7 +194,7 @@ export class TypedPriorityQueue<
   protected removeRootNode(): void {
     if (this.isEmpty()) return;
     if (this._elements.length !== this._priorities.length) {
-      throw new Error("[FlatPriorityQueue] Elements and priorities are out of sync.");
+      throw new Error("[pq-ts] Elements and priorities are out of sync.");
     }
 
     const lastNodeIndex = --this._size;
