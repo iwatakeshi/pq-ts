@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/iwatakeshi/pq-ts/actions/workflows/test.yml/badge.svg)](https://github.com/iwatakeshi/pq-ts/actions/workflows/test.yml)
 [![npm version](https://badge.fury.io/js/pq-ts.svg)](https://badge.fury.io/js/pq-ts)
+[![npm downloads](https://img.shields.io/npm/dw/pq-ts.svg)](https://www.npmjs.com/package/pq-ts)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![codecov](https://codecov.io/gh/iwatakeshi/pq-ts/graph/badge.svg?token=TPtnuh2TqY)](https://codecov.io/gh/iwatakeshi/pq-ts)
 
