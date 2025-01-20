@@ -359,7 +359,8 @@ export const heapify = <T, P extends IPriorityNode<T> = IPriorityNode<T>>(
 export const heapifyWithPriorities = (
   nodes: Indexable<number>,
   priorities: Indexable<number>,
-  size: number
+  size: number,
+  indices?: Indexable<bigint>
 ) => {
   return <P extends IPriorityNode<number> = IPriorityNode<number>>(
     comparer: IComparer<P>,
@@ -367,42 +368,10 @@ export const heapifyWithPriorities = (
     const lastParentWithChildren = parent(size - 1);
     for (let i = lastParentWithChildren; i >= 0; --i) {
       const node: P = { value: nodes[i], priority: priorities[i], nindex: i } as const as P;
-      downWithPriorities(nodes, priorities, size)(node, i, comparer);
-    }
-  }
-}
-
-/**
- * Converts an array with separate priority and index arrays into a heap data structure using the provided comparison function.
- * The heapification process is performed in-place, modifying the original arrays.
- * 
- * @param nodes - The array to be converted into a heap
- * @param priorities - The array representing the priorities
- * @param indices - The array representing the stable indices
- * @param size - The number of elements in the heap
- * @param comparer - A function that compares two elements and returns:
- *   - A negative number if a should be higher in the heap than b
- *   - Zero if a and b are equal
- *   - A positive number if a should be lower in the heap than b
- * @returns {void}
- */
-export const heapifyWithPrioritiesAndIndices = (
-  nodes: Indexable<number>,
-  priorities: Indexable<number>,
-  indices: Indexable<bigint>,
-  size: number
-) => {
-  return <P extends IStableNode<number> = IStableNode<number>>(
-    comparer: IComparer<P>,
-  ) => {
-    const lastParentWithChildren = parent(size - 1);
-    for (let i = lastParentWithChildren; i >= 0; --i) {
-      const node: P = { value: nodes[i], priority: priorities[i], nindex: i, sindex: indices[i] } as const as P;
       downWithPriorities(nodes, priorities, size, indices)(node, i, comparer);
     }
   }
-};
-
+}
 /**
  * Grows an array to a new size and copies the elements from the original array.
  * @param elements - The original array to copy
