@@ -172,11 +172,9 @@ describe("PriorityQueue", () => {
 
   // TODO: Fix this flaky test
   it("should handle stress test", () => {
-    console.log("Stress test: PriorityQueue");
     const pq = new PriorityQueue<number>();
     for (let i = 0; i < 10; i++) {
       pq.enqueue(i, Math.floor(Math.random() * 1000));
-      console.log(pq.heap);
     }
     let { priority } = pq.pop() ?? { priority: 0 };
 
