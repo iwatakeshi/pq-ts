@@ -244,8 +244,15 @@ export class StableTypedPriorityQueue<
     return this.toArray()[Symbol.iterator]();
   }
 
-  /**
-   * Create a queue from elements and priorities
+    /**
+   * Create a queue from elements and priorities.
+   * 
+   * @param elements - An array of elements to be added to the queue.
+   * @param priorities - An array of priorities corresponding to the elements.
+   * @param backend - The typed array constructor to be used for the queue.
+   * @param size - The initial size of the queue.
+   * @param comparer - (Optional) A custom comparer for the queue elements.
+   * @returns A new instance of the stable typed priority queue.
    */
   static override from(
     elements: number[],
@@ -254,18 +261,30 @@ export class StableTypedPriorityQueue<
     size: number,
     comparer?: IComparer<IStableNode<number>>
   ): StableTypedPriorityQueue<IStableNode<number>>;
-
+  
   /**
-   * Create a queue from an existing queue
+   * Create a queue from an existing queue.
+   * 
+   * @param queue - An existing queue to copy.
+   * @param size - The initial size of the new queue.
+   * @param comparer - (Optional) A custom comparer for the queue elements.
+   * @returns A new instance of the stable typed priority queue.
    */
   static override from<Node extends IStableNode<number>>(
     queue: StableTypedPriorityQueue<Node>,
     size: number,
     comparer?: IComparer<Node>
   ): StableTypedPriorityQueue<Node>;
-
+  
   /**
-   * Implementation
+   * Implementation of the `from` method to create a queue from elements and priorities or from an existing queue.
+   * 
+   * @param elementsOrQueue - An array of elements or an existing queue.
+   * @param prioritiesOrSize - An array of priorities or the initial size of the queue.
+   * @param backendOrComparer - The typed array constructor or a custom comparer.
+   * @param size - (Optional) The initial size of the queue if not provided in `prioritiesOrSize`.
+   * @param comparer - (Optional) A custom comparer for the queue elements.
+   * @returns A new instance of the stable typed priority queue.
    */
   static override from<Node extends IStableNode<number>>(
     elementsOrQueue: number[] | StableTypedPriorityQueue<Node>,
@@ -302,7 +321,6 @@ export class StableTypedPriorityQueue<
       return newQueue;
     };
 
-    // Now let's start with the first case.
     if (Array.isArray(elementsOrQueue)) {
       return fromElements(
         elementsOrQueue as number[],
@@ -313,7 +331,6 @@ export class StableTypedPriorityQueue<
       );
     }
 
-    // And then the second case.
     return fromQueue(
       elementsOrQueue as StableTypedPriorityQueue<Node>,
       prioritiesOrSize as number,
