@@ -16,7 +16,6 @@
 		"build": "npx rimraf dist && tsup main.ts --dts --format esm,cjs --sourcemap",
 		"test": "vitest --coverage",
 		"bench:deno": "deno run -A --unstable-sloppy-imports bench.ts",
-		"bench:node": "node --experimental-strip-types bench.ts",
 		"bench:bun": "bun bench.ts",
 		"docs:generate": "npx rimraf docs && deno doc --html --name=pq-ts main.ts",
 		"docs:serve": "npx serve docs",
