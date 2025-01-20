@@ -34,7 +34,7 @@ export class TypedPriorityQueue<
   }
 
   /**
-   * Creates a new instance of a flat priority queue.
+   * Creates a new instance of a priority queue backed by a typed array.
    * @param backend - The typed array constructor for the elements.
    * @param size - The initial size of the queue.
    * @param comparer - An optional comparison function.
