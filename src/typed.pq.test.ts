@@ -2,6 +2,37 @@ import { expect, describe, it } from "vitest";
 import { TypedPriorityQueue } from "./typed.pq.ts";
 
 describe("TypedPriorityQueue", () => {
+  it("should create a typed priority queue from an existing queue", () => {
+    const pq = new TypedPriorityQueue(Uint32Array, 10);
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+    pq.enqueue(3, 4);
+
+    const pq2 = TypedPriorityQueue.from(pq);
+    expect(pq2.count).toBe(3);
+    expect(pq2.values).toEqual(pq.values);
+  });
+
+  it("should create a typed priority queue from an array", () => {
+    const pq = TypedPriorityQueue.from([1, 2, 3], [5, 3, 4], Uint32Array, 10);
+    expect(pq.count).toBe(3);
+    expect(pq.toArray()).toEqual([2, 3, 1]);
+  });
+
+  it("should create an empty priority queue", () => {
+    const pq = new TypedPriorityQueue(Uint32Array, 10);
+    expect(pq.count).toBe(0);
+    expect(pq.isEmpty()).toBe(true);
+    expect(pq.peek()).toBeUndefined();
+  });
+
+  it("should create an empty priority queue", () => {
+    const pq = new TypedPriorityQueue(Uint32Array, 10);
+    expect(pq.count).toBe(0);
+    expect(pq.isEmpty()).toBe(true);
+    expect(pq.peek()).toBeUndefined
+  });
+
   it("should enqueue elements with priorities", () => {
     const pq = new TypedPriorityQueue(Uint32Array, 10);
     pq.enqueue(1, 5);
@@ -64,7 +95,7 @@ describe("TypedPriorityQueue", () => {
     pq.enqueue(3, 4);
 
     expect(new Set(pq.values)).toEqual(new Set([
-      1, 2, 3, 0 // 0 comes from the empty slots in the array
+      1, 2, 3
     ]));
   });
 
@@ -87,7 +118,7 @@ describe("TypedPriorityQueue", () => {
     expect(pq.remove(2)).toBe(true);
     expect(pq.count).toBe(2);
     expect(new Set(pq.values)).toEqual(new Set([
-      1, 3, 0
+      1, 3
     ]));
     expect(pq.toArray()).toEqual([3, 1]);
   });
