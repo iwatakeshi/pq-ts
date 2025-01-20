@@ -17,8 +17,7 @@ import type {
   IComparer,
   Indexable,
   IPriorityNode,
-  IStableTypedPriorityNode,
-  ITypedPriorityNode,
+  IStableNode,
   TypedArray, TypedArrayConstructor
 } from "./types.ts";
 
@@ -133,7 +132,7 @@ export const upWithPriorities = (
   nodes: Indexable<number>,
   priorities: Indexable<number>
 ) => {
-  return <P extends ITypedPriorityNode = ITypedPriorityNode>(
+  return <P extends IPriorityNode<number> = IPriorityNode<number>>(
     node: P,
     index: number,
     comparer: IComparer<P>
@@ -178,7 +177,7 @@ export const upWithPrioritiesAndIndices = (
   priorities: Indexable<number>,
   indices: Indexable<bigint>
 ) => {
-  return <P extends IStableTypedPriorityNode = IStableTypedPriorityNode>(
+  return <P extends IStableNode<number> = IStableNode<number>>(
     node: P,
     index: number,
     comparer: IComparer<P>
@@ -291,7 +290,7 @@ export const downWithPriorities = (
   priorities: Indexable<number>,
   size: number
 ) => {
-  return <P extends ITypedPriorityNode = ITypedPriorityNode>(
+  return <P extends IPriorityNode<number> = IPriorityNode<number>>(
     node: P,
     index: number,
     comparer: IComparer<P>
@@ -358,7 +357,7 @@ export const downWithPrioritiesAndIndices = (
   indices: Indexable<bigint>,
   size: number
 ) => {
-  return <P extends IStableTypedPriorityNode = IStableTypedPriorityNode>(
+  return <P extends IStableNode<number> = IStableNode<number>>(
     node: P,
     index: number,
     comparer: IComparer<P>
@@ -462,7 +461,7 @@ export const heapifyWithPriorities = (
   priorities: Indexable<number>,
   size: number
 ) => {
-  return <P extends ITypedPriorityNode = ITypedPriorityNode>(
+  return <P extends IPriorityNode<number> = IPriorityNode<number>>(
     comparer: IComparer<P>,
   ) => {
     const lastParentWithChildren = parent(size - 1);
@@ -493,7 +492,7 @@ export const heapifyWithPrioritiesAndIndices = (
   indices: Indexable<bigint>,
   size: number
 ) => {
-  return <P extends IStableTypedPriorityNode = IStableTypedPriorityNode>(
+  return <P extends IStableNode<number> = IStableNode<number>>(
     comparer: IComparer<P>,
   ) => {
     const lastParentWithChildren = parent(size - 1);
