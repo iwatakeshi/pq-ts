@@ -1,6 +1,6 @@
 {
 	"name": "pq-ts",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "A priority queue written in TypeScript.",
 	"main": "dist/main.js",
 	"module": "dist/main.mjs",
