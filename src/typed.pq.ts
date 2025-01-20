@@ -232,16 +232,16 @@ export class TypedPriorityQueue<
     return this.toArray()[Symbol.iterator]();
   }
 
-   /**
-   * Create a queue from elements and priorities.
-   * 
-   * @param elements - An array of elements to be added to the queue.
-   * @param priorities - An array of priorities corresponding to the elements.
-   * @param backend - The typed array constructor to be used for the queue.
-   * @param size - The initial size of the queue.
-   * @param comparer - (Optional) A custom comparer for the queue elements.
-   * @returns A new instance of the queue.
-   */
+  /**
+  * Create a queue from elements and priorities.
+  * 
+  * @param elements - An array of elements to be added to the queue.
+  * @param priorities - An array of priorities corresponding to the elements.
+  * @param backend - The typed array constructor to be used for the queue.
+  * @param size - The initial size of the queue.
+  * @param comparer - (Optional) A custom comparer for the queue elements.
+  * @returns A new instance of the queue.
+  */
   static from<
     Node extends IPriorityNode<number>,
     Comparer extends IComparer<Node>,
@@ -254,7 +254,7 @@ export class TypedPriorityQueue<
     size: number,
     comparer?: Comparer
   ): InstanceType<Self>;
-  
+
   /**
    * Create a queue from an existing queue.
    * 
@@ -273,7 +273,7 @@ export class TypedPriorityQueue<
     size: number,
     comparer?: Comparer
   ): InstanceType<Self>;
-  
+
   /**
    * Implementation of the `from` method to create a queue from elements and priorities or from an existing queue.
    * 
