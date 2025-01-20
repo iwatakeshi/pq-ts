@@ -250,10 +250,6 @@ export class PriorityQueue<
   remove(value: T, comparer: IEqualityComparator<T> = (a, b) => a === b): boolean {
     const index = this._elements.findIndex((node) => comparer(node.value, value));
     if (index === -1) return false;
-    if (!this.compare) {
-      console.log("[pq-ts] No comparison function provided.");
-      return false;
-    }
 
     const removedElement = this._elements[index];
     const newSize = --this._size;

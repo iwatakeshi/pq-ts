@@ -82,10 +82,6 @@ export class StableTypedPriorityQueue<
   }
 
   remove(value: number, comparer: IEqualityComparator<number> = (a, b) => a === b): boolean {
-    if (!this.compare) {
-      console.log("[pq-ts] No comparison function provided.");
-      return false;
-    }
     const index = this._elements.findIndex((v) => comparer(value, v));
     if (index < 0) return false;
     const [removedElement, removedPriority] = [this._elements[index], this._priorities[index]];
@@ -300,10 +296,6 @@ export class StableTypedPriorityQueue<
     ) => {
       const size = queue._size > queue._defaultSize ? queue._size : queue._defaultSize;
       const newQueue = new StableTypedPriorityQueue<Node>(queue._backend, size, comparer);
-      if (newQueue._elements.length !== queue._elements.length) {
-        console.log(newQueue._elements.length, queue._elements.length);
-        throw new Error("[pq-ts] Elements and priorities are out of sync.");
-      }
       newQueue._elements.set(queue._elements);
       newQueue._priorities.set(queue._priorities);
       newQueue._indices.set(queue._indices);
