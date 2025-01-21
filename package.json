@@ -17,7 +17,7 @@
 		}
 	},
 	"scripts": {
-		"build": "npx rimraf dist && tsup main.ts --dts --format esm,cjs --sourcemap",
+		"build": "tsup main.ts --clean --dts --format esm,cjs --sourcemap",
 		"test": "vitest --coverage",
 		"bench:deno": "deno run -A --unstable-sloppy-imports bench.ts",
 		"bench:node": "npm install && ts-node bench.ts && npx rimraf node_modules && npx rimraf package-lock.json",
