@@ -155,6 +155,10 @@ export interface IPriorityQueueLike<
    * The comparison function used to determine the order of elements in the queue.
    */
   compare: Comparer;
+  /**
+   * The iterator function used to traverse the elements in the queue.
+   */
+  [Symbol.iterator](): Iterator<T>;
 }
 
 /**
