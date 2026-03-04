@@ -241,4 +241,56 @@ describe("PriorityQueue", () => {
     const priorities = dequeuedItems.map((_, index) => pq2.priorityAt(index, true));
     expect(priorities).toEqual([3, 4, 5]);
   });
+
+  // Regression: remove() with many elements should preserve heap order
+  // (Bug: up/down directions were swapped in remove(), causing heap corruption
+  // when the last element needed to bubble in the opposite direction)
+  it("should maintain heap order after removing an internal element (regression)", () => {
+    const pq = new PriorityQueue<number>();
+    // This specific priority pattern triggers the bug: after removing value 0
+    // (pri=50), the last node (pri=25) must bubble UP past its new parent (pri=30),
+    // but the buggy code called _down instead, leaving it in the wrong position.
+    const priorities = [50, 10, 90, 20, 80, 30, 70, 40, 60, 5, 95, 15, 85, 25];
+    for (let i = 0; i < priorities.length; i++) {
+      pq.enqueue(i, priorities[i]);
+    }
+
+    expect(pq.remove(0)).toBe(true);
+
+    // Verify the heap invariant: parent priority <= child priority
+    const heap = pq.heap;
+    const size = pq.count;
+    for (let i = 1; i < size; i++) {
+      const parentIdx = (i - 1) >> 2;
+      expect(heap[i].priority).toBeGreaterThanOrEqual(heap[parentIdx].priority);
+    }
+
+    // Also verify dequeue order
+    let prev = pq.pop()!;
+    while (!pq.isEmpty()) {
+      const curr = pq.pop()!;
+      expect(curr.priority).toBeGreaterThanOrEqual(prev.priority);
+      prev = curr;
+    }
+  });
+
+  // Regression: remove() should preserve heap for all removals (stress test)
+  it("should maintain heap order after removing any element (regression)", () => {
+    const priorities = [50, 10, 90, 20, 80, 30, 70, 40, 60, 5, 95, 15, 85, 25];
+    for (let removeIdx = 0; removeIdx < priorities.length; removeIdx++) {
+      const pq = new PriorityQueue<number>();
+      for (let i = 0; i < priorities.length; i++) {
+        pq.enqueue(i, priorities[i]);
+      }
+
+      pq.remove(removeIdx);
+
+      let prev = pq.pop()!;
+      while (!pq.isEmpty()) {
+        const curr = pq.pop()!;
+        expect(curr.priority).toBeGreaterThanOrEqual(prev.priority);
+        prev = curr;
+      }
+    }
+  });
 });

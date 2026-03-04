@@ -257,4 +257,37 @@ describe("TypedPriorityQueue", () => {
     const priorities = dequeuedItems.map((_, index) => pq2.priorityAt(index, true));
     expect(priorities).toEqual([3, 4, 5]);
   });
+
+  // Regression: remove() with many elements should preserve heap order
+  // (Bug: up/down directions were swapped in remove())
+  it("should maintain heap order after removing an internal element (regression)", () => {
+    const pq = new TypedPriorityQueue(Uint32Array, 4);
+    for (let i = 1; i <= 20; i++) {
+      pq.enqueue(i * 10, i);
+    }
+
+    // Remove an element with high priority value so lastNode must bubble up
+    expect(pq.remove(150)).toBe(true);
+    expect(pq.count).toBe(19);
+
+    let prev = pq.pop()!;
+    while (!pq.isEmpty()) {
+      const curr = pq.pop()!;
+      expect(curr.priority).toBeGreaterThanOrEqual(prev.priority);
+      prev = curr;
+    }
+  });
+
+  // Regression: clone() should work even after internal array growth
+  // (Bug: clone used _defaultSize which is too small after growth)
+  it("should clone correctly after the queue has grown beyond initial size (regression)", () => {
+    const pq = new TypedPriorityQueue(Uint32Array, 2); // tiny initial size
+    for (let i = 0; i < 10; i++) {
+      pq.enqueue(i, i);
+    }
+
+    const clone = pq.clone();
+    expect(clone.count).toBe(10);
+    expect(clone.toArray()).toEqual(pq.toArray());
+  });
 });

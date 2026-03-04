@@ -77,7 +77,8 @@ export class TypedPriorityQueue<
   }
 
   clone(): this {
-    const clone = new TypedPriorityQueue<Node, Comparer>(this._backend, this._defaultSize, this.compare);
+    const size = Math.max(this._elements.length, this._defaultSize);
+    const clone = new TypedPriorityQueue<Node, Comparer>(this._backend, size, this.compare);
     clone._elements.set(this._elements);
     clone._priorities.set(this._priorities);
     clone._size = this._size;
@@ -103,12 +104,12 @@ export class TypedPriorityQueue<
         nindex: newSize
       } as const as Node;
 
-      // If the last element should be "bubbled up" (preserve heap property)
+      // If lastNode has higher or equal priority than removed, it may need to bubble up;
+      // otherwise it has lower priority and must bubble down.
       if (this.compare(removedNode, lastNode) < 0) {
-        this._up(lastNode, index);
-      } else {
-        // Otherwise, it should "bubble down"
         this._down(lastNode, index);
+      } else {
+        this._up(lastNode, index);
       }
     }
 

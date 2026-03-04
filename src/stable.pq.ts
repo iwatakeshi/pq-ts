@@ -41,6 +41,7 @@ export class StablePriorityQueue<
       this._elements = [...elements._elements];
       this._size = elements._size;
       this.compare = elements.compare;
+      this._index = elements._index;
     } else if (Array.isArray(elements)) {
       this._elements = new Array(elements.length);
       this.compare = comparer ?? min as Comparer;

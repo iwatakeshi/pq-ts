@@ -282,4 +282,45 @@ describe("StableTypedPriorityQueue", () => {
     const elements = dequeuedItems.map((item) => item?.value);
     expect(elements).toEqual([2, 4, 3, 1]);
   });
+
+  // Regression: remove() with many elements should preserve heap + stability
+  it("should maintain heap order after removing an internal element (regression)", () => {
+    const pq = new StableTypedPriorityQueue(Uint32Array, 4);
+    for (let i = 1; i <= 20; i++) {
+      pq.enqueue(i * 10, i);
+    }
+
+    expect(pq.remove(150)).toBe(true);
+    expect(pq.count).toBe(19);
+
+    let prev = pq.pop()!;
+    while (!pq.isEmpty()) {
+      const curr = pq.pop()!;
+      expect(curr.priority).toBeGreaterThanOrEqual(prev.priority);
+      prev = curr;
+    }
+  });
+
+  // Regression: clone() should work after internal array growth
+  it("should clone correctly after the queue has grown beyond initial size (regression)", () => {
+    const pq = new StableTypedPriorityQueue(Uint32Array, 2);
+    for (let i = 0; i < 10; i++) {
+      pq.enqueue(i, i);
+    }
+
+    const clone = pq.clone();
+    expect(clone.count).toBe(10);
+    expect(clone.toArray()).toEqual(pq.toArray());
+  });
+
+  // Regression: heap getter should include sindex for stable nodes
+  it("should include sindex in heap nodes (regression)", () => {
+    const pq = new StableTypedPriorityQueue(Uint32Array, 10);
+    pq.enqueue(1, 5);
+    pq.enqueue(2, 3);
+
+    const nodes = pq.heap;
+    expect(nodes[0]).toHaveProperty("sindex");
+    expect(nodes[1]).toHaveProperty("sindex");
+  });
 });

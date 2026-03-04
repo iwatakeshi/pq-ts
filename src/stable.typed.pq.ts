@@ -49,7 +49,7 @@ export class StableTypedPriorityQueue<
     return Array
       .from(this._elements)
       .map((value, index) => ({
-        value, priority: this._priorities[index], nindex: index
+        value, priority: this._priorities[index], nindex: index, sindex: this._indices[index]
       }) as Node);
   }
 
@@ -72,7 +72,8 @@ export class StableTypedPriorityQueue<
   }
 
   clone(): this {
-    const clone = new StableTypedPriorityQueue<Node, Comparer>(this._backend, this._defaultSize, this.compare);
+    const size = Math.max(this._elements.length, this._defaultSize);
+    const clone = new StableTypedPriorityQueue<Node, Comparer>(this._backend, size, this.compare);
     clone._elements.set(this._elements);
     clone._priorities.set(this._priorities);
     clone._indices.set(this._indices);
@@ -102,12 +103,12 @@ export class StableTypedPriorityQueue<
         sindex: this._indices[newSize]
       } as const as Node;
 
-      // If the last element should be "bubbled up" (preserve heap property)
+      // If lastNode has higher or equal priority than removed, it may need to bubble up;
+      // otherwise it has lower priority and must bubble down.
       if (this.compare(removedNode, lastNode) < 0) {
-        this._up(lastNode, index);
-      } else {
-        // Otherwise, it should "bubble down"
         this._down(lastNode, index);
+      } else {
+        this._up(lastNode, index);
       }
     }
 
@@ -301,7 +302,6 @@ export class StableTypedPriorityQueue<
       newQueue._indices.set(queue._indices);
       newQueue._size = queue._size;
       newQueue._sindex = queue._sindex;
-      newQueue._indices.set(queue._indices);
       return newQueue;
     };
 

@@ -257,9 +257,9 @@ export class PriorityQueue<
     if (index < newSize) {
       const lastNode = this._elements[newSize];
       if (this.compare(lastNode, removedElement) < 0) {
-        this._down(lastNode, index);
-      } else {
         this._up(lastNode, index);
+      } else {
+        this._down(lastNode, index);
       }
     }
 

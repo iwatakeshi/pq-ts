@@ -105,7 +105,7 @@ export interface IPriorityQueueLike<
    * Removes and returns the element at the front of the queue.
    */
   pop(): Node | undefined;
-  /** Removes all elements from the queue */
+  /** Returns the element at the front of the queue without removing it */
   peek(): T | undefined;
   /** Removes all elements from the queue */
   clear(): void;

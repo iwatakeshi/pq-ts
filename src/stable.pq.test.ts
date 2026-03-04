@@ -286,4 +286,37 @@ describe("StablePriorityQueue", () => {
     const elements = dequeuedItems.map((item) => item?.value);
     expect(elements).toEqual([2, 4, 3, 1]);
   });
+
+  // Regression: clone should copy _index so new inserts into the clone
+  // preserve FIFO stability relative to existing items
+  it("should preserve stability after cloning and enqueueing (regression)", () => {
+    const pq = new StablePriorityQueue<string>();
+    pq.enqueue("a", 1);
+    pq.enqueue("b", 1);
+    pq.enqueue("c", 1);
+
+    const clone = pq.clone();
+    // After clone, inserting "d" with same priority should come after a, b, c
+    clone.enqueue("d", 1);
+
+    expect(clone.toArray()).toEqual(["a", "b", "c", "d"]);
+  });
+
+  // Regression: remove() with many elements should preserve heap + stability
+  it("should maintain heap order after removing internal element (regression)", () => {
+    const pq = new StablePriorityQueue<number>();
+    for (let i = 0; i < 15; i++) {
+      pq.enqueue(i, i % 5); // Groups of 3 items at each priority 0..4
+    }
+
+    // Remove an element from the middle
+    expect(pq.remove(7)).toBe(true);
+
+    let prev = pq.pop()!;
+    while (!pq.isEmpty()) {
+      const curr = pq.pop()!;
+      expect(curr.priority).toBeGreaterThanOrEqual(prev.priority);
+      prev = curr;
+    }
+  });
 });
