@@ -116,6 +116,28 @@ describe("StablePriorityQueue", () => {
     expect(pq.toArray()).toEqual([4, 3, 1]);
   });
 
+  it("should not crash when remove() is called after dequeue()", () => {
+    const pq = new StablePriorityQueue<{ id: string }>();
+    pq.enqueue({ id: "a" }, 1);
+    pq.enqueue({ id: "b" }, 2);
+
+    pq.dequeue();
+
+    expect(pq.remove({ id: "b" }, (a, b) => a.id === b.id)).toBe(true);
+    expect(pq.count).toBe(0);
+  });
+
+  it("should return false when remove() targets a nonexistent element after dequeue()", () => {
+    const pq = new StablePriorityQueue<number>();
+    pq.enqueue(1, 1);
+    pq.enqueue(2, 2);
+
+    pq.dequeue();
+
+    expect(pq.remove(99)).toBe(false);
+    expect(pq.count).toBe(1);
+  });
+
   it("should clone the queue", () => {
     const pq = new StablePriorityQueue<number>();
     pq.enqueue(1, 5);

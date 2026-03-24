@@ -248,7 +248,7 @@ export class PriorityQueue<
    * @returns - True if the element was removed, false otherwise.
    */
   remove(value: T, comparer: IEqualityComparator<T> = (a, b) => a === b): boolean {
-    const index = this._elements.findIndex((node) => comparer(node.value, value));
+    const index = this._elements.findIndex((node) => node && comparer(node.value, value));
     if (index === -1) return false;
 
     const removedElement = this._elements[index];

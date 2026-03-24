@@ -86,7 +86,10 @@ export class TypedPriorityQueue<
   }
 
   remove(value: number, comparer: IEqualityComparator<number> = (a, b) => a === b): boolean {
-    const index = this._elements.findIndex((v) => comparer(value, v));
+    let index = -1;
+    for (let i = 0; i < this._size; i++) {
+      if (comparer(value, this._elements[i])) { index = i; break; }
+    }
     if (index < 0) return false;
     const [removedElement, removedPriority] = [this._elements[index], this._priorities[index]];
     const newSize = --this._size;
@@ -120,7 +123,12 @@ export class TypedPriorityQueue<
   }
 
   indexOf(value: number, dequeue = false, comparer: IEqualityComparator<number> = (a, b) => a === b): number {
-    if (!dequeue) return this._elements.findIndex((v) => comparer?.(v, value));
+    if (!dequeue) {
+      for (let i = 0; i < this._size; i++) {
+        if (comparer?.(this._elements[i], value)) return i;
+      }
+      return -1;
+    }
     const clone = this.clone();
     let index = 0;
     while (!clone.isEmpty()) {

@@ -121,6 +121,29 @@ describe("TypedPriorityQueue", () => {
     expect(pq.toArray()).toEqual([3, 1]);
   });
 
+  it("should not crash when remove() is called after dequeue()", () => {
+    const pq = new TypedPriorityQueue(Uint32Array, 10);
+    pq.enqueue(1, 1);
+    pq.enqueue(2, 2);
+
+    pq.dequeue();
+
+    expect(pq.remove(2)).toBe(true);
+    expect(pq.count).toBe(0);
+  });
+
+  it("should not match stale zero slots after dequeue()", () => {
+    const pq = new TypedPriorityQueue(Uint32Array, 10);
+    pq.enqueue(0, 1);
+    pq.enqueue(1, 2);
+
+    pq.dequeue();
+    pq.dequeue();
+
+    expect(pq.remove(0)).toBe(false);
+    expect(pq.count).toBe(0);
+  });
+
   it("should clone the queue", () => {
     const pq = new TypedPriorityQueue(Uint32Array, 10);
     pq.enqueue(1, 5);
