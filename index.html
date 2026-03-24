@@ -81,7 +81,345 @@
 </nav>
 <div id="searchResults"></div><div id="content">
     <main><section>
-  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"></div>
+  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><h1 id="pq-ts">
+pq-ts</h1>
+<p><code>pq-ts</code> is a TypeScript library that provides efficient and flexible priority
+queue implementations. It includes both standard and stable priority queues,
+ensuring that elements with the same priority maintain their relative order of
+insertion. Additionally, it supports typed priority queues which use typed
+arrays.</p>
+<h2 id="features">
+Features</h2>
+<ul>
+<li><strong>Priority Queue</strong>: A standard priority queue that orders elements based on
+their priority.</li>
+<li><strong>Stable Priority Queue</strong>: A stable priority queue that maintains the relative
+order of elements with the same priority.</li>
+<li><strong>Typed Priority Queue</strong>: A priority queue with typed arrays.</li>
+<li><strong>Stable Typed Priority Queue</strong>: A stable priority queue with typed arrays.</li>
+<li><strong>Custom Comparer</strong>: Support for custom comparison functions to define the
+order of elements.</li>
+<li><strong>Efficient Operations</strong>: Optimized for efficient enqueue, dequeue, and heap
+operations.</li>
+</ul>
+<h2 id="installation">
+Installation</h2>
+<p>You can install <code>pq-ts</code> using npm, yarn, or bun:</p>
+<pre class="highlight"><code class="language-sh">npm install pq-ts
+
+yarn add pq-ts
+
+bun add pq-ts
+</code><button class="copyButton" data-copy="npm install pq-ts
+
+yarn add pq-ts
+
+bun add pq-ts
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<h2 id="usage">
+Usage</h2>
+<h3 id="importing-the-library">
+Importing the Library</h3>
+<pre class="highlight"><code class="language-typescript">import {
+  PriorityQueue,
+  StablePriorityQueue,
+  StableTypedPriorityQueue,
+  TypedPriorityQueue,
+} from &quot;pq-ts&quot;;
+</code><button class="copyButton" data-copy="import {
+  PriorityQueue,
+  StablePriorityQueue,
+  StableTypedPriorityQueue,
+  TypedPriorityQueue,
+} from &quot;pq-ts&quot;;
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<h3 id="priority-queue">
+Priority Queue</h3>
+<pre class="highlight"><code class="language-typescript">const pq = new PriorityQueue&lt;number&gt;();
+
+// Enqueue elements with priorities
+pq.enqueue(1, 5);
+pq.enqueue(2, 3);
+pq.enqueue(3, 4);
+
+// Dequeue elements (lowest priority first)
+console.log(pq.dequeue()); // 2
+console.log(pq.dequeue()); // 3
+console.log(pq.dequeue()); // 1
+</code><button class="copyButton" data-copy="const pq = new PriorityQueue&lt;number&gt;();
+
+// Enqueue elements with priorities
+pq.enqueue(1, 5);
+pq.enqueue(2, 3);
+pq.enqueue(3, 4);
+
+// Dequeue elements (lowest priority first)
+console.log(pq.dequeue()); // 2
+console.log(pq.dequeue()); // 3
+console.log(pq.dequeue()); // 1
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<h3 id="stable-priority-queue">
+Stable Priority Queue</h3>
+<pre class="highlight"><code class="language-typescript">const spq = new StablePriorityQueue&lt;number&gt;();
+
+spq.enqueue(1, 5);
+spq.enqueue(2, 3);
+spq.enqueue(3, 4);
+
+console.log(spq.dequeue()); // 2
+console.log(spq.dequeue()); // 3
+console.log(spq.dequeue()); // 1
+</code><button class="copyButton" data-copy="const spq = new StablePriorityQueue&lt;number&gt;();
+
+spq.enqueue(1, 5);
+spq.enqueue(2, 3);
+spq.enqueue(3, 4);
+
+console.log(spq.dequeue()); // 2
+console.log(spq.dequeue()); // 3
+console.log(spq.dequeue()); // 1
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<h3 id="typed-priority-queue">
+Typed Priority Queue</h3>
+<pre class="highlight"><code class="language-typescript">const tpq = new TypedPriorityQueue(Int32Array, 10);
+
+tpq.enqueue(1, 5);
+tpq.enqueue(2, 3);
+tpq.enqueue(3, 4);
+
+console.log(tpq.dequeue()); // 2
+console.log(tpq.dequeue()); // 3
+console.log(tpq.dequeue()); // 1
+</code><button class="copyButton" data-copy="const tpq = new TypedPriorityQueue(Int32Array, 10);
+
+tpq.enqueue(1, 5);
+tpq.enqueue(2, 3);
+tpq.enqueue(3, 4);
+
+console.log(tpq.dequeue()); // 2
+console.log(tpq.dequeue()); // 3
+console.log(tpq.dequeue()); // 1
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<h3 id="using-a-custom-comparer">
+Using a Custom Comparer</h3>
+<pre class="highlight"><code class="language-typescript">const customComparer = (
+  a: { value: number; priority: number },
+  b: { value: number; priority: number },
+) =&gt; {
+  return b.priority - a.priority; // Max-heap
+};
+
+const pq = new PriorityQueue&lt;number&gt;(customComparer);
+pq.enqueue(1, 5);
+pq.enqueue(2, 3);
+pq.enqueue(3, 4);
+
+console.log(pq.dequeue()); // 1
+console.log(pq.dequeue()); // 3
+console.log(pq.dequeue()); // 2
+</code><button class="copyButton" data-copy="const customComparer = (
+  a: { value: number; priority: number },
+  b: { value: number; priority: number },
+) =&gt; {
+  return b.priority - a.priority; // Max-heap
+};
+
+const pq = new PriorityQueue&lt;number&gt;(customComparer);
+pq.enqueue(1, 5);
+pq.enqueue(2, 3);
+pq.enqueue(3, 4);
+
+console.log(pq.dequeue()); // 1
+console.log(pq.dequeue()); // 3
+console.log(pq.dequeue()); // 2
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<h2 id="credits">
+Credits</h2>
+<ul>
+<li><a href="https://andrewlock.net/behind-the-implementation-of-dotnets-priorityqueue/">Behind the implementation of .NET's PriorityQueue</a></li>
+<li><a href="https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/PriorityQueue.cs">DotNet's PriorityQueue&lt;TElement,TPriority&gt; Class</a></li>
+</ul>
+</div></div>
 </div>
 </section>
 </main><div class="toc">
@@ -132,7 +470,8 @@
     fill="currentColor"
   />
 </svg>
-</a></nav></div>
+</a></nav><nav class="documentNavigation">
+          <h3>Document Navigation</h3><ul><li><a href="#pq-ts" title="pq-ts">pq-ts</a></li><li><ul><li><a href="#features" title="Features">Features</a></li><li><a href="#installation" title="Installation">Installation</a></li><li><a href="#usage" title="Usage">Usage</a></li><li><ul><li><a href="#importing-the-library" title="Importing the Library">Importing the Library</a></li><li><a href="#priority-queue" title="Priority Queue">Priority Queue</a></li><li><a href="#stable-priority-queue" title="Stable Priority Queue">Stable Priority Queue</a></li><li><a href="#typed-priority-queue" title="Typed Priority Queue">Typed Priority Queue</a></li><li><a href="#using-a-custom-comparer" title="Using a Custom Comparer">Using a Custom Comparer</a></li></ul></li><li><a href="#credits" title="Credits">Credits</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>
