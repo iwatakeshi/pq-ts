@@ -237,6 +237,50 @@ bench(`Native Array dequeue ${ITEMS_COUNT} random items`, () => {
 });
 
 
+// Remove benchmarks
+const REMOVE_COUNT = 10000;
+const REMOVE_RANDOM = Array.from({ length: REMOVE_COUNT }, () => Math.floor(Math.random() * REMOVE_COUNT));
+
+bench(`PriorityQueue remove ${REMOVE_COUNT} items`, () => {
+  const pq = new PriorityQueue();
+  for (let i = 0; i < REMOVE_COUNT; i++) {
+    pq.enqueue(i, REMOVE_RANDOM[i]);
+  }
+  for (let i = 0; i < REMOVE_COUNT; i++) {
+    pq.remove(i);
+  }
+});
+
+bench(`StablePriorityQueue remove ${REMOVE_COUNT} items`, () => {
+  const spq = new StablePriorityQueue();
+  for (let i = 0; i < REMOVE_COUNT; i++) {
+    spq.enqueue(i, REMOVE_RANDOM[i]);
+  }
+  for (let i = 0; i < REMOVE_COUNT; i++) {
+    spq.remove(i);
+  }
+});
+
+bench(`TypedPriorityQueue remove ${REMOVE_COUNT} items`, () => {
+  const tpq = new TypedPriorityQueue(Uint32Array, REMOVE_COUNT);
+  for (let i = 0; i < REMOVE_COUNT; i++) {
+    tpq.enqueue(i, REMOVE_RANDOM[i]);
+  }
+  for (let i = 0; i < REMOVE_COUNT; i++) {
+    tpq.remove(i);
+  }
+});
+
+bench(`StableTypedPriorityQueue remove ${REMOVE_COUNT} items`, () => {
+  const stpq = new StableTypedPriorityQueue(Uint32Array, REMOVE_COUNT);
+  for (let i = 0; i < REMOVE_COUNT; i++) {
+    stpq.enqueue(i, REMOVE_RANDOM[i]);
+  }
+  for (let i = 0; i < REMOVE_COUNT; i++) {
+    stpq.remove(i);
+  }
+});
+
 // Force garbage collection before running benchmarks if supported
 globalThis.gc?.();
 
